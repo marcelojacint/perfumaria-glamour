@@ -11,5 +11,6 @@ public interface IProdutoRepository : IRepository<Produto>
         string ordenarPor, bool descrescente,
         int pagina, int tamanhoPagina);
     Task<IEnumerable<Produto>> ObterDestaqueAsync(int quantidade);
+    Task<IEnumerable<Produto>> ObterPromocoesAsync(int quantidade);
     Task<IEnumerable<Produto>> ObterRelacionadosAsync(Guid produtoId, Guid categoriaId, int quantidade);
 }

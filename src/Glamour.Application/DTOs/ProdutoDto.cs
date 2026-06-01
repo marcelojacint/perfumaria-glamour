@@ -14,7 +14,13 @@ public record ProdutoImagemDto(Guid Id, string Url, int Ordem, bool Principal);
 public record ProdutoListagemDto(
     Guid Id, string Nome, string Slug, decimal Preco, decimal? PrecoPromo,
     string Marca, string? Volume, bool Destaque, int Estoque,
-    string? UrlImagemPrincipal);
+    string? UrlImagemPrincipal)
+{
+    public bool EmPromocao => PrecoPromo.HasValue && PrecoPromo.Value < Preco;
+    public int PercentualDesconto => EmPromocao && Preco > 0
+        ? (int)Math.Round((1 - PrecoPromo!.Value / Preco) * 100)
+        : 0;
+}
 
 public record CriarProdutoDto(
     string Nome, string Slug, string Descricao,

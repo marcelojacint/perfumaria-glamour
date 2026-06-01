@@ -33,6 +33,9 @@ public class ProdutoService(IProdutoRepository produtoRepo, ICategoriaRepository
     public async Task<IEnumerable<ProdutoListagemDto>> ObterDestaqueAsync(int quantidade = 8) =>
         (await produtoRepo.ObterDestaqueAsync(quantidade)).Select(MapListagemDto);
 
+    public async Task<IEnumerable<ProdutoListagemDto>> ObterPromocoesAsync(int quantidade = 8) =>
+        (await produtoRepo.ObterPromocoesAsync(quantidade)).Select(MapListagemDto);
+
     public async Task<IEnumerable<ProdutoListagemDto>> ObterRelacionadosAsync(Guid produtoId, Guid categoriaId, int quantidade = 4) =>
         (await produtoRepo.ObterRelacionadosAsync(produtoId, categoriaId, quantidade)).Select(MapListagemDto);
 

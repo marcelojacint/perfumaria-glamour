@@ -23,8 +23,11 @@ try
     var builder = WebApplication.CreateBuilder(args);
     builder.Host.UseSerilog();
 
-    // MVC
-    builder.Services.AddControllersWithViews();
+    // MVC — decimais parseados com InvariantCulture (inputs HTML number usam ponto)
+    builder.Services.AddControllersWithViews(opt =>
+    {
+        opt.ModelBinderProviders.Insert(0, new Glamour.Web.ModelBinding.InvariantDecimalModelBinderProvider());
+    });
     builder.Services.AddApplication();
     builder.Services.AddInfrastructure(builder.Configuration);
 

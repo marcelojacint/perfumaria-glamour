@@ -37,10 +37,40 @@
                 <textarea name="Descricao" rows="4" required style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.6rem 0.75rem; font-size:0.875rem; resize:vertical; box-sizing:border-box;">@Model.Descricao</textarea>
             </div>
 
-            <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem;">
-                @{ Campo("Preço (R$)", "Preco", Model.Preco.ToString(), "number"); }
-                @{ Campo("Promoção (R$)", "PrecoPromo", Model.PrecoPromo?.ToString(), "number", false); }
-                @{ Campo("Estoque", "Estoque", Model.Estoque.ToString(), "number"); }
+            <div x-data="{ preco: '@(Model.Preco.ToString(System.Globalization.CultureInfo.InvariantCulture))', promo: '@(Model.PrecoPromo?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "")' }">
+                <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem;">
+                    <div>
+                        <label style="font-size:0.7rem; color:rgba(212,175,55,0.7); text-transform:uppercase; letter-spacing:0.1em; display:block; margin-bottom:0.4rem;">Preço (R$)</label>
+                        <input type="number" name="Preco" step="0.01" required value="@Model.Preco.ToString(System.Globalization.CultureInfo.InvariantCulture)" @@input="preco = $event.target.value"
+                               style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.6rem 0.75rem; font-size:0.875rem; box-sizing:border-box;" />
+                    </div>
+                    <div>
+                        <label style="font-size:0.7rem; color:rgba(212,175,55,0.7); text-transform:uppercase; letter-spacing:0.1em; display:block; margin-bottom:0.4rem;">Promoção (R$)</label>
+                        <div style="display:flex; gap:0.4rem;">
+                            <input type="number" name="PrecoPromo" step="0.01" placeholder="Sem promoção" x-ref="promoInput"
+                                   value="@(Model.PrecoPromo?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "")" @@input="promo = $event.target.value"
+                                   style="flex:1; min-width:0; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.6rem 0.75rem; font-size:0.875rem; box-sizing:border-box;" />
+                            <button type="button" x-show="promo" @@click="promo = ''; $refs.promoInput.value = ''" title="Remover promoção"
+                                    style="background:none; border:1px solid rgba(248,113,113,0.4); color:rgba(248,113,113,0.8); padding:0 0.6rem; cursor:pointer; font-size:0.9rem;">×</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="font-size:0.7rem; color:rgba(212,175,55,0.7); text-transform:uppercase; letter-spacing:0.1em; display:block; margin-bottom:0.4rem;">Estoque</label>
+                        <input type="number" name="Estoque" required value="@Model.Estoque.ToString()"
+                               style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.6rem 0.75rem; font-size:0.875rem; box-sizing:border-box;" />
+                    </div>
+                </div>
+                <div x-show="promo && parseFloat(promo) > 0 && parseFloat(promo) < parseFloat(preco)" x-transition
+                     style="margin-top:0.75rem; border:1px solid rgba(212,175,55,0.3); background:rgba(212,175,55,0.06); padding:0.6rem 0.875rem; font-size:0.8rem; display:flex; align-items:center; gap:0.75rem;">
+                    <span style="background:linear-gradient(135deg,#D4AF37,#A08020); color:#000; font-weight:700; padding:0.15rem 0.5rem; border-radius:2px;"
+                          x-text="'-' + Math.round((1 - parseFloat(promo) / parseFloat(preco)) * 100) + '%'"></span>
+                    <span style="color:rgba(255,255,255,0.5);">De <span style="text-decoration:line-through;" x-text="'R$ ' + parseFloat(preco||0).toFixed(2)"></span>
+                        por <span style="color:#D4AF37; font-weight:600;" x-text="'R$ ' + parseFloat(promo||0).toFixed(2)"></span></span>
+                    <span style="color:rgba(255,255,255,0.35); margin-left:auto;">ativo nas Promoções</span>
+                </div>
+                <p x-show="!promo" style="margin-top:0.5rem; font-size:0.72rem; color:rgba(255,255,255,0.3);">
+                    Promoção desativada — o produto é vendido pelo preço normal. Informe um valor para reativar.
+                </p>
             </div>
 
             <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem;">
