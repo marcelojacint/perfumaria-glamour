@@ -73,6 +73,14 @@ h1, h2, h3, h4, h5, h6 { font-weight: inherit; }
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
+/* Compensa o letter-spacing (que sobra à direita) recentralizando o texto,
+   e garante respiro lateral mínimo em todos os botões */
+.btn-gold, .btn-accent, .btn-gold-outline, .btn-accent-outline {
+    text-indent: 0.12em;          /* reequilibra o letter-spacing */
+    padding-left: 1.75rem;
+    padding-right: 1.75rem;
+}
+
 .btn-accent {
     position: relative;
     overflow: hidden;
