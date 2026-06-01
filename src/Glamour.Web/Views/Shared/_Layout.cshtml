@@ -1,3 +1,13 @@
+@inject Microsoft.Extensions.Configuration.IConfiguration Config
+@{
+    var lojaTelefone = Config["Loja:Telefone"] ?? "";
+    var lojaWhatsapp = Config["Loja:WhatsApp"] ?? "";
+    var lojaEmail = Config["Loja:Email"] ?? "";
+    var lojaEndereco = Config["Loja:EnderecoLoja"] ?? "";
+    var lojaHorario = Config["Loja:HorarioFuncionamento"] ?? "";
+    var mapaUrl = "https://www.google.com/maps/search/?api=1&query=" + Uri.EscapeDataString(lojaEndereco);
+    var whatsappUrl = "https://wa.me/" + lojaWhatsapp;
+}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -106,9 +116,22 @@
             <div>
                 <h4 class="text-gold font-semibold text-sm tracking-wider uppercase mb-4">Atendimento</h4>
                 <ul class="space-y-2 text-sm text-white/50">
-                    <li>Seg-Sex: 9h às 18h</li>
-                    <li>Sáb: 9h às 14h</li>
-                    <li><a href="mailto:contato@glamour.com" class="hover:text-gold transition-colors">contato@glamour.com</a></li>
+                    <li>
+                        <a href="@mapaUrl" target="_blank" rel="noopener" class="hover:text-gold transition-colors flex items-start gap-2">
+                            <span class="text-gold">📍</span> <span>@lojaEndereco</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="@whatsappUrl" target="_blank" rel="noopener" class="hover:text-gold transition-colors flex items-center gap-2">
+                            <span class="text-gold">📱</span> @lojaTelefone
+                        </a>
+                    </li>
+                    <li>
+                        <a href="mailto:@lojaEmail" class="hover:text-gold transition-colors flex items-center gap-2">
+                            <span class="text-gold">✉️</span> @lojaEmail
+                        </a>
+                    </li>
+                    <li class="text-white/30 text-xs pt-1">@lojaHorario</li>
                 </ul>
             </div>
             <div>

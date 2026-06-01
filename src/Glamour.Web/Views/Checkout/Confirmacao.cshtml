@@ -12,7 +12,9 @@
         Seu pedido foi recebido com sucesso.<br/>
         @if (Model.TipoEntrega == Glamour.Domain.Enums.TipoEntrega.RetiradaNaLoja)
         {
-            <span>Retire na loja no endereço: <strong class="text-white">@lojaEndereco</strong></span>
+            <span>Retire na loja no endereço:
+                <a href="https://www.google.com/maps/search/?api=1&query=@(Uri.EscapeDataString(lojaEndereco))" target="_blank" rel="noopener" class="text-gold hover:underline"><strong>@lojaEndereco</strong></a>
+            </span>
         }
         else
         {

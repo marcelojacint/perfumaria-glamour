@@ -157,7 +157,15 @@
 
                     <div x-show="tipoEntrega === 'RetiradaNaLoja'" x-transition class="mt-6 border border-gold/20 bg-gold/5 p-4 text-sm text-white/70">
                         <p class="font-semibold text-gold mb-2">Endereço da Loja</p>
-                        <p>@lojaEndereco</p>
+                        <a href="https://www.google.com/maps/search/?api=1&query=@(Uri.EscapeDataString(lojaEndereco))" target="_blank" rel="noopener" class="text-white/80 hover:text-gold transition-colors flex items-start gap-2">
+                            <span class="text-gold">📍</span> <span>@lojaEndereco</span>
+                        </a>
+                        @if (!string.IsNullOrEmpty(lojaWhatsapp))
+                        {
+                            <a href="https://wa.me/@lojaWhatsapp" target="_blank" rel="noopener" class="text-white/80 hover:text-gold transition-colors flex items-center gap-2 mt-2">
+                                <span class="text-gold">📱</span> @lojaTelefone
+                            </a>
+                        }
                         <p class="text-white/40 text-xs mt-2">@lojaHorario</p>
                     </div>
                 </div>

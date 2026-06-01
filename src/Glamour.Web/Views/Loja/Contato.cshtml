@@ -12,32 +12,50 @@
 
         <div>
             <h2 class="font-playfair" style="font-size:1.25rem; font-weight:600; margin-bottom:1.5rem; color:#D4AF37;">Informações da Loja</h2>
+            @{
+                var endereco = ViewBag.EnderecoLoja as string ?? "";
+                var telefone = ViewBag.Telefone as string ?? "";
+                var email = ViewBag.Email as string ?? "";
+                var horario = ViewBag.HorarioFuncionamento as string ?? "";
+                var whats = ViewBag.WhatsApp as string ?? new string(telefone.Where(char.IsDigit).ToArray());
+                if (!string.IsNullOrEmpty(whats) && !whats.StartsWith("55")) whats = "55" + whats;
+                var mapa = "https://www.google.com/maps/search/?api=1&query=" + Uri.EscapeDataString(endereco);
+            }
             <div style="display:flex; flex-direction:column; gap:1.5rem;">
-                @{
-                    var info = new[] {
-                        ("📍", "Endereço", ViewBag.EnderecoLoja as string ?? ""),
-                        ("📞", "Telefone / WhatsApp", ViewBag.Telefone as string ?? ""),
-                        ("✉️", "E-mail", ViewBag.Email as string ?? ""),
-                        ("🕐", "Horário", ViewBag.HorarioFuncionamento as string ?? "")
-                    };
-                }
-                @foreach (var (icone, label, valor) in info)
-                {
-                    if (string.IsNullOrEmpty(valor)) continue;
-                    <div style="display:flex; gap:1rem; align-items:flex-start;">
-                        <span style="font-size:1.25rem; flex-shrink:0;">@icone</span>
-                        <div>
-                            <div style="font-size:0.7rem; color:#D4AF37; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.2rem;">@label</div>
-                            <div style="color:rgba(255,255,255,0.7); font-size:0.875rem;">@valor</div>
-                        </div>
+                <a href="@mapa" target="_blank" rel="noopener" style="display:flex; gap:1rem; align-items:flex-start; color:inherit;" class="hover:text-gold transition-colors">
+                    <span style="font-size:1.25rem; flex-shrink:0;">📍</span>
+                    <div>
+                        <div style="font-size:0.7rem; color:#D4AF37; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.2rem;">Endereço</div>
+                        <div style="color:rgba(255,255,255,0.7); font-size:0.875rem;">@endereco</div>
                     </div>
-                }
+                </a>
+                <a href="https://wa.me/@whats" target="_blank" rel="noopener" style="display:flex; gap:1rem; align-items:flex-start; color:inherit;" class="hover:text-gold transition-colors">
+                    <span style="font-size:1.25rem; flex-shrink:0;">📱</span>
+                    <div>
+                        <div style="font-size:0.7rem; color:#D4AF37; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.2rem;">Telefone / WhatsApp</div>
+                        <div style="color:rgba(255,255,255,0.7); font-size:0.875rem;">@telefone</div>
+                    </div>
+                </a>
+                <a href="mailto:@email" style="display:flex; gap:1rem; align-items:flex-start; color:inherit;" class="hover:text-gold transition-colors">
+                    <span style="font-size:1.25rem; flex-shrink:0;">✉️</span>
+                    <div>
+                        <div style="font-size:0.7rem; color:#D4AF37; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.2rem;">E-mail</div>
+                        <div style="color:rgba(255,255,255,0.7); font-size:0.875rem;">@email</div>
+                    </div>
+                </a>
+                <div style="display:flex; gap:1rem; align-items:flex-start;">
+                    <span style="font-size:1.25rem; flex-shrink:0;">🕐</span>
+                    <div>
+                        <div style="font-size:0.7rem; color:#D4AF37; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.2rem;">Horário</div>
+                        <div style="color:rgba(255,255,255,0.7); font-size:0.875rem;">@horario</div>
+                    </div>
+                </div>
             </div>
 
             <div style="margin-top:2rem; border-top:1px solid rgba(255,255,255,0.08); padding-top:1.5rem;">
                 <h3 style="font-size:0.8rem; color:#D4AF37; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1rem;">Formas de Entrega</h3>
                 <div style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.875rem; color:rgba(255,255,255,0.6);">
-                    <div style="display:flex; gap:0.5rem;"><span style="color:#D4AF37;">✓</span> Entrega para todo o Brasil</div>
+                    <div style="display:flex; gap:0.5rem;"><span style="color:#D4AF37;">✓</span> Entrega em Cacimba de Dentro e região</div>
                     <div style="display:flex; gap:0.5rem;"><span style="color:#D4AF37;">✓</span> Retirada na loja (frete grátis)</div>
                     <div style="display:flex; gap:0.5rem;"><span style="color:#D4AF37;">✓</span> Pagamento na entrega ou retirada</div>
                 </div>
@@ -64,11 +82,7 @@
                         <label style="font-size:0.65rem; color:rgba(212,175,55,0.6); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:0.35rem;">Mensagem</label>
                         <textarea rows="4" placeholder="Sua mensagem..." style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.75rem; font-size:0.875rem; resize:vertical; box-sizing:border-box;"></textarea>
                     </div>
-                    @{
-                        var telefone = ViewBag.Telefone as string ?? "";
-                        var whatsappNum = new string(telefone.Where(char.IsDigit).ToArray());
-                    }
-                    <a href="https://wa.me/55@whatsappNum?text=Olá, vim pelo site da Glamour Perfumaria!" target="_blank"
+                    <a href="https://wa.me/@whats?text=Ol%C3%A1,%20vim%20pelo%20site%20da%20Glamour%20Perfumaria!" target="_blank"
                        class="btn-gold" style="padding:0.75rem; font-size:0.8rem; text-align:center; display:block; letter-spacing:0.08em;">
                         Enviar via WhatsApp
                     </a>
