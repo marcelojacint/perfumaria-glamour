@@ -50,7 +50,10 @@
                             @(pedido.TipoEntrega == Glamour.Domain.Enums.TipoEntrega.RetiradaNaLoja ? "Retirada na Loja" : "Entrega")
                             · @pedido.MetodoPagamento
                         </div>
-                        <span class="text-gold font-semibold">R$ @pedido.Total.ToString("N2")</span>
+                        <div style="display:flex; align-items:center; gap:1rem;">
+                            <span class="text-gold font-semibold">R$ @pedido.Total.ToString("N2")</span>
+                            <a href="/conta/pedido/@pedido.Id" style="font-size:0.75rem; color:rgba(212,175,55,0.7);">Ver detalhes →</a>
+                        </div>
                     </div>
                 </div>
             }

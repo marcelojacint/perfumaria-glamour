@@ -90,17 +90,24 @@
                 <!-- Forma de pagamento -->
                 <div class="border border-gold/20 bg-zinc-900/50 p-6">
                     <h2 class="font-playfair text-xl font-semibold mb-5">Forma de Pagamento</h2>
-                    <p class="text-white/40 text-sm mb-5">Informe como deseja pagar. O pagamento será realizado no momento da entrega ou retirada.</p>
+                    <p class="text-white/40 text-sm mb-4">Informe como deseja pagar. O pagamento será realizado no momento da entrega ou retirada.</p>
+
+                    <!-- Destaque PIX -->
+                    <div style="border:1px solid rgba(74,222,128,0.3); background:rgba(74,222,128,0.05); padding:0.75rem 1rem; margin-bottom:1.25rem; font-size:0.8rem; color:rgb(74,222,128); display:flex; align-items:center; gap:0.5rem;">
+                        <span style="font-size:1rem;">⚡</span>
+                        <span><strong>PIX tem aprovação instantânea!</strong> Separe a chave PIX para pagar na hora da entrega.</span>
+                    </div>
+
                     <div class="grid grid-cols-2 gap-3" x-data="{ metodo: 'Dinheiro' }">
                         @foreach (var (val, nome, icon) in new[] {
                             ("Dinheiro", "Dinheiro", "💵"),
                             ("CartaoCredito", "Crédito", "💳"),
                             ("CartaoDebito", "Débito", "💳"),
-                            ("Pix", "PIX", "⚡")
+                            ("Pix", "PIX ⚡", "⚡")
                         })
                         {
                             <label class="cursor-pointer">
-                                <input type="radio" name="metodoPagamento" value="@val"
+                                <input type="radio" name="metodoPagamento" value="@val.Split(' ')[0]"
                                        x-model="metodo" class="sr-only" @(val == "Dinheiro" ? "checked" : "") />
                                 <div :class="metodo === '@val' ? 'border-gold bg-gold/10' : 'border-white/20 hover:border-white/40'"
                                      class="border p-3 text-center transition-all">

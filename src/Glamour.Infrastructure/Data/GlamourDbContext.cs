@@ -18,6 +18,8 @@ public class GlamourDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Pagamento> Pagamentos => Set<Pagamento>();
     public DbSet<Cupom> Cupons => Set<Cupom>();
     public DbSet<Avaliacao> Avaliacoes => Set<Avaliacao>();
+    public DbSet<NotificacaoEstoque> NotificacoesEstoque => Set<NotificacaoEstoque>();
+    public DbSet<Newsletter> Newsletters => Set<Newsletter>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

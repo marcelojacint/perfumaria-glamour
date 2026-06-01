@@ -36,6 +36,25 @@
                 <a href="/quiz" class="text-gold hover:text-gold transition-colors uppercase" style="font-size:0.7rem; border:1px solid rgba(212,175,55,0.4); padding:0.25rem 0.75rem; letter-spacing:0.12em;">Quiz ✦</a>
             </nav>
 
+            <!-- Busca autocomplete -->
+            <div x-data="{ aberto: false, q: '', resultados: [] }" style="position:relative; display:none;" class="md:block">
+                <div style="display:flex; align-items:center; border:1px solid rgba(255,255,255,0.1); background:rgba(24,24,27,0.6); padding:0.35rem 0.75rem; gap:0.5rem;">
+                    <svg style="width:14px; height:14px; color:rgba(255,255,255,0.4);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <input type="text" x-model="q" placeholder="Buscar perfume..." style="background:transparent; border:none; color:#fff; font-size:0.8rem; outline:none; width:130px;"
+                           @@focus="aberto=true" @@blur="setTimeout(()=>aberto=false,200)"
+                           @@input.debounce.300ms="if(q.length>=2) fetch('/busca/sugestoes?q='+encodeURIComponent(q)).then(r=>r.json()).then(d=>resultados=d)" />
+                </div>
+                <div x-show="aberto && resultados.length" style="position:absolute; top:calc(100% + 4px); right:0; min-width:280px; background:#18181b; border:1px solid rgba(212,175,55,0.2); z-index:200;">
+                    <template x-for="p in resultados" :key="p.id">
+                        <a :href="'/produto/'+p.slug" style="display:flex; align-items:center; gap:0.6rem; padding:0.5rem 0.75rem; border-bottom:1px solid rgba(255,255,255,0.04);">
+                            <template x-if="p.imagem"><img :src="p.imagem" style="width:2.25rem; height:2.25rem; object-fit:cover; flex-shrink:0;" /></template>
+                            <div><div style="font-size:0.8rem; color:#fff;" x-text="p.nome"></div><div style="font-size:0.7rem; color:#D4AF37;" x-text="'R$ '+p.preco.toFixed(2).replace('.',',')"></div></div>
+                        </a>
+                    </template>
+                    <a :href="'/catalogo?busca='+q" style="display:block; padding:0.4rem 0.75rem; font-size:0.72rem; color:rgba(212,175,55,0.6); text-align:center;">Ver todos →</a>
+                </div>
+            </div>
+
             <div class="flex items-center gap-4">
                 @if (User.Identity?.IsAuthenticated == true)
                 {

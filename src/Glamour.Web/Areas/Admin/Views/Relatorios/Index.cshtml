@@ -1,0 +1,43 @@
+@{
+    ViewBag.Title = "Relatórios";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    var hoje = DateTime.Now;
+    var inicio30 = hoje.AddDays(-30).ToString("yyyy-MM-dd");
+    var fimHoje = hoje.ToString("yyyy-MM-dd");
+}
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; max-width:700px;">
+    <div style="border:1px solid rgba(212,175,55,0.2); background:rgba(24,24,27,0.5); padding:1.5rem;">
+        <h2 style="font-size:0.8rem; color:#D4AF37; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1.25rem;">Relatório de Vendas</h2>
+        <form method="get" action="/admin/relatorios/vendas-csv" style="display:flex; flex-direction:column; gap:1rem;">
+            <div>
+                <label style="font-size:0.65rem; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:0.3rem;">Data Início</label>
+                <input type="date" name="de" value="@inicio30" style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.75rem; font-size:0.8rem; box-sizing:border-box;" />
+            </div>
+            <div>
+                <label style="font-size:0.65rem; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:0.3rem;">Data Fim</label>
+                <input type="date" name="ate" value="@fimHoje" style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.75rem; font-size:0.8rem; box-sizing:border-box;" />
+            </div>
+            <button type="submit" class="btn-gold" style="padding:0.6rem; font-size:0.75rem; letter-spacing:0.08em;">
+                ↓ Exportar CSV
+            </button>
+        </form>
+    </div>
+
+    <div style="border:1px solid rgba(212,175,55,0.2); background:rgba(24,24,27,0.5); padding:1.5rem;">
+        <h2 style="font-size:0.8rem; color:#D4AF37; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1.25rem;">Produtos Mais Vendidos</h2>
+        <form method="get" action="/admin/relatorios/produtos-csv" style="display:flex; flex-direction:column; gap:1rem;">
+            <div>
+                <label style="font-size:0.65rem; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:0.3rem;">Data Início</label>
+                <input type="date" name="de" value="@inicio30" style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.75rem; font-size:0.8rem; box-sizing:border-box;" />
+            </div>
+            <div>
+                <label style="font-size:0.65rem; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:0.3rem;">Data Fim</label>
+                <input type="date" name="ate" value="@fimHoje" style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.75rem; font-size:0.8rem; box-sizing:border-box;" />
+            </div>
+            <button type="submit" class="btn-gold" style="padding:0.6rem; font-size:0.75rem; letter-spacing:0.08em;">
+                ↓ Exportar CSV
+            </button>
+        </form>
+    </div>
+</div>

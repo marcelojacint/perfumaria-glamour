@@ -115,6 +115,7 @@ try
     }
 
     app.UseResponseCompression();
+    app.UseStatusCodePagesWithReExecute("/erro/{0}");
     app.UseHttpsRedirection();
 
     // Headers de segurança

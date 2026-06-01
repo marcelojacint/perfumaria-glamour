@@ -129,8 +129,23 @@
             }
             else
             {
-                <div style="border:1px solid rgba(127,29,29,0.4); background:rgba(127,29,29,0.1); color:rgb(248,113,113); font-size:0.875rem; text-align:center; padding:1rem; margin-bottom:1.5rem;">
+                <div style="border:1px solid rgba(127,29,29,0.4); background:rgba(127,29,29,0.1); color:rgb(248,113,113); font-size:0.875rem; text-align:center; padding:1rem; margin-bottom:0.75rem;">
                     Produto temporariamente indisponível
+                </div>
+                @if (TempData["Sucesso"] != null)
+                {
+                    <div style="border:1px solid rgba(74,222,128,0.3); background:rgba(74,222,128,0.05); color:rgb(74,222,128); padding:0.75rem 1rem; margin-bottom:0.75rem; font-size:0.8rem;">@TempData["Sucesso"]</div>
+                }
+                <div style="border:1px solid rgba(212,175,55,0.2); background:rgba(24,24,27,0.5); padding:1rem; margin-bottom:1.5rem;">
+                    <p style="font-size:0.75rem; color:rgba(255,255,255,0.6); margin-bottom:0.75rem;">🔔 Avise-me quando voltar ao estoque</p>
+                    <form method="post" action="/notificacao-estoque/cadastrar" style="display:flex; gap:0.5rem;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="produtoId" value="@Model.Id" />
+                        <input type="hidden" name="returnSlug" value="@Model.Slug" />
+                        <input type="email" name="email" placeholder="seu@email.com" required
+                               style="flex:1; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.75rem; font-size:0.8rem;" />
+                        <button type="submit" class="btn-gold" style="padding:0.5rem 1rem; font-size:0.75rem; white-space:nowrap;">Avisar</button>
+                    </form>
                 </div>
             }
 

@@ -11,6 +11,7 @@ public class PedidoService(
     IProdutoRepository produtoRepo,
     ICupomRepository cupomRepo,
     ICarrinhoService carrinhoService,
+    IFidelidadeService fidelidadeService,
     NotificacaoContext notificacoes)
 {
     public async Task<PedidoDto?> ObterAsync(Guid pedidoId)
@@ -82,9 +83,16 @@ public class PedidoService(
     {
         var pedido = await pedidoRepo.ObterComItensAsync(dto.PedidoId);
         if (pedido == null) { notificacoes.Adicionar("Id", "Pedido não encontrado."); return false; }
+
+        var statusAnterior = pedido.Status;
         pedido.AtualizarStatus(dto.NovoStatus);
         await pedidoRepo.AtualizarAsync(pedido);
         await pedidoRepo.SalvarAsync();
+
+        // Credita pontos quando pedido é entregue (1 ponto por R$1)
+        if (dto.NovoStatus == StatusPedido.Entregue && statusAnterior != StatusPedido.Entregue)
+            await fidelidadeService.CreditarPontosAsync(pedido.UsuarioId, pedido.Total);
+
         return true;
     }
 

@@ -1,0 +1,59 @@
+@model Glamour.Infrastructure.Identity.ApplicationUser
+@{
+    ViewBag.Title = Model.Nome;
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    var pedidos = ViewBag.Pedidos as IEnumerable<Glamour.Application.DTOs.PedidoDto> ?? [];
+}
+
+<div style="max-width:800px;">
+    <div style="border:1px solid rgba(212,175,55,0.2); background:rgba(24,24,27,0.5); padding:1.5rem; margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+            <h2 class="font-playfair" style="font-size:1.25rem; font-weight:600; margin-bottom:0.25rem;">@Model.Nome</h2>
+            <p style="color:rgba(255,255,255,0.4); font-size:0.8rem;">@Model.Email · desde @Model.CriadoEm.ToString("dd/MM/yyyy")</p>
+        </div>
+        <div style="text-align:right;">
+            <div class="font-playfair" style="font-size:1.5rem; font-weight:700; color:#D4AF37;">@Model.PontosLoyalty pts</div>
+            <div style="font-size:0.7rem; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:0.1em;">Programa Glamour</div>
+        </div>
+    </div>
+
+    <h3 style="font-size:0.8rem; color:#D4AF37; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1rem;">Histórico de Pedidos</h3>
+    @if (!pedidos.Any())
+    {
+        <p style="color:rgba(255,255,255,0.3); font-size:0.875rem;">Nenhum pedido realizado.</p>
+    }
+    else
+    {
+        <div style="border:1px solid rgba(255,255,255,0.08); overflow:hidden;">
+            <table style="width:100%; border-collapse:collapse; font-size:0.8rem;">
+                <thead>
+                    <tr style="background:rgba(212,175,55,0.05); border-bottom:1px solid rgba(255,255,255,0.08);">
+                        @foreach (var col in new[] { "Pedido", "Data", "Itens", "Total", "Status" })
+                        {
+                            <th style="text-align:left; padding:0.6rem 0.875rem; color:rgba(212,175,55,0.7); font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase; font-weight:600;">@col</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in pedidos)
+                    {
+                        <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+                            <td style="padding:0.6rem 0.875rem; font-family:monospace; color:rgba(255,255,255,0.7);">#@p.Id.ToString()[..8].ToUpper()</td>
+                            <td style="padding:0.6rem 0.875rem; color:rgba(255,255,255,0.4);">@p.CriadoEm.ToString("dd/MM/yy")</td>
+                            <td style="padding:0.6rem 0.875rem; color:rgba(255,255,255,0.5);">@p.Itens.Count() item(ns)</td>
+                            <td style="padding:0.6rem 0.875rem; color:#D4AF37; font-weight:600;">R$ @p.Total.ToString("N2")</td>
+                            <td style="padding:0.6rem 0.875rem;">
+                                <span style="font-size:0.65rem; color:@(p.Status == Glamour.Domain.Enums.StatusPedido.Entregue ? "rgb(74,222,128)" : p.Status == Glamour.Domain.Enums.StatusPedido.Cancelado ? "rgb(248,113,113)" : "#D4AF37");">@p.Status</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div style="margin-top:1rem; padding:0.75rem; border:1px solid rgba(255,255,255,0.06); font-size:0.8rem; color:rgba(255,255,255,0.5); display:flex; gap:2rem;">
+            <span>Total de pedidos: <strong style="color:#fff;">@pedidos.Count()</strong></span>
+            <span>Total gasto: <strong style="color:#D4AF37;">R$ @pedidos.Sum(p => p.Total).ToString("N2")</strong></span>
+            <span>Ticket médio: <strong style="color:#fff;">R$ @(pedidos.Any() ? (pedidos.Average(p => p.Total)).ToString("N2") : "0,00")</strong></span>
+        </div>
+    }
+</div>

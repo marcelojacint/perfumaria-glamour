@@ -2,6 +2,7 @@
     ViewBag.Title = "Início";
     var destaques = ViewBag.Destaques as IEnumerable<Glamour.Application.DTOs.ProdutoListagemDto> ?? [];
     var categorias = ViewBag.Categorias as IEnumerable<Glamour.Application.DTOs.CategoriaDto> ?? [];
+    bool newsletterOk = TempData["NewsletterSucesso"] != null;
 }
 
 <!-- Hero -->
@@ -118,3 +119,44 @@
         </div>
     </section>
 }
+
+<!-- Quiz CTA -->
+<section style="background:linear-gradient(135deg, rgba(212,175,55,0.08), rgba(9,9,11,0.8)); border-top:1px solid rgba(212,175,55,0.15); border-bottom:1px solid rgba(212,175,55,0.15);">
+    <div class="max-w-4xl mx-auto px-4 py-16" style="text-align:center;">
+        <p class="text-gold" style="font-size:0.65rem; letter-spacing:0.4em; text-transform:uppercase; margin-bottom:0.75rem;">Descubra</p>
+        <h2 class="font-playfair" style="font-size:2.5rem; font-weight:700; margin-bottom:1rem;">
+            Qual é o seu <span class="text-gradient">perfume ideal</span>?
+        </h2>
+        <p style="color:rgba(255,255,255,0.5); margin-bottom:2rem; font-size:0.9375rem;">
+            Responda 4 perguntas e receba recomendações personalizadas para o seu perfil olfativo.
+        </p>
+        <a href="/quiz" class="btn-gold" style="padding:0.875rem 2.5rem; font-size:0.875rem; letter-spacing:0.15em; text-transform:uppercase; display:inline-block;">
+            Fazer Quiz ✦
+        </a>
+    </div>
+</section>
+
+<!-- Newsletter -->
+<section class="max-w-3xl mx-auto px-4 py-16" style="text-align:center;">
+    <p class="text-gold" style="font-size:0.65rem; letter-spacing:0.4em; text-transform:uppercase; margin-bottom:0.75rem;">Exclusividades</p>
+    <h2 class="font-playfair" style="font-size:2rem; font-weight:700; margin-bottom:0.75rem;">Fique por dentro das novidades</h2>
+    <p style="color:rgba(255,255,255,0.4); margin-bottom:2rem; font-size:0.875rem;">Lançamentos, promoções e dicas de fragrâncias diretamente no seu e-mail.</p>
+    @if (newsletterOk)
+    {
+        <div style="border:1px solid rgba(74,222,128,0.3); background:rgba(74,222,128,0.05); color:rgb(74,222,128); padding:0.75rem 1.25rem; margin-bottom:1rem; font-size:0.875rem; display:inline-block;">
+            ✓ Obrigado! Você está inscrito na nossa newsletter.
+        </div>
+    }
+    else
+    {
+        <form method="post" action="/newsletter/inscrever" style="display:flex; max-width:480px; margin:0 auto; gap:0;">
+            @Html.AntiForgeryToken()
+            <input type="email" name="email" placeholder="seu@email.com" required
+                   style="flex:1; background:rgba(24,24,27,0.8); border:1px solid rgba(212,175,55,0.3); border-right:none; color:#fff; padding:0.75rem 1.25rem; font-size:0.875rem; outline:none;" />
+            <button type="submit" class="btn-gold" style="padding:0.75rem 1.5rem; font-size:0.8rem; letter-spacing:0.08em; white-space:nowrap;">
+                Inscrever
+            </button>
+        </form>
+        <p style="color:rgba(255,255,255,0.2); font-size:0.7rem; margin-top:0.75rem;">Sem spam. Cancele quando quiser.</p>
+    }
+</section>

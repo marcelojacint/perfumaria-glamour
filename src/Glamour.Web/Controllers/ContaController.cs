@@ -89,6 +89,16 @@ public class ContaController(
         return View(pedidos);
     }
 
+    [HttpGet("pedido/{id}")]
+    [Authorize]
+    public async Task<IActionResult> DetalhePedido(Guid id)
+    {
+        var pedido = await pedidoService.ObterAsync(id);
+        if (pedido == null || pedido.UsuarioId != userManager.GetUserId(User))
+            return NotFound();
+        return View(pedido);
+    }
+
     [HttpGet("perfil")]
     [Authorize]
     public async Task<IActionResult> Perfil()

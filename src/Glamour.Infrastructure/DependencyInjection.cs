@@ -40,8 +40,11 @@ public static class DependencyInjection
         services.AddScoped<ICupomRepository, CupomRepository>();
         services.AddScoped<ICarrinhoService, CarrinhoRedisService>();
         services.AddScoped<IWishlistService, WishlistRedisService>();
+        services.AddScoped<IFidelidadeService, FidelidadeService>();
         services.AddScoped<IRepository<Glamour.Domain.Entities.Endereco>, BaseRepository<Glamour.Domain.Entities.Endereco>>();
         services.AddScoped<IRepository<Glamour.Domain.Entities.Avaliacao>, BaseRepository<Glamour.Domain.Entities.Avaliacao>>();
+        services.AddScoped<IRepository<Glamour.Domain.Entities.NotificacaoEstoque>, BaseRepository<Glamour.Domain.Entities.NotificacaoEstoque>>();
+        services.AddScoped<IRepository<Glamour.Domain.Entities.Newsletter>, BaseRepository<Glamour.Domain.Entities.Newsletter>>();
 
         return services;
     }
