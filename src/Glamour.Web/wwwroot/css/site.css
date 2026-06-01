@@ -92,6 +92,7 @@ body {
 .max-w-4xl { max-width: 56rem; }
 .max-w-3xl { max-width: 48rem; }
 .max-w-2xl { max-width: 42rem; }
+.max-w-xl { max-width: 36rem; }
 .max-w-md { max-width: 28rem; }
 .mx-auto { margin-left: auto; margin-right: auto; }
 .px-4 { padding-left: 1rem; padding-right: 1rem; }
@@ -104,6 +105,8 @@ body {
 .py-16 { padding-top: 4rem; padding-bottom: 4rem; }
 .py-20 { padding-top: 5rem; padding-bottom: 5rem; }
 .pb-20 { padding-bottom: 5rem; }
+.pb-8 { padding-bottom: 2rem; }
+.pt-12 { padding-top: 3rem; }
 .p-4 { padding: 1rem; }
 .p-5 { padding: 1.25rem; }
 .p-6 { padding: 1.5rem; }
@@ -125,6 +128,8 @@ body {
 .mt-3 { margin-top: 0.75rem; }
 .mt-4 { margin-top: 1rem; }
 .mt-6 { margin-top: 1.5rem; }
+.mt-8 { margin-top: 2rem; }
+.mt-10 { margin-top: 2.5rem; }
 .mt-12 { margin-top: 3rem; }
 .gap-2 { gap: 0.5rem; }
 .gap-3 { gap: 0.75rem; }
@@ -141,6 +146,7 @@ body {
 .items-center { align-items: center; }
 .items-start { align-items: flex-start; }
 .items-end { align-items: flex-end; }
+.items-baseline { align-items: baseline; }
 .justify-center { justify-content: center; }
 .justify-between { justify-content: space-between; }
 .grid { display: grid; }
@@ -320,7 +326,10 @@ body {
     .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .md\:col-span-2 { grid-column: span 2 / span 2; }
+    .md\:text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+    .md\:text-5xl { font-size: 3rem; line-height: 1; }
     .md\:text-7xl { font-size: 4.5rem; line-height: 1; }
+    .md\:block { display: block; }
 }
 
 @media (min-width: 1024px) {
