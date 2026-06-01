@@ -1,0 +1,32 @@
+.admin-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 1.5rem;
+    color: rgba(255, 255, 255, 0.45);
+    text-decoration: none;
+    font-size: 0.8rem;
+    letter-spacing: 0.03em;
+    transition: color 0.15s, background-color 0.15s;
+    margin: 0.1rem 0;
+}
+
+.admin-nav-item:hover {
+    color: rgba(255, 255, 255, 0.85);
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+.admin-nav-item.active {
+    color: #D4AF37;
+    background-color: rgba(212, 175, 55, 0.08);
+    border-right: 2px solid #D4AF37;
+}
+
+.admin-nav-item svg {
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.admin-nav-item.active svg {
+    opacity: 1;
+}
