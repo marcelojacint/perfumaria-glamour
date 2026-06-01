@@ -28,7 +28,7 @@
     <table style="width:100%; border-collapse:collapse; font-size:0.875rem;">
         <thead>
             <tr style="background:rgba(212,175,55,0.05); border-bottom:1px solid rgba(255,255,255,0.08);">
-                @foreach (var col in new[] { "Pedido", "Data", "Tipo", "Pagamento", "Total", "Status", "" })
+                @foreach (var col in new[] { "Pedido", "Cliente", "Data", "Tipo", "Pagamento", "Total", "Status", "" })
                 {
                     <th style="text-align:left; padding:0.75rem 1rem; color:rgba(212,175,55,0.7); font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; font-weight:600;">@col</th>
                 }
@@ -39,6 +39,18 @@
             {
                 <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
                     <td style="padding:0.75rem 1rem; font-family:monospace; color:rgba(255,255,255,0.7);">#@p.Id.ToString()[..8].ToUpper()</td>
+                    <td style="padding:0.75rem 1rem;">
+                        @{
+                            var clientes = ViewBag.Clientes as Dictionary<string, Glamour.Web.Areas.Admin.Controllers.ClienteResumo>;
+                            Glamour.Web.Areas.Admin.Controllers.ClienteResumo? cli = null;
+                            clientes?.TryGetValue(p.UsuarioId, out cli);
+                        }
+                        <div style="color:rgba(255,255,255,0.85); font-size:0.85rem;">@(cli?.Nome ?? "Cliente")</div>
+                        @if (!string.IsNullOrEmpty(cli?.Telefone))
+                        {
+                            <div style="color:rgba(255,255,255,0.4); font-size:0.72rem;">@cli.Telefone</div>
+                        }
+                    </td>
                     <td style="padding:0.75rem 1rem; color:rgba(255,255,255,0.4); font-size:0.8rem;">@p.CriadoEm.ToString("dd/MM/yy HH:mm")</td>
                     <td style="padding:0.75rem 1rem; color:rgba(255,255,255,0.5); font-size:0.8rem;">@p.TipoEntrega</td>
                     <td style="padding:0.75rem 1rem; color:rgba(255,255,255,0.5); font-size:0.8rem;">@p.MetodoPagamento</td>

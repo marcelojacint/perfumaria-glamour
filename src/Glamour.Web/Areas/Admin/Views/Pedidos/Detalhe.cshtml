@@ -38,6 +38,40 @@
     </div>
 
     <div>
+        @{
+            string nomeCliente = ViewBag.NomeCliente ?? "Cliente";
+            string emailCliente = ViewBag.EmailCliente ?? "";
+            string telefoneCliente = ViewBag.TelefoneCliente ?? "";
+            var telDigitos = new string((telefoneCliente ?? "").Where(char.IsDigit).ToArray());
+            var waNumero = telDigitos.Length >= 10 ? (telDigitos.StartsWith("55") ? telDigitos : "55" + telDigitos) : "";
+        }
+        <div style="border:1px solid rgba(212,175,55,0.3); background:rgba(212,175,55,0.04); padding:1.5rem; margin-bottom:1.5rem;">
+            <h3 style="font-size:0.8rem; color:#D4AF37; text-transform:uppercase; letter-spacing:0.1em; margin:0 0 1rem;">Cliente</h3>
+            <div style="font-size:0.875rem; color:rgba(255,255,255,0.75); display:flex; flex-direction:column; gap:0.4rem;">
+                <div style="font-weight:600; color:#fff;">@nomeCliente</div>
+                @if (!string.IsNullOrEmpty(telefoneCliente))
+                {
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <span style="color:rgba(255,255,255,0.4);">📞</span> @telefoneCliente
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(emailCliente))
+                {
+                    <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.8rem; color:rgba(255,255,255,0.5);">
+                        <span style="color:rgba(255,255,255,0.4);">✉️</span> @emailCliente
+                    </div>
+                }
+            </div>
+            @if (!string.IsNullOrEmpty(waNumero))
+            {
+                <a href="https://wa.me/@waNumero?text=Ol%C3%A1%20@(Uri.EscapeDataString(nomeCliente))!%20Sobre%20o%20seu%20pedido%20%23@(Model.Id.ToString()[..8].ToUpper())..."
+                   target="_blank"
+                   style="display:inline-flex; align-items:center; gap:0.4rem; margin-top:1rem; background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.3); color:rgb(74,222,128); padding:0.5rem 0.875rem; font-size:0.75rem; text-decoration:none; border-radius:2px;">
+                    💬 Falar no WhatsApp
+                </a>
+            }
+        </div>
+
         <div style="border:1px solid rgba(212,175,55,0.2); padding:1.5rem; margin-bottom:1.5rem;">
             <h3 style="font-size:0.8rem; color:#D4AF37; text-transform:uppercase; letter-spacing:0.1em; margin:0 0 1rem;">Informações</h3>
             <div style="font-size:0.8rem; color:rgba(255,255,255,0.5); display:flex; flex-direction:column; gap:0.5rem;">
