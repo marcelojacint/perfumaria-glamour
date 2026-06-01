@@ -14,6 +14,7 @@ public class CheckoutController(
     PedidoService pedidoService,
     EnderecoService enderecoService,
     ICarrinhoService carrinhoService,
+    FreteService freteService,
     NotificacaoContext notificacoes) : Controller
 {
     private string CarrinhoId => HttpContext.Session.GetString("CarrinhoId") ?? "";
@@ -27,6 +28,15 @@ public class CheckoutController(
 
         ViewBag.Enderecos = await enderecoService.ListarPorUsuarioAsync(UsuarioId);
         return View(itens);
+    }
+
+    [HttpGet("calcular-frete")]
+    public async Task<IActionResult> CalcularFrete(string? cidade, string? uf)
+    {
+        var itens = await carrinhoService.ObterCarrinhoAsync(CarrinhoId);
+        var subtotal = itens.Sum(i => i.Preco * i.Quantidade);
+        var resultado = freteService.Calcular(cidade, uf, subtotal);
+        return Json(resultado);
     }
 
     [HttpPost]

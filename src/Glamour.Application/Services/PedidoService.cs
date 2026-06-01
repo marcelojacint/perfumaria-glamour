@@ -12,6 +12,8 @@ public class PedidoService(
     ICupomRepository cupomRepo,
     ICarrinhoService carrinhoService,
     IFidelidadeService fidelidadeService,
+    IRepository<Endereco> enderecoRepo,
+    FreteService freteService,
     NotificacaoContext notificacoes)
 {
     public async Task<PedidoDto?> ObterAsync(Guid pedidoId)
@@ -42,6 +44,24 @@ public class PedidoService(
         Cupom? cupom = null;
         decimal subtotalEstimado = itensCarrinho.Sum(i => i.Preco * i.Quantidade);
 
+        // Validação de frete por localização (entrega)
+        if (dto.TipoEntrega == TipoEntrega.Entrega)
+        {
+            var endereco = await enderecoRepo.ObterPorIdAsync(dto.EnderecoId!.Value);
+            if (endereco == null)
+            {
+                notificacoes.Adicionar("Endereco", "Endereço de entrega não encontrado.");
+                return Guid.Empty;
+            }
+            // Fora da área de entrega: cliente deve entrar em contato (não cria entrega automática)
+            if (!freteService.MesmaLocalidade(endereco.Cidade, endereco.UF))
+            {
+                notificacoes.Adicionar("Frete",
+                    "Não realizamos entrega automática para esse endereço. Entre em contato com a loja ou escolha retirada na loja.");
+                return Guid.Empty;
+            }
+        }
+
         if (!string.IsNullOrWhiteSpace(dto.CupomCodigo))
         {
             cupom = await cupomRepo.ObterPorCodigoAsync(dto.CupomCodigo);
@@ -65,6 +85,14 @@ public class PedidoService(
 
             pedido.AdicionarItem(new PedidoItem(pedido.Id, produto.Id, produto.Nome, item.Quantidade, produto.PrecoEfetivo));
             await produtoRepo.AtualizarAsync(produto);
+        }
+
+        // Frete calculado no servidor (fonte de verdade), com base no subtotal real e no endereço
+        if (dto.TipoEntrega == TipoEntrega.Entrega)
+        {
+            var endereco = await enderecoRepo.ObterPorIdAsync(dto.EnderecoId!.Value);
+            var resultadoFrete = freteService.Calcular(endereco!.Cidade, endereco.UF, pedido.Subtotal);
+            pedido.DefinirFrete(resultadoFrete.Valor);
         }
 
         if (desconto > 0) pedido.AplicarDesconto(desconto);

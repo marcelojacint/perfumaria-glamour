@@ -1,12 +1,19 @@
 @model IEnumerable<Glamour.Domain.Interfaces.ItemCarrinho>
+@inject Microsoft.Extensions.Configuration.IConfiguration Config
 @{
     ViewBag.Title = "Checkout";
     var itens = Model.ToList();
     var subtotal = itens.Sum(i => i.Preco * i.Quantidade);
+    var subtotalJs = subtotal.ToString(System.Globalization.CultureInfo.InvariantCulture);
     var enderecos = (ViewBag.Enderecos as IEnumerable<Glamour.Application.DTOs.EnderecoDto> ?? []).ToList();
     var enderecoPrincipal = enderecos.FirstOrDefault(e => e.Principal) ?? enderecos.FirstOrDefault();
-    // Opção inicial: endereço principal (se houver) ou "novo"
     var opcaoInicial = enderecoPrincipal != null ? enderecoPrincipal.Id.ToString() : "novo";
+
+    var lojaNome = Config["Loja:Nome"] ?? "Glamour";
+    var lojaEndereco = Config["Loja:EnderecoLoja"] ?? "";
+    var lojaHorario = Config["Loja:HorarioFuncionamento"] ?? "";
+    var lojaWhatsapp = Config["Loja:WhatsApp"] ?? "";
+    var lojaTelefone = Config["Loja:Telefone"] ?? "";
 }
 
 <div class="max-w-5xl mx-auto px-4 py-12">
@@ -15,28 +22,15 @@
         <h1 class="font-playfair text-4xl font-bold">Checkout</h1>
     </div>
 
+    @if (TempData["Erro"] != null)
+    {
+        <div style="border:1px solid rgba(248,113,113,0.4); background:rgba(127,29,29,0.15); color:rgb(248,113,113); padding:0.875rem 1.25rem; margin-bottom:1.5rem; font-size:0.875rem;">
+            @TempData["Erro"]
+        </div>
+    }
+
     <form method="post" action="/checkout"
-          x-data="{
-              tipoEntrega: 'Entrega',
-              enderecoOpcao: '@opcaoInicial',
-              cepBuscando: false,
-              async buscarCep(cep) {
-                  cep = (cep || '').replace(/\D/g, '');
-                  if (cep.length !== 8) return;
-                  this.cepBuscando = true;
-                  try {
-                      const r = await fetch('https://viacep.com.br/ws/' + cep + '/json/');
-                      const d = await r.json();
-                      if (!d.erro) {
-                          this.$refs.logradouro.value = d.logradouro || '';
-                          this.$refs.bairro.value = d.bairro || '';
-                          this.$refs.cidade.value = d.localidade || '';
-                          this.$refs.uf.value = d.uf || '';
-                          this.$refs.numero.focus();
-                      }
-                  } catch (e) {} finally { this.cepBuscando = false; }
-              }
-          }">
+          x-data="checkout()" x-init="init()">
         @Html.AntiForgeryToken()
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
             <!-- Formulário -->
@@ -48,17 +42,17 @@
                     <div class="grid grid-cols-2 gap-4">
                         <label class="cursor-pointer">
                             <input type="radio" name="tipoEntrega" value="Entrega"
-                                   x-model="tipoEntrega" class="sr-only" checked />
+                                   x-model="tipoEntrega" @@change="aoMudarEntrega()" class="sr-only" checked />
                             <div :class="tipoEntrega === 'Entrega' ? 'border-gold bg-gold/10' : 'border-white/20 hover:border-white/40'"
                                  class="border p-4 text-center transition-all">
                                 <div class="text-2xl mb-2">🚚</div>
                                 <div class="font-semibold text-sm">Entrega</div>
-                                <div class="text-white/40 text-xs mt-1">Receba em casa</div>
+                                <div class="text-white/40 text-xs mt-1">Cacimba de Dentro e região</div>
                             </div>
                         </label>
                         <label class="cursor-pointer">
                             <input type="radio" name="tipoEntrega" value="RetiradaNaLoja"
-                                   x-model="tipoEntrega" class="sr-only" />
+                                   x-model="tipoEntrega" @@change="aoMudarEntrega()" class="sr-only" />
                             <div :class="tipoEntrega === 'RetiradaNaLoja' ? 'border-gold bg-gold/10' : 'border-white/20 hover:border-white/40'"
                                  class="border p-4 text-center transition-all">
                                 <div class="text-2xl mb-2">🏪</div>
@@ -79,7 +73,8 @@
                                 {
                                     <label class="cursor-pointer block">
                                         <input type="radio" name="enderecoId" value="@e.Id"
-                                               x-model="enderecoOpcao" class="sr-only" />
+                                               data-cidade="@e.Cidade" data-uf="@e.UF"
+                                               x-model="enderecoOpcao" @@change="aoSelecionarEndereco()" class="sr-only" />
                                         <div :class="enderecoOpcao === '@e.Id' ? 'border-gold bg-gold/10' : 'border-white/15 hover:border-white/30'"
                                              class="border p-4 transition-all flex items-start justify-between gap-3">
                                             <div class="text-sm">
@@ -94,10 +89,9 @@
                                         </div>
                                     </label>
                                 }
-                                <!-- Opção: novo endereço -->
                                 <label class="cursor-pointer block">
                                     <input type="radio" name="enderecoId" value="novo"
-                                           x-model="enderecoOpcao" class="sr-only" />
+                                           x-model="enderecoOpcao" @@change="aoSelecionarEndereco()" class="sr-only" />
                                     <div :class="enderecoOpcao === 'novo' ? 'border-gold bg-gold/10' : 'border-white/15 hover:border-white/30'"
                                          class="border p-4 transition-all text-sm text-white/70 flex items-center gap-2">
                                         <span class="text-gold">+</span> Usar um novo endereço
@@ -106,7 +100,7 @@
                             </div>
                         }
 
-                        <!-- Formulário de novo endereço (com autopreenchimento por CEP) -->
+                        <!-- Formulário de novo endereço (autopreenchimento por CEP) -->
                         <div x-show="@(enderecos.Any() ? "enderecoOpcao === 'novo'" : "true")" x-transition
                              class="grid grid-cols-2 gap-4 pt-2">
                             <div class="col-span-2">
@@ -140,22 +134,36 @@
                             </div>
                             <div>
                                 <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">Cidade</label>
-                                <input type="text" name="cidade" x-ref="cidade"
+                                <input type="text" name="cidade" x-ref="cidade" @@change="aoSelecionarEndereco()"
                                        class="w-full bg-zinc-800 border border-white/10 text-white px-4 py-3 text-sm focus:border-gold/60 focus:outline-none" />
                             </div>
                             <div>
                                 <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">Estado</label>
-                                <input type="text" name="uf" x-ref="uf" maxlength="2"
+                                <input type="text" name="uf" x-ref="uf" maxlength="2" @@change="aoSelecionarEndereco()"
                                        class="w-full bg-zinc-800 border border-white/10 text-white px-4 py-3 text-sm focus:border-gold/60 focus:outline-none" />
                             </div>
+                        </div>
+
+                        <!-- Aviso: fora da área de entrega -->
+                        <div x-show="freteCalculado && !dentroDaArea" x-transition
+                             class="border border-amber-600/40 bg-amber-950/20 p-4 text-sm">
+                            <p class="text-amber-400 font-semibold mb-1">📍 Fora da nossa área de entrega</p>
+                            <p class="text-white/60 leading-relaxed mb-3" x-text="freteMensagem"></p>
+                            @if (!string.IsNullOrEmpty(lojaWhatsapp))
+                            {
+                                <a href="https://wa.me/@lojaWhatsapp?text=Ol%C3%A1!%20Gostaria%20de%20saber%20sobre%20entrega%20para%20a%20minha%20regi%C3%A3o."
+                                   target="_blank" class="inline-flex items-center gap-2 text-gold text-sm hover:underline">
+                                    💬 Falar com a loja no WhatsApp
+                                </a>
+                            }
                         </div>
                     </div>
 
                     <!-- Info retirada -->
                     <div x-show="tipoEntrega === 'RetiradaNaLoja'" x-transition class="mt-6 border border-gold/20 bg-gold/5 p-4 text-sm text-white/70">
                         <p class="font-semibold text-gold mb-2">Endereço da Loja</p>
-                        <p>Rua das Flores, 123 - Centro</p>
-                        <p class="text-white/40 text-xs mt-2">Seg-Sex: 9h às 18h | Sáb: 9h às 14h</p>
+                        <p>@lojaEndereco</p>
+                        <p class="text-white/40 text-xs mt-2">@lojaHorario</p>
                     </div>
                 </div>
 
@@ -164,7 +172,6 @@
                     <h2 class="font-playfair text-xl font-semibold mb-5">Forma de Pagamento</h2>
                     <p class="text-white/40 text-sm mb-4">Informe como deseja pagar. O pagamento será realizado no momento da entrega ou retirada.</p>
 
-                    <!-- Destaque PIX -->
                     <div style="border:1px solid rgba(74,222,128,0.3); background:rgba(74,222,128,0.05); padding:0.75rem 1rem; margin-bottom:1.25rem; font-size:0.8rem; color:rgb(74,222,128); display:flex; align-items:center; gap:0.5rem;">
                         <span style="font-size:1rem;">⚡</span>
                         <span><strong>PIX tem aprovação instantânea!</strong> Separe a chave PIX para pagar na hora da entrega.</span>
@@ -226,16 +233,21 @@
                         </div>
                         <div class="flex justify-between">
                             <span>Frete</span>
-                            <span x-text="tipoEntrega === 'RetiradaNaLoja' ? 'Grátis' : 'A combinar'"></span>
+                            <span class="text-white" x-text="textoFrete()"></span>
                         </div>
                     </div>
                     <div class="border-t border-white/10 pt-4 flex justify-between font-semibold mb-6">
                         <span>Total</span>
-                        <span class="text-gold text-lg">R$ @subtotal.ToString("N2")</span>
+                        <span class="text-gold text-lg" x-text="textoTotal()"></span>
                     </div>
-                    <button type="submit" class="btn-gold w-full py-4 text-sm tracking-widest uppercase">
+                    <button type="submit" class="btn-gold w-full py-4 text-sm tracking-widest uppercase"
+                            :disabled="bloqueado()"
+                            :style="bloqueado() ? 'opacity:0.4; cursor:not-allowed;' : ''">
                         Confirmar Pedido
                     </button>
+                    <p x-show="bloqueado()" class="text-amber-400/70 text-xs text-center mt-3">
+                        Selecione um endereço dentro da área de entrega ou escolha retirada na loja.
+                    </p>
                     <p class="text-white/20 text-xs text-center mt-4 leading-relaxed">
                         Pagamento na entrega ou retirada.<br/>
                         Seu pedido será confirmado por e-mail.
@@ -245,3 +257,101 @@
         </div>
     </form>
 </div>
+
+@section Scripts {
+<script>
+function checkout() {
+    return {
+        tipoEntrega: 'Entrega',
+        enderecoOpcao: '@opcaoInicial',
+        cepBuscando: false,
+        subtotal: @subtotalJs,
+        freteCalculado: false,
+        calculandoFrete: false,
+        dentroDaArea: false,
+        freteGratis: false,
+        freteValor: 0,
+        freteMensagem: '',
+
+        init() {
+            this.$nextTick(() => { if (this.tipoEntrega === 'Entrega') this.aoSelecionarEndereco(); });
+        },
+
+        aoMudarEntrega() {
+            if (this.tipoEntrega === 'RetiradaNaLoja') {
+                this.freteCalculado = false;
+            } else {
+                this.aoSelecionarEndereco();
+            }
+        },
+
+        aoSelecionarEndereco() {
+            if (this.tipoEntrega !== 'Entrega') return;
+            if (this.enderecoOpcao === 'novo') {
+                this.calcularFrete(this.$refs.cidade?.value, this.$refs.uf?.value);
+            } else {
+                const el = document.querySelector('input[name=enderecoId][value="' + this.enderecoOpcao + '"]');
+                if (el) this.calcularFrete(el.dataset.cidade, el.dataset.uf);
+            }
+        },
+
+        async buscarCep(cep) {
+            cep = (cep || '').replace(/\D/g, '');
+            if (cep.length !== 8) return;
+            this.cepBuscando = true;
+            try {
+                const r = await fetch('https://viacep.com.br/ws/' + cep + '/json/');
+                const d = await r.json();
+                if (!d.erro) {
+                    // Só preenche quando o ViaCEP retorna valor — não apaga o que o usuário digitou
+                    // (CEPs gerais de cidades pequenas vêm sem logradouro/bairro)
+                    if (d.logradouro) this.$refs.logradouro.value = d.logradouro;
+                    if (d.bairro) this.$refs.bairro.value = d.bairro;
+                    if (d.localidade) this.$refs.cidade.value = d.localidade;
+                    if (d.uf) this.$refs.uf.value = d.uf;
+                    this.$refs.numero.focus();
+                    this.calcularFrete(d.localidade || this.$refs.cidade.value, d.uf || this.$refs.uf.value);
+                }
+            } catch (e) {} finally { this.cepBuscando = false; }
+        },
+
+        async calcularFrete(cidade, uf) {
+            if (!cidade || !uf) { this.freteCalculado = false; return; }
+            this.calculandoFrete = true;
+            try {
+                const r = await fetch('/checkout/calcular-frete?cidade=' + encodeURIComponent(cidade) + '&uf=' + encodeURIComponent(uf));
+                const d = await r.json();
+                this.dentroDaArea = d.dentroDaArea;
+                this.freteGratis = d.gratis;
+                this.freteValor = d.valor;
+                this.freteMensagem = d.mensagem;
+                this.freteCalculado = true;
+            } catch (e) { this.freteCalculado = false; }
+            finally { this.calculandoFrete = false; }
+        },
+
+        freteAtual() {
+            if (this.tipoEntrega === 'RetiradaNaLoja') return 0;
+            if (this.freteCalculado && this.dentroDaArea) return this.freteValor;
+            return 0;
+        },
+
+        textoFrete() {
+            if (this.tipoEntrega === 'RetiradaNaLoja') return 'Grátis (retirada)';
+            if (this.calculandoFrete) return 'calculando...';
+            if (!this.freteCalculado) return 'Informe o endereço';
+            if (!this.dentroDaArea) return 'Consultar loja';
+            return this.freteGratis ? 'Grátis' : 'R$ ' + this.freteValor.toFixed(2).replace('.', ',');
+        },
+
+        textoTotal() {
+            return 'R$ ' + (this.subtotal + this.freteAtual()).toFixed(2).replace('.', ',');
+        },
+
+        bloqueado() {
+            return this.tipoEntrega === 'Entrega' && this.freteCalculado && !this.dentroDaArea;
+        }
+    };
+}
+</script>
+}

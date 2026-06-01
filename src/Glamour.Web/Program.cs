@@ -64,10 +64,11 @@ try
         opt.Cookie.SameSite = SameSiteMode.Strict;
     });
 
-    // Output cache
+    // Output cache — sem política base global (apenas endpoints marcados com [OutputCache]
+    // são cacheados). Páginas autenticadas/dinâmicas (checkout, carrinho, conta, admin)
+    // nunca são cacheadas, evitando vazamento de dados entre sessões.
     builder.Services.AddOutputCache(opt =>
     {
-        opt.AddBasePolicy(b => b.Expire(TimeSpan.FromMinutes(2)));
         opt.AddPolicy("home", b => b.Expire(TimeSpan.FromMinutes(5)).Tag("home"));
         opt.AddPolicy("catalogo", b => b.Expire(TimeSpan.FromMinutes(2)).Tag("catalogo"));
         opt.AddPolicy("produto", b => b.Expire(TimeSpan.FromMinutes(10)).Tag("produto"));

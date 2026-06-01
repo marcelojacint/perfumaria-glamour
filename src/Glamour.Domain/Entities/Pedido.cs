@@ -49,6 +49,12 @@ public class Pedido : BaseEntity
         RecalcularTotal();
     }
 
+    public void DefinirFrete(decimal frete)
+    {
+        Frete = TipoEntrega == TipoEntrega.RetiradaNaLoja ? 0 : frete;
+        RecalcularTotal();
+    }
+
     private void RecalcularTotal()
     {
         Subtotal = _itens.Sum(i => i.Subtotal);

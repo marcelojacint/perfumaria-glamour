@@ -1,7 +1,6 @@
 using Glamour.Application.Services;
 using Glamour.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OutputCaching;
 
 namespace Glamour.Web.Controllers;
 
@@ -12,7 +11,6 @@ public class CatalogoController(
     IWishlistService wishlist) : Controller
 {
     [Route("catalogo")]
-    [OutputCache(PolicyName = "catalogo")]
     public async Task<IActionResult> Index(
         string? busca, Guid? categoriaId, string? genero,
         decimal? precoMin, decimal? precoMax,

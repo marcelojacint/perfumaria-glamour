@@ -1,6 +1,8 @@
 @model Glamour.Application.DTOs.PedidoDto
+@inject Microsoft.Extensions.Configuration.IConfiguration Config
 @{
     ViewBag.Title = "Pedido Confirmado";
+    var lojaEndereco = Config["Loja:EnderecoLoja"] ?? "";
 }
 
 <div class="max-w-2xl mx-auto px-4 py-20 text-center">
@@ -10,7 +12,7 @@
         Seu pedido foi recebido com sucesso.<br/>
         @if (Model.TipoEntrega == Glamour.Domain.Enums.TipoEntrega.RetiradaNaLoja)
         {
-            <span>Retire na loja no endereço: <strong class="text-white">Rua das Flores, 123 - Centro</strong></span>
+            <span>Retire na loja no endereço: <strong class="text-white">@lojaEndereco</strong></span>
         }
         else
         {
