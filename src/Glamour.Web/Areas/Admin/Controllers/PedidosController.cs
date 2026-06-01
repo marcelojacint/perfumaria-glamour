@@ -37,4 +37,18 @@ public class PedidosController(PedidoService pedidoService, IPedidoRepository pe
         TempData["Sucesso"] = "Status atualizado.";
         return RedirectToAction(nameof(Detalhe), new { id = dto.PedidoId });
     }
+
+    [HttpPost("{id}/rastreio")]
+    public async Task<IActionResult> DefinirRastreio(Guid id, string codigoRastreio)
+    {
+        var pedido = await pedidoRepo.ObterComItensAsync(id);
+        if (pedido != null)
+        {
+            pedido.DefinirRastreio(codigoRastreio);
+            await pedidoRepo.AtualizarAsync(pedido);
+            await pedidoRepo.SalvarAsync();
+            TempData["Sucesso"] = $"Código de rastreio {codigoRastreio} salvo e pedido marcado como Enviado.";
+        }
+        return RedirectToAction(nameof(Detalhe), new { id });
+    }
 }

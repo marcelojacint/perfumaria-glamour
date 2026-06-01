@@ -93,6 +93,7 @@ try
     });
 
     builder.Services.AddHttpContextAccessor();
+    builder.Services.AddScoped<Glamour.Web.Services.ImagemService>();
 
     var app = builder.Build();
 

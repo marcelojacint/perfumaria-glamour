@@ -57,8 +57,7 @@ public class ProdutosController(ProdutoService produtoService, CategoriaService 
             produto.Volume, produto.Genero, produto.Destaque);
 
         ViewBag.Categorias = await categoriaService.ObterAtivasAsync();
-        ViewBag.UrlImagem = produto.Imagens.FirstOrDefault(i => i.Principal)?.Url
-                         ?? produto.Imagens.FirstOrDefault()?.Url;
+        ViewBag.Imagens = produto.Imagens.OrderBy(i => i.Ordem).ToList();
         return View(dto);
     }
 

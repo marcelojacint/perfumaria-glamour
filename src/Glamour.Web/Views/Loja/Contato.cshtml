@@ -1,0 +1,81 @@
+@{
+    ViewBag.Title = "Contato";
+}
+
+<div class="max-w-4xl mx-auto px-4 py-16">
+    <div style="text-align:center; margin-bottom:3rem;">
+        <p class="text-gold" style="font-size:0.65rem; letter-spacing:0.4em; text-transform:uppercase; margin-bottom:0.75rem;">Fale Conosco</p>
+        <h1 class="font-playfair" style="font-size:3rem; font-weight:700;">Contato</h1>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:3rem;">
+        <!-- Informações -->
+        <div>
+            <h2 class="font-playfair" style="font-size:1.25rem; font-weight:600; margin-bottom:1.5rem; color:#D4AF37;">Informações da Loja</h2>
+            <div style="display:flex; flex-direction:column; gap:1.5rem;">
+                @{
+                    var info = new[] {
+                        ("📍", "Endereço", ViewBag.EnderecoLoja as string ?? ""),
+                        ("📞", "Telefone / WhatsApp", ViewBag.Telefone as string ?? ""),
+                        ("✉️", "E-mail", ViewBag.Email as string ?? ""),
+                        ("🕐", "Horário", ViewBag.HorarioFuncionamento as string ?? "")
+                    };
+                }
+                @foreach (var (icone, label, valor) in info)
+                {
+                    if (string.IsNullOrEmpty(valor)) continue;
+                    <div style="display:flex; gap:1rem; align-items:flex-start;">
+                        <span style="font-size:1.25rem; flex-shrink:0;">@icone</span>
+                        <div>
+                            <div style="font-size:0.7rem; color:#D4AF37; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.2rem;">@label</div>
+                            <div style="color:rgba(255,255,255,0.7); font-size:0.875rem;">@valor</div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div style="margin-top:2rem; border-top:1px solid rgba(255,255,255,0.08); padding-top:1.5rem;">
+                <h3 style="font-size:0.8rem; color:#D4AF37; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1rem;">Formas de Entrega</h3>
+                <div style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.875rem; color:rgba(255,255,255,0.6);">
+                    <div style="display:flex; gap:0.5rem;"><span style="color:#D4AF37;">✓</span> Entrega para todo o Brasil</div>
+                    <div style="display:flex; gap:0.5rem;"><span style="color:#D4AF37;">✓</span> Retirada na loja (frete grátis)</div>
+                    <div style="display:flex; gap:0.5rem;"><span style="color:#D4AF37;">✓</span> Pagamento na entrega ou retirada</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulário de contato visual (sem envio real — indica WhatsApp) -->
+        <div>
+            <div style="border:1px solid rgba(212,175,55,0.2); background:rgba(24,24,27,0.5); padding:2rem;">
+                <h2 class="font-playfair" style="font-size:1.25rem; font-weight:600; margin-bottom:1.5rem;">Envie uma Mensagem</h2>
+                <div style="display:flex; flex-direction:column; gap:1rem;">
+                    @foreach (var (label, placeholder) in new[] {
+                        ("Nome", "Seu nome completo"),
+                        ("E-mail", "seu@email.com"),
+                        ("Assunto", "Como podemos ajudar?")
+                    })
+                    {
+                        <div>
+                            <label style="font-size:0.65rem; color:rgba(212,175,55,0.6); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:0.35rem;">@label</label>
+                            <input type="text" placeholder="@placeholder"
+                                   style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.75rem; font-size:0.875rem; box-sizing:border-box;" />
+                        </div>
+                    }
+                    <div>
+                        <label style="font-size:0.65rem; color:rgba(212,175,55,0.6); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:0.35rem;">Mensagem</label>
+                        <textarea rows="4" placeholder="Sua mensagem..." style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.75rem; font-size:0.875rem; resize:vertical; box-sizing:border-box;"></textarea>
+                    </div>
+                    @{
+                        var telefone = ViewBag.Telefone as string ?? "";
+                        var whatsappNum = new string(telefone.Where(char.IsDigit).ToArray());
+                    }
+                    <a href="https://wa.me/55@whatsappNum?text=Olá, vim pelo site da Glamour Perfumaria!" target="_blank"
+                       class="btn-gold" style="padding:0.75rem; font-size:0.8rem; text-align:center; display:block; letter-spacing:0.08em;">
+                        Enviar via WhatsApp
+                    </a>
+                    <p style="font-size:0.7rem; color:rgba(255,255,255,0.25); text-align:center;">O formulário abrirá o WhatsApp com sua mensagem pré-preenchida.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

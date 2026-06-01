@@ -64,6 +64,29 @@
                 </select>
                 <button type="submit" class="btn-gold" style="padding:0.6rem; font-size:0.75rem;">Atualizar</button>
             </form>
+
+            <!-- Código de rastreio -->
+            <div style="border-top:1px solid rgba(255,255,255,0.08); margin-top:1.25rem; padding-top:1.25rem;">
+                <h3 style="font-size:0.8rem; color:#D4AF37; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.875rem;">Rastreio</h3>
+                @if (!string.IsNullOrEmpty(Model.CodigoRastreio))
+                {
+                    <div style="font-size:0.8rem; color:rgba(255,255,255,0.6); margin-bottom:0.75rem;">
+                        Código atual: <strong style="color:#fff; font-family:monospace;">@Model.CodigoRastreio</strong>
+                    </div>
+                    <a href="https://rastreamento.correios.com.br/app/index.php" target="_blank"
+                       style="font-size:0.75rem; color:#D4AF37; display:block; margin-bottom:0.75rem;">
+                        Rastrear nos Correios →
+                    </a>
+                }
+                <form method="post" action="/admin/pedidos/@Model.Id/rastreio" style="display:flex; flex-direction:column; gap:0.5rem;">
+                    @Html.AntiForgeryToken()
+                    <input type="text" name="codigoRastreio" placeholder="AA123456789BR" value="@Model.CodigoRastreio"
+                           style="background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.6rem; font-size:0.8rem; font-family:monospace; text-transform:uppercase;" />
+                    <button type="submit" style="background:none; border:1px solid rgba(212,175,55,0.4); color:#D4AF37; padding:0.4rem 0.75rem; font-size:0.72rem; cursor:pointer; letter-spacing:0.08em;">
+                        Salvar e Marcar como Enviado
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
