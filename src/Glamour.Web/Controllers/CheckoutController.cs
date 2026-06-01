@@ -32,7 +32,7 @@ public class CheckoutController(
     [HttpPost]
     public async Task<IActionResult> Finalizar(
         string tipoEntrega, string metodoPagamento,
-        Guid? enderecoId,
+        string? enderecoId,
         // Campos para novo endereço de entrega
         string? cep, string? logradouro, string? numero,
         string? complemento, string? bairro, string? cidade, string? uf,
@@ -48,10 +48,12 @@ public class CheckoutController(
 
         if (tipo == TipoEntrega.Entrega)
         {
-            if (enderecoId.HasValue && enderecoId != Guid.Empty)
+            // Endereço salvo selecionado (enderecoId é um Guid válido)
+            if (Guid.TryParse(enderecoId, out var idSalvo) && idSalvo != Guid.Empty)
             {
-                enderecoFinalId = enderecoId;
+                enderecoFinalId = idSalvo;
             }
+            // Novo endereço digitado
             else if (!string.IsNullOrWhiteSpace(logradouro) && !string.IsNullOrWhiteSpace(cep))
             {
                 var novoEndereco = new CriarEnderecoDto(
