@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Glamour.Application\Glamour.Application.csproj" />
+    <ProjectReference Include="..\Glamour.Infrastructure\Glamour.Infrastructure.csproj" />
+    <ProjectReference Include="..\Glamour.Domain\Glamour.Domain.csproj" />
+    <ProjectReference Include="..\Glamour.Shared\Glamour.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.5" />
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
