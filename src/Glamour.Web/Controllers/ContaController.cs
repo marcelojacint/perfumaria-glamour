@@ -62,7 +62,18 @@ public class ContaController(
     {
         var resultado = await signInManager.PasswordSignInAsync(dto.Email, dto.Senha, dto.LembrarMe, lockoutOnFailure: true);
         if (resultado.Succeeded)
-            return LocalRedirect(returnUrl ?? "/");
+        {
+            // Se houver returnUrl explícito, respeita
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return LocalRedirect(returnUrl);
+
+            // Admin vai direto para o dashboard; cliente para a home
+            var usuario = await userManager.FindByEmailAsync(dto.Email);
+            if (usuario != null && await userManager.IsInRoleAsync(usuario, RolesUsuario.Admin))
+                return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
+
+            return RedirectToAction("Index", "Home");
+        }
 
         if (resultado.IsLockedOut)
             ModelState.AddModelError("", "Conta bloqueada. Aguarde alguns minutos.");
