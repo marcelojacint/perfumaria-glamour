@@ -1,0 +1,148 @@
+@{
+    ViewBag.Title = "Quiz Olfativo";
+}
+
+<div class="max-w-3xl mx-auto px-4 py-16" x-data="{ etapa: 1, total: 4 }">
+    <div style="text-align:center; margin-bottom:3rem;">
+        <p class="text-gold" style="font-size:0.65rem; letter-spacing:0.4em; text-transform:uppercase; margin-bottom:0.5rem;">Descoberta</p>
+        <h1 class="font-playfair" style="font-size:3rem; font-weight:700; margin-bottom:1rem;">
+            Seu <span class="text-gradient">Perfume Ideal</span>
+        </h1>
+        <p style="color:rgba(255,255,255,0.5); font-size:0.9375rem; line-height:1.7;">
+            Responda 4 perguntas e descubra quais fragrâncias combinam com você.
+        </p>
+    </div>
+
+    <!-- Barra de progresso -->
+    <div style="background:rgba(255,255,255,0.08); height:2px; border-radius:1px; margin-bottom:2.5rem; overflow:hidden;">
+        <div :style="'width:' + (etapa/total*100) + '%'" style="background:linear-gradient(90deg,#D4AF37,#F0D060); height:100%; transition:width 0.4s;"></div>
+    </div>
+
+    <form method="post" action="/quiz/resultado">
+        @Html.AntiForgeryToken()
+
+        <!-- Etapa 1: Ocasião -->
+        <div x-show="etapa === 1" x-transition>
+            <h2 class="font-playfair" style="font-size:1.5rem; font-weight:600; text-align:center; margin-bottom:2rem;">
+                Para qual ocasião?
+            </h2>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                @foreach (var (val, label, desc) in new[] {
+                    ("diario", "Dia a Dia", "Leve e versátil para o cotidiano"),
+                    ("trabalho", "Trabalho", "Profissional e marcante"),
+                    ("romantico", "Romântico", "Sedutor e memorável"),
+                    ("noturno", "Noite / Festa", "Intenso e sofisticado")
+                })
+                {
+                    <label class="quiz-card" x-data>
+                        <input type="radio" name="ocasiao" value="@val" required
+                               @@change="etapa = 2" class="sr-only" />
+                        <div class="quiz-option">
+                            <div style="font-weight:600; margin-bottom:0.25rem;">@label</div>
+                            <div style="font-size:0.8rem; color:rgba(255,255,255,0.45);">@desc</div>
+                        </div>
+                    </label>
+                }
+            </div>
+        </div>
+
+        <!-- Etapa 2: Intensidade -->
+        <div x-show="etapa === 2" x-transition>
+            <h2 class="font-playfair" style="font-size:1.5rem; font-weight:600; text-align:center; margin-bottom:2rem;">
+                Prefere fragrâncias...
+            </h2>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                @foreach (var (val, label, desc) in new[] {
+                    ("suave", "Suaves e Discretas", "Leves, quase imperceptíveis"),
+                    ("moderado", "Moderadas", "Presença sem exagero"),
+                    ("intenso", "Intensas", "Marcantes e duradouras"),
+                    ("muito-intenso", "Muito Intensas", "Envolve o ambiente inteiro")
+                })
+                {
+                    <label class="quiz-card">
+                        <input type="radio" name="intensidade" value="@val" required
+                               @@change="etapa = 3" class="sr-only" />
+                        <div class="quiz-option">
+                            <div style="font-weight:600; margin-bottom:0.25rem;">@label</div>
+                            <div style="font-size:0.8rem; color:rgba(255,255,255,0.45);">@desc</div>
+                        </div>
+                    </label>
+                }
+            </div>
+        </div>
+
+        <!-- Etapa 3: Família olfativa -->
+        <div x-show="etapa === 3" x-transition>
+            <h2 class="font-playfair" style="font-size:1.5rem; font-weight:600; text-align:center; margin-bottom:2rem;">
+                Qual aroma te atrai?
+            </h2>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                @foreach (var (val, label, desc) in new[] {
+                    ("floral", "Floral ✿", "Rosas, jasmim, peônia"),
+                    ("amadeirado", "Amadeirado ♦", "Cedro, sândalo, oud"),
+                    ("citrico", "Cítrico ◎", "Bergamota, limão, laranja"),
+                    ("oriental", "Oriental ☽", "Baunilha, âmbar, especiarias")
+                })
+                {
+                    <label class="quiz-card">
+                        <input type="radio" name="familia" value="@val" required
+                               @@change="etapa = 4" class="sr-only" />
+                        <div class="quiz-option">
+                            <div style="font-weight:600; margin-bottom:0.25rem;">@label</div>
+                            <div style="font-size:0.8rem; color:rgba(255,255,255,0.45);">@desc</div>
+                        </div>
+                    </label>
+                }
+            </div>
+        </div>
+
+        <!-- Etapa 4: Gênero -->
+        <div x-show="etapa === 4" x-transition>
+            <h2 class="font-playfair" style="font-size:1.5rem; font-weight:600; text-align:center; margin-bottom:2rem;">
+                Buscando para...
+            </h2>
+            <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1rem;">
+                @foreach (var (val, label) in new[] {
+                    ("feminino", "Feminino"), ("masculino", "Masculino"), ("unissex", "Unissex")
+                })
+                {
+                    <label class="quiz-card">
+                        <input type="radio" name="genero" value="@val" required class="sr-only" />
+                        <div class="quiz-option" style="text-align:center;">
+                            <div style="font-weight:600;">@label</div>
+                        </div>
+                    </label>
+                }
+            </div>
+            <div style="text-align:center; margin-top:2rem;">
+                <button type="submit" class="btn-gold" style="padding:1rem 3rem; font-size:0.875rem; letter-spacing:0.15em; text-transform:uppercase;">
+                    Ver Minhas Recomendações →
+                </button>
+            </div>
+        </div>
+
+        <!-- Voltar -->
+        <div style="text-align:center; margin-top:1.5rem;" x-show="etapa > 1">
+            <button type="button" @@click="etapa--"
+                    style="background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.4); font-size:0.8rem;">
+                ← Voltar
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+.quiz-card { cursor:pointer; display:block; }
+.quiz-option {
+    border:1px solid rgba(255,255,255,0.1);
+    background:rgba(24,24,27,0.5);
+    padding:1.25rem;
+    transition:all 0.2s;
+}
+.quiz-card:hover .quiz-option,
+.quiz-card input:checked + .quiz-option {
+    border-color:#D4AF37;
+    background:rgba(212,175,55,0.08);
+    color:#D4AF37;
+}
+</style>

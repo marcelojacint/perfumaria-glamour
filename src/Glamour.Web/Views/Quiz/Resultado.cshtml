@@ -1,0 +1,62 @@
+@model List<Glamour.Application.DTOs.ProdutoDto?>
+@{
+    ViewBag.Title = "Suas Recomendações";
+    dynamic res = ViewBag.Respostas;
+}
+
+<div class="max-w-4xl mx-auto px-4 py-16" style="text-align:center;">
+    <p class="text-gold" style="font-size:0.65rem; letter-spacing:0.4em; text-transform:uppercase; margin-bottom:0.75rem;">Resultado do Quiz</p>
+    <h1 class="font-playfair" style="font-size:2.75rem; font-weight:700; margin-bottom:1rem;">
+        Selecionamos para <span class="text-gradient">você</span>
+    </h1>
+    <p style="color:rgba(255,255,255,0.5); margin-bottom:3rem; font-size:0.9375rem;">
+        Com base nas suas preferências, estes são os perfumes que mais combinam com você.
+    </p>
+
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:2rem; margin-bottom:3rem; text-align:left;">
+        @foreach (var produto in Model)
+        {
+            if (produto == null) continue;
+            var img = produto.Imagens.FirstOrDefault(i => i.Principal)?.Url ?? produto.Imagens.FirstOrDefault()?.Url;
+            <div style="border:1px solid rgba(212,175,55,0.2); background:rgba(24,24,27,0.5); overflow:hidden;">
+                <a href="/produto/@produto.Slug">
+                    <div style="aspect-ratio:1; background:#18181b; overflow:hidden; display:flex; align-items:center; justify-content:center;">
+                        @if (!string.IsNullOrEmpty(img))
+                        {
+                            <img src="@img" alt="@produto.Nome" style="width:100%; height:100%; object-fit:cover;" />
+                        }
+                    </div>
+                </a>
+                <div style="padding:1.25rem;">
+                    <div class="text-gold" style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.25rem;">@produto.Marca</div>
+                    <a href="/produto/@produto.Slug" style="font-size:1rem; font-weight:600; display:block; margin-bottom:0.5rem;" class="font-playfair">@produto.Nome</a>
+                    <div style="font-size:0.8rem; color:rgba(255,255,255,0.45); margin-bottom:1rem; line-height:1.6;">@produto.Volume · @produto.Genero</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            @if (produto.PrecoPromo.HasValue)
+                            {
+                                <div style="color:#D4AF37; font-weight:700; font-size:1.125rem;">R$ @produto.PrecoPromo.Value.ToString("N2")</div>
+                                <div style="color:rgba(255,255,255,0.3); font-size:0.75rem; text-decoration:line-through;">R$ @produto.Preco.ToString("N2")</div>
+                            }
+                            else
+                            {
+                                <div style="font-weight:700; font-size:1.125rem;">R$ @produto.Preco.ToString("N2")</div>
+                            }
+                        </div>
+                        <form method="post" action="/carrinho/adicionar">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="produtoId" value="@produto.Id" />
+                            <input type="hidden" name="quantidade" value="1" />
+                            <button type="submit" class="btn-gold" style="padding:0.5rem 0.875rem; font-size:0.7rem;">+ Carrinho</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div style="display:flex; justify-content:center; gap:1rem;">
+        <a href="/quiz" class="btn-gold-outline" style="padding:0.75rem 2rem; font-size:0.8rem; display:inline-block;">Refazer Quiz</a>
+        <a href="/catalogo" class="btn-gold" style="padding:0.75rem 2rem; font-size:0.8rem; display:inline-block;">Ver Catálogo Completo</a>
+    </div>
+</div>

@@ -2,16 +2,17 @@
 @{
     ViewBag.Title = Model.Nome;
     var imagemPrincipal = Model.Imagens.FirstOrDefault(i => i.Principal) ?? Model.Imagens.FirstOrDefault();
+    var avaliacoes = ViewBag.Avaliacoes as IEnumerable<Glamour.Application.DTOs.AvaliacaoDto> ?? [];
+    var relacionados = ViewBag.Relacionados as IEnumerable<Glamour.Application.DTOs.ProdutoListagemDto> ?? [];
+    bool naWishlist = ViewBag.NaWishlist ?? false;
 }
 
 <div class="max-w-7xl mx-auto px-4 py-12">
     <!-- Breadcrumb -->
-    <nav class="text-xs text-white/30 mb-8 tracking-wider uppercase">
-        <a href="/" class="hover:text-gold transition-colors">Início</a>
-        <span class="mx-2">/</span>
-        <a href="/catalogo" class="hover:text-gold transition-colors">Catálogo</a>
-        <span class="mx-2">/</span>
-        <span class="text-white/60">@Model.Nome</span>
+    <nav style="font-size:0.7rem; color:rgba(255,255,255,0.3); margin-bottom:2rem; letter-spacing:0.1em; text-transform:uppercase;">
+        <a href="/" style="color:inherit;">Início</a> /
+        <a href="/catalogo" style="color:inherit;">Catálogo</a> /
+        <span style="color:rgba(255,255,255,0.6);">@Model.Nome</span>
     </nav>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
@@ -19,20 +20,20 @@
         <div x-data="{ ativa: '@(imagemPrincipal?.Url ?? "")' }">
             <div class="aspect-square bg-zinc-900 border border-white/10 mb-4 overflow-hidden flex items-center justify-center">
                 <template x-if="ativa">
-                    <img :src="ativa" alt="@Model.Nome" class="w-full h-full object-cover" />
+                    <img :src="ativa" alt="@Model.Nome" style="width:100%; height:100%; object-fit:cover;" />
                 </template>
                 <template x-if="!ativa">
-                    <span class="text-white/10 text-8xl font-playfair">G</span>
+                    <span style="color:rgba(255,255,255,0.1); font-size:5rem;" class="font-playfair">G</span>
                 </template>
             </div>
             @if (Model.Imagens.Count() > 1)
             {
-                <div class="grid grid-cols-4 gap-2">
+                <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:0.5rem;">
                     @foreach (var img in Model.Imagens.OrderBy(i => i.Ordem))
                     {
                         <button @@click="ativa = '@img.Url'"
-                                class="aspect-square bg-zinc-900 border border-white/10 hover:border-gold/40 transition-colors overflow-hidden">
-                            <img src="@img.Url" alt="Imagem @img.Ordem" class="w-full h-full object-cover" />
+                                style="aspect-ratio:1; background:#18181b; border:1px solid rgba(255,255,255,0.1); overflow:hidden; cursor:pointer;">
+                            <img src="@img.Url" style="width:100%; height:100%; object-fit:cover;" />
                         </button>
                     }
                 </div>
@@ -41,85 +42,217 @@
 
         <!-- Info -->
         <div>
-            <p class="text-gold text-xs tracking-[0.4em] uppercase mb-3">@Model.Marca</p>
-            <h1 class="font-playfair text-3xl font-bold mb-2">@Model.Nome</h1>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.75rem;">
+                <p class="text-gold" style="font-size:0.7rem; letter-spacing:0.4em; text-transform:uppercase;">@Model.Marca</p>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <form method="post" action="/favoritos/toggle/@Model.Id" style="margin:0;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="returnUrl" value="/produto/@Model.Slug" />
+                        <button type="submit" style="background:none; border:none; cursor:pointer; font-size:1.5rem; line-height:1;"
+                                title="@(naWishlist ? "Remover dos favoritos" : "Adicionar aos favoritos")">
+                            @(naWishlist ? "♥" : "♡")
+                        </button>
+                    </form>
+                }
+            </div>
+
+            <h1 class="font-playfair" style="font-size:2rem; font-weight:700; margin-bottom:0.5rem;">@Model.Nome</h1>
 
             @if (!string.IsNullOrEmpty(Model.Volume))
             {
-                <p class="text-white/40 text-sm mb-4">@Model.Volume @(!string.IsNullOrEmpty(Model.Genero) ? $"· {Model.Genero}" : "")</p>
+                <p style="color:rgba(255,255,255,0.4); font-size:0.875rem; margin-bottom:1rem;">
+                    @Model.Volume @(!string.IsNullOrEmpty(Model.Genero) ? $"· {Model.Genero}" : "")
+                </p>
             }
 
-            <!-- Avaliações -->
+            <!-- Avaliações resumo -->
             @if (Model.TotalAvaliacoes > 0)
             {
-                <div class="flex items-center gap-2 mb-6">
-                    <div class="flex text-gold text-sm">
+                <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem;">
+                    <div style="color:#D4AF37; font-size:0.875rem; letter-spacing:0.1em;">
                         @for (int i = 1; i <= 5; i++)
-                        {
-                            <span>@(i <= Math.Round(Model.NotaMedia) ? "★" : "☆")</span>
-                        }
+                        { <span>@(i <= Math.Round(Model.NotaMedia) ? "★" : "☆")</span> }
                     </div>
-                    <span class="text-white/40 text-xs">(@Model.TotalAvaliacoes avaliações)</span>
+                    <span style="color:rgba(255,255,255,0.4); font-size:0.75rem;">
+                        @Model.NotaMedia.ToString("F1") (@Model.TotalAvaliacoes avaliações)
+                    </span>
                 </div>
             }
 
             <!-- Preço -->
-            <div class="mb-8">
+            <div style="margin-bottom:2rem;">
                 @if (Model.PrecoPromo.HasValue)
                 {
-                    <div class="text-white/40 text-sm line-through mb-1">R$ @Model.Preco.ToString("N2")</div>
-                    <div class="text-gold font-playfair text-4xl font-bold">R$ @Model.PrecoPromo.Value.ToString("N2")</div>
+                    <div style="color:rgba(255,255,255,0.4); font-size:0.875rem; text-decoration:line-through; margin-bottom:0.25rem;">R$ @Model.Preco.ToString("N2")</div>
+                    <div class="font-playfair" style="font-size:2.5rem; font-weight:700; color:#D4AF37;">R$ @Model.PrecoPromo.Value.ToString("N2")</div>
                 }
                 else
                 {
-                    <div class="text-white font-playfair text-4xl font-bold">R$ @Model.Preco.ToString("N2")</div>
+                    <div class="font-playfair" style="font-size:2.5rem; font-weight:700;">R$ @Model.Preco.ToString("N2")</div>
                 }
-                <p class="text-white/30 text-xs mt-2">Pagamento na entrega ou retirada</p>
+                <p style="color:rgba(255,255,255,0.3); font-size:0.75rem; margin-top:0.25rem;">Pagamento na entrega ou retirada</p>
             </div>
 
-            <!-- Formas de pagamento aceitas -->
-            <div class="border border-gold/20 bg-zinc-900/50 p-4 mb-8 text-sm">
-                <p class="text-gold text-xs tracking-wider uppercase mb-3 font-semibold">Formas de Pagamento Aceitas</p>
-                <div class="grid grid-cols-2 gap-2 text-white/60 text-xs">
-                    <div class="flex items-center gap-2"><span class="text-gold">◇</span> Dinheiro</div>
-                    <div class="flex items-center gap-2"><span class="text-gold">◇</span> Cartão de Crédito</div>
-                    <div class="flex items-center gap-2"><span class="text-gold">◇</span> Cartão de Débito</div>
-                    <div class="flex items-center gap-2"><span class="text-gold">◇</span> PIX</div>
+            <!-- Formas de pagamento -->
+            <div style="border:1px solid rgba(212,175,55,0.2); background:rgba(24,24,27,0.5); padding:1rem; margin-bottom:2rem;">
+                <p class="text-gold" style="font-size:0.65rem; letter-spacing:0.15em; text-transform:uppercase; font-weight:600; margin-bottom:0.75rem;">Formas de Pagamento Aceitas</p>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.375rem; font-size:0.75rem; color:rgba(255,255,255,0.6);">
+                    @foreach (var m in new[] { "Dinheiro", "Cartão de Crédito", "Cartão de Débito", "PIX" })
+                    {
+                        <div style="display:flex; align-items:center; gap:0.4rem;"><span class="text-gold">◇</span> @m</div>
+                    }
                 </div>
-                <p class="text-white/30 text-xs mt-3">Pagamento realizado no momento da entrega ou retirada na loja.</p>
+                <p style="color:rgba(255,255,255,0.3); font-size:0.7rem; margin-top:0.75rem;">Pagamento realizado no momento da entrega ou retirada na loja.</p>
             </div>
 
             @if (Model.Estoque > 0)
             {
-                <form method="post" action="/carrinho/adicionar" class="mb-6">
+                <form method="post" action="/carrinho/adicionar" style="margin-bottom:1.5rem;">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="produtoId" value="@Model.Id" />
-                    <div class="flex gap-4 mb-4">
-                        <div class="flex items-center border border-white/20">
-                            <button type="button" onclick="decrementar()" class="px-4 py-3 text-white/60 hover:text-white transition-colors">−</button>
+                    <div style="display:flex; gap:1rem; margin-bottom:1rem;">
+                        <div style="display:flex; align-items:center; border:1px solid rgba(255,255,255,0.2);">
+                            <button type="button" onclick="decrementar()" style="padding:0.75rem 1rem; color:rgba(255,255,255,0.6); background:none; border:none; cursor:pointer; font-size:1rem;">−</button>
                             <input type="number" name="quantidade" id="qtd" value="1" min="1" max="@Model.Estoque"
-                                   class="w-16 bg-transparent text-center text-white focus:outline-none" />
-                            <button type="button" onclick="incrementar(@Model.Estoque)" class="px-4 py-3 text-white/60 hover:text-white transition-colors">+</button>
+                                   style="width:3.5rem; background:transparent; text-align:center; color:#fff; border:none; outline:none; font-size:0.875rem;" />
+                            <button type="button" onclick="incrementar(@Model.Estoque)" style="padding:0.75rem 1rem; color:rgba(255,255,255,0.6); background:none; border:none; cursor:pointer; font-size:1rem;">+</button>
                         </div>
-                        <button type="submit" class="btn-gold flex-1 py-3 text-sm tracking-widest uppercase">
+                        <button type="submit" class="btn-gold" style="flex:1; padding:0.875rem; font-size:0.8rem; letter-spacing:0.1em;">
                             Adicionar ao Carrinho
                         </button>
                     </div>
+                    <p style="color:rgba(255,255,255,0.3); font-size:0.7rem;">
+                        @Model.Estoque unidade(s) disponível(is)
+                    </p>
                 </form>
             }
             else
             {
-                <div class="border border-red-900/40 bg-red-950/20 text-red-400 text-sm text-center py-4 mb-6">
+                <div style="border:1px solid rgba(127,29,29,0.4); background:rgba(127,29,29,0.1); color:rgb(248,113,113); font-size:0.875rem; text-align:center; padding:1rem; margin-bottom:1.5rem;">
                     Produto temporariamente indisponível
                 </div>
             }
 
-            <div class="text-white/50 text-sm leading-relaxed">
-                <p class="text-gold text-xs tracking-[0.3em] uppercase mb-3">Sobre o Produto</p>
-                @Model.Descricao
+            <div>
+                <p class="text-gold" style="font-size:0.65rem; letter-spacing:0.3em; text-transform:uppercase; margin-bottom:0.75rem;">Sobre o Produto</p>
+                <p style="color:rgba(255,255,255,0.5); font-size:0.875rem; line-height:1.7;">@Model.Descricao</p>
             </div>
         </div>
     </div>
+
+    <!-- Produtos Relacionados -->
+    @if (relacionados.Any())
+    {
+        <section style="margin-bottom:4rem;">
+            <div style="text-align:center; margin-bottom:2.5rem;">
+                <p class="text-gold" style="font-size:0.65rem; letter-spacing:0.4em; text-transform:uppercase; margin-bottom:0.5rem;">Você pode gostar</p>
+                <h2 class="font-playfair" style="font-size:1.75rem; font-weight:700;">Produtos Relacionados</h2>
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:1.5rem;">
+                @foreach (var p in relacionados)
+                {
+                    <a href="/produto/@p.Slug" class="group" style="display:block;">
+                        <div style="aspect-ratio:1; background:#18181b; border:1px solid rgba(255,255,255,0.05); margin-bottom:0.75rem; overflow:hidden; display:flex; align-items:center; justify-content:center; transition:border-color 0.3s;">
+                            @if (!string.IsNullOrEmpty(p.UrlImagemPrincipal))
+                            {
+                                <img src="@p.UrlImagemPrincipal" alt="@p.Nome" style="width:100%; height:100%; object-fit:cover;" loading="lazy" />
+                            }
+                        </div>
+                        <div style="color:rgba(255,255,255,0.4); font-size:0.7rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.25rem;">@p.Marca</div>
+                        <div style="font-size:0.875rem; font-weight:500;">@p.Nome</div>
+                        <div style="margin-top:0.25rem; color:@(p.PrecoPromo.HasValue ? "#D4AF37" : "#fff"); font-weight:600; font-size:0.875rem;">
+                            R$ @((p.PrecoPromo ?? p.Preco).ToString("N2"))
+                        </div>
+                    </a>
+                }
+            </div>
+        </section>
+    }
+
+    <!-- Avaliações -->
+    <section style="max-width:700px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+            <h2 class="font-playfair" style="font-size:1.75rem; font-weight:700;">Avaliações</h2>
+            @if (Model.TotalAvaliacoes > 0)
+            {
+                <div style="text-align:right;">
+                    <div style="font-size:2rem; font-weight:700; color:#D4AF37;">@Model.NotaMedia.ToString("F1")</div>
+                    <div style="color:#D4AF37; font-size:0.875rem;">
+                        @for (int i = 1; i <= 5; i++) { <span>@(i <= Math.Round(Model.NotaMedia) ? "★" : "☆")</span> }
+                    </div>
+                    <div style="color:rgba(255,255,255,0.3); font-size:0.75rem;">@Model.TotalAvaliacoes avaliação(ões)</div>
+                </div>
+            }
+        </div>
+
+        @if (avaliacoes.Any())
+        {
+            <div style="display:flex; flex-direction:column; gap:1rem; margin-bottom:2.5rem;">
+                @foreach (var av in avaliacoes)
+                {
+                    <div style="border:1px solid rgba(255,255,255,0.08); background:rgba(24,24,27,0.5); padding:1.25rem;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                            <div>
+                                <span style="font-weight:500; font-size:0.875rem;">@av.NomeUsuario</span>
+                                <div style="color:#D4AF37; font-size:0.75rem; margin-top:0.1rem;">
+                                    @for (int i = 1; i <= 5; i++) { <span>@(i <= av.Nota ? "★" : "☆")</span> }
+                                </div>
+                            </div>
+                            <span style="color:rgba(255,255,255,0.3); font-size:0.7rem;">@av.CriadoEm.ToString("dd/MM/yyyy")</span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(av.Comentario))
+                        {
+                            <p style="color:rgba(255,255,255,0.55); font-size:0.875rem; line-height:1.6; margin-top:0.5rem;">@av.Comentario</p>
+                        }
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p style="color:rgba(255,255,255,0.3); font-size:0.875rem; margin-bottom:2rem;">Seja o primeiro a avaliar este produto.</p>
+        }
+
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <div style="border:1px solid rgba(212,175,55,0.2); background:rgba(24,24,27,0.5); padding:1.5rem;">
+                <h3 style="font-size:0.875rem; font-weight:600; color:#D4AF37; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1.25rem;">Deixar Avaliação</h3>
+                <form method="post" action="/avaliacoes/criar" style="display:flex; flex-direction:column; gap:1rem;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="ProdutoId" value="@Model.Id" />
+                    <input type="hidden" name="slug" value="@Model.Slug" />
+                    <div>
+                        <label style="font-size:0.7rem; color:rgba(212,175,55,0.7); text-transform:uppercase; letter-spacing:0.1em; display:block; margin-bottom:0.5rem;">Nota</label>
+                        <div x-data="{ nota: 5 }" style="display:flex; gap:0.5rem;">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                var n = i;
+                                <label style="cursor:pointer; font-size:1.5rem; color:#D4AF37;">
+                                    <input type="radio" name="Nota" value="@n" class="sr-only" @@click="nota = @n" required />
+                                    <span x-text="nota >= @n ? '★' : '☆'"></span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+                    <div>
+                        <label style="font-size:0.7rem; color:rgba(212,175,55,0.7); text-transform:uppercase; letter-spacing:0.1em; display:block; margin-bottom:0.5rem;">Comentário (opcional)</label>
+                        <textarea name="Comentario" rows="3" placeholder="Conte sua experiência com este perfume..."
+                                  style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.6rem 0.75rem; font-size:0.875rem; resize:vertical; box-sizing:border-box;"></textarea>
+                    </div>
+                    <button type="submit" class="btn-gold" style="align-self:flex-start; padding:0.625rem 1.5rem; font-size:0.75rem; letter-spacing:0.1em;">
+                        Enviar Avaliação
+                    </button>
+                </form>
+            </div>
+        }
+        else
+        {
+            <div style="border:1px solid rgba(255,255,255,0.08); padding:1rem; text-align:center; font-size:0.875rem; color:rgba(255,255,255,0.4);">
+                <a href="/conta/login" style="color:#D4AF37;">Faça login</a> para deixar uma avaliação.
+            </div>
+        }
+    </section>
 </div>
 
 @section Scripts {

@@ -3,6 +3,9 @@
     ViewBag.Title = "Carrinho";
     var itens = Model.ToList();
     var subtotal = itens.Sum(i => i.Preco * i.Quantidade);
+    const decimal limiteFreteGratis = 150m;
+    var faltaFreteGratis = Math.Max(0, limiteFreteGratis - subtotal);
+    var progressoFrete = Math.Min(100, (double)(subtotal / limiteFreteGratis * 100));
 }
 
 <div class="max-w-5xl mx-auto px-4 py-12">
@@ -34,6 +37,26 @@
     }
     else
     {
+        <!-- Banner frete grátis progressivo -->
+        @if (faltaFreteGratis > 0)
+        {
+            <div style="border:1px solid rgba(212,175,55,0.2); background:rgba(212,175,55,0.05); padding:1rem 1.25rem; margin-bottom:1.5rem;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.8rem;">
+                    <span style="color:rgba(255,255,255,0.7);">Faltam <strong style="color:#D4AF37;">R$ @faltaFreteGratis.ToString("N2")</strong> para frete grátis!</span>
+                    <span style="color:rgba(255,255,255,0.3);">R$ @limiteFreteGratis.ToString("N0")</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.08); height:4px; border-radius:2px; overflow:hidden;">
+                    <div style="width:@progressoFrete.ToString("F0")%; background:linear-gradient(90deg,#D4AF37,#F0D060); height:100%; transition:width 0.4s; border-radius:2px;"></div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div style="border:1px solid rgba(74,222,128,0.3); background:rgba(74,222,128,0.05); padding:0.875rem 1.25rem; margin-bottom:1.5rem; font-size:0.8rem; color:rgb(74,222,128);">
+                ✓ Você ganhou <strong>frete grátis</strong>!
+            </div>
+        }
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
             <!-- Itens -->
             <div class="lg:col-span-2 space-y-4">

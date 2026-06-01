@@ -13,6 +13,7 @@ public static class DependencyInjection
         services.AddScoped<CategoriaService>();
         services.AddScoped<PedidoService>();
         services.AddScoped<EnderecoService>();
+        services.AddScoped<AvaliacaoService>();
         return services;
     }
 }

@@ -1,9 +1,14 @@
 using Glamour.Application.Services;
+using Glamour.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Glamour.Web.Controllers;
 
-public class CatalogoController(ProdutoService produtoService, CategoriaService categoriaService) : Controller
+public class CatalogoController(
+    ProdutoService produtoService,
+    CategoriaService categoriaService,
+    AvaliacaoService avaliacaoService,
+    IWishlistService wishlist) : Controller
 {
     [Route("catalogo")]
     public async Task<IActionResult> Index(
@@ -28,6 +33,21 @@ public class CatalogoController(ProdutoService produtoService, CategoriaService 
     {
         var produto = await produtoService.ObterPorSlugAsync(slug);
         if (produto == null) return NotFound();
+
+        var avaliacoes = await avaliacaoService.ObterAprovadosAsync(produto.Id);
+        ViewBag.Avaliacoes = avaliacoes;
+
+        var relacionados = await produtoService.ObterRelacionadosAsync(produto.Id, Guid.Parse(produto.CategoriaId), 4);
+        ViewBag.Relacionados = relacionados;
+
+        bool naWishlist = false;
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            var uid = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "";
+            naWishlist = await wishlist.ContemAsync(uid, produto.Id);
+        }
+        ViewBag.NaWishlist = naWishlist;
+
         return View(produto);
     }
 }
