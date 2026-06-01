@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Glamour.Application/Glamour.Application.csproj" />
+    <Project Path="src/Glamour.Domain/Glamour.Domain.csproj" />
+    <Project Path="src/Glamour.Infrastructure/Glamour.Infrastructure.csproj" />
+    <Project Path="src/Glamour.Shared/Glamour.Shared.csproj" />
+    <Project Path="src/Glamour.Web/Glamour.Web.csproj" />
+  </Folder>
+</Solution>
