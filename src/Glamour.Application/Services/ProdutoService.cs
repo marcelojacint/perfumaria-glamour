@@ -7,6 +7,12 @@ namespace Glamour.Application.Services;
 
 public class ProdutoService(IProdutoRepository produtoRepo, ICategoriaRepository categoriaRepo, NotificacaoContext notificacoes)
 {
+    public async Task<ProdutoDto?> ObterPorIdAsync(Guid id)
+    {
+        var produto = await produtoRepo.ObterPorIdAsync(id);
+        return produto == null ? null : MapDto(produto);
+    }
+
     public async Task<ProdutoDto?> ObterPorSlugAsync(string slug)
     {
         var produto = await produtoRepo.ObterPorSlugAsync(slug);

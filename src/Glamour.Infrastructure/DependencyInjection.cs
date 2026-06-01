@@ -39,6 +39,7 @@ public static class DependencyInjection
         services.AddScoped<IPedidoRepository, PedidoRepository>();
         services.AddScoped<ICupomRepository, CupomRepository>();
         services.AddScoped<ICarrinhoService, CarrinhoRedisService>();
+        services.AddScoped<IRepository<Glamour.Domain.Entities.Endereco>, BaseRepository<Glamour.Domain.Entities.Endereco>>();
 
         return services;
     }

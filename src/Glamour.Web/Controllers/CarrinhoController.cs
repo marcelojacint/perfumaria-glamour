@@ -25,20 +25,22 @@ public class CarrinhoController(ICarrinhoService carrinhoService, ProdutoService
     [HttpPost, Route("carrinho/adicionar")]
     public async Task<IActionResult> Adicionar(Guid produtoId, int quantidade = 1)
     {
-        var produto = await produtoService.ObterPorSlugAsync("");
-        // Busca produto pelo Id
+        var produto = await produtoService.ObterPorIdAsync(produtoId);
+        if (produto == null) return RedirectToAction(nameof(Index));
+
+        var imagem = produto.Imagens.FirstOrDefault(i => i.Principal)?.Url
+                  ?? produto.Imagens.FirstOrDefault()?.Url;
+
         var itens = await carrinhoService.ObterCarrinhoAsync(CarrinhoId);
         var existente = itens.FirstOrDefault(i => i.ProdutoId == produtoId);
+
         if (existente != null)
-        {
             await carrinhoService.AtualizarQuantidadeAsync(CarrinhoId, produtoId, existente.Quantidade + quantidade);
-        }
         else
-        {
-            // Precisamos buscar o produto pelo id — simplificado aqui
             await carrinhoService.AdicionarItemAsync(CarrinhoId,
-                new ItemCarrinho(produtoId, "Produto", null, 0, quantidade));
-        }
+                new ItemCarrinho(produtoId, produto.Nome, imagem, produto.PrecoPromo ?? produto.Preco, quantidade));
+
+        TempData["Sucesso"] = $"\"{produto.Nome}\" adicionado ao carrinho!";
         return RedirectToAction(nameof(Index));
     }
 

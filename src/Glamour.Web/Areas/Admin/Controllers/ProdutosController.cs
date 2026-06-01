@@ -47,9 +47,19 @@ public class ProdutosController(ProdutoService produtoService, CategoriaService 
     [HttpGet("editar/{id}")]
     public async Task<IActionResult> Editar(Guid id)
     {
-        var produto = await produtoService.ObterPorSlugAsync("");
+        var produto = await produtoService.ObterPorIdAsync(id);
+        if (produto == null) return NotFound();
+
+        var dto = new AtualizarProdutoDto(
+            produto.Id, produto.Nome, produto.Slug, produto.Descricao,
+            produto.Preco, produto.PrecoPromo, produto.Estoque,
+            Guid.Parse(produto.CategoriaId), produto.Marca,
+            produto.Volume, produto.Genero, produto.Destaque);
+
         ViewBag.Categorias = await categoriaService.ObterAtivasAsync();
-        return View();
+        ViewBag.UrlImagem = produto.Imagens.FirstOrDefault(i => i.Principal)?.Url
+                         ?? produto.Imagens.FirstOrDefault()?.Url;
+        return View(dto);
     }
 
     [HttpPost("editar")]

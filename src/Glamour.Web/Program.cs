@@ -55,6 +55,7 @@ try
         var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var roleMgr = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         await SeedAsync(userMgr, roleMgr);
+        await Glamour.Infrastructure.Data.DataSeeder.SeedDadosDemoAsync(db);
     }
 
     if (!app.Environment.IsDevelopment())

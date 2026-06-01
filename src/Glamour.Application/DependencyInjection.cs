@@ -12,6 +12,7 @@ public static class DependencyInjection
         services.AddScoped<ProdutoService>();
         services.AddScoped<CategoriaService>();
         services.AddScoped<PedidoService>();
+        services.AddScoped<EnderecoService>();
         return services;
     }
 }
