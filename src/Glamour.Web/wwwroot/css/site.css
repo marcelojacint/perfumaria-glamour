@@ -74,19 +74,32 @@ h1, h2, h3, h4, h5, h6 { font-weight: inherit; }
     background-clip: text;
 }
 .btn-accent {
+    position: relative;
+    overflow: hidden;
     display: inline-block;
     background: var(--accent-grad);
     color: #0A0A0A;
     font-weight: 600;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     text-align: center;
     border: none;
     cursor: pointer;
-    transition: filter 0.2s, transform 0.1s, box-shadow 0.2s;
+    transition: transform 0.25s cubic-bezier(.2,.7,.3,1), box-shadow 0.25s ease, filter 0.2s ease;
 }
-.btn-accent:hover { filter: brightness(1.08); box-shadow: 0 6px 24px var(--accent-glow); }
-.btn-accent:active { transform: scale(0.99); }
+.btn-accent::before {
+    content: "";
+    position: absolute; top: 0; left: -120%;
+    width: 60%; height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,0.55), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.6s cubic-bezier(.2,.7,.3,1);
+    pointer-events: none;
+}
+.btn-accent:hover { transform: translateY(-2px); filter: brightness(1.06); box-shadow: 0 10px 28px var(--accent-glow); }
+.btn-accent:hover::before { left: 130%; }
+.btn-accent:active { transform: translateY(0); }
+.btn-accent:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
 /* Reset base */
 *, *::before, *::after { box-sizing: border-box; }
@@ -120,39 +133,101 @@ body {
 
 /* Botões */
 .btn-gold {
+    position: relative;
+    overflow: hidden;
     display: inline-block;
-    background: linear-gradient(135deg, #D4AF37, #A08020);
-    color: #000;
+    background: linear-gradient(135deg, #F0D060 0%, #D4AF37 45%, #A08020 100%);
+    color: #0A0A0A;
     font-weight: 600;
     font-family: 'Inter', sans-serif;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     text-decoration: none;
     cursor: pointer;
     border: none;
-    transition: opacity 0.2s, transform 0.1s;
     text-align: center;
+    transition: transform 0.25s cubic-bezier(.2,.7,.3,1), box-shadow 0.25s ease, filter 0.2s ease;
 }
-.btn-gold:hover { filter: brightness(1.08); box-shadow: 0 6px 24px rgba(212,175,55,0.28); }
-.btn-gold:active { transform: scale(0.99); }
+.btn-gold::before {
+    content: "";
+    position: absolute; top: 0; left: -120%;
+    width: 60%; height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,0.55), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.6s cubic-bezier(.2,.7,.3,1);
+    pointer-events: none;
+}
+.btn-gold:hover { transform: translateY(-2px); filter: brightness(1.05); box-shadow: 0 10px 28px rgba(212,175,55,0.32); }
+.btn-gold:hover::before { left: 130%; }
+.btn-gold:active { transform: translateY(0); }
+.btn-gold:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
 .btn-gold-outline {
+    position: relative;
+    overflow: hidden;
     display: inline-block;
-    border: 1px solid var(--gold);
+    border: 1px solid rgba(212,175,55,0.6);
     color: var(--gold);
     font-weight: 500;
     font-family: 'Inter', sans-serif;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
     text-decoration: none;
     cursor: pointer;
     background: transparent;
-    transition: background-color 0.2s, color 0.2s;
     text-align: center;
+    transition: color 0.3s ease, border-color 0.3s ease, transform 0.25s cubic-bezier(.2,.7,.3,1), box-shadow 0.25s ease;
+}
+.btn-gold-outline::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, #F0D060, #A08020);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s cubic-bezier(.2,.7,.3,1);
+    z-index: -1;
 }
 .btn-gold-outline:hover {
-    background-color: rgba(212, 175, 55, 0.1);
-    box-shadow: 0 4px 18px rgba(212,175,55,0.15);
+    color: #0A0A0A;
+    border-color: var(--gold);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 26px rgba(212,175,55,0.25);
 }
+.btn-gold-outline:hover::after { transform: scaleX(1); }
+.btn-gold-outline:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* Variante outline temática (segue o acento por gênero) */
+.btn-accent-outline {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    border: 1px solid rgba(var(--accent-rgb), 0.6);
+    color: var(--accent);
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    background: transparent;
+    text-align: center;
+    transition: color 0.3s ease, border-color 0.3s ease, transform 0.25s cubic-bezier(.2,.7,.3,1), box-shadow 0.25s ease;
+}
+.btn-accent-outline::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: var(--accent-grad);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s cubic-bezier(.2,.7,.3,1);
+    z-index: -1;
+}
+.btn-accent-outline:hover {
+    color: #0A0A0A;
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 26px var(--accent-glow);
+}
+.btn-accent-outline:hover::after { transform: scaleX(1); }
+.btn-accent-outline:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ===== Refino visual de produtos e banners ===== */
 
