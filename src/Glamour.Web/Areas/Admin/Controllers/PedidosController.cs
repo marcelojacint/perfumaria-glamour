@@ -23,7 +23,6 @@ public class PedidosController(
         var (pedidos, total) = await pedidoRepo.ListarAdminAsync(busca, status, de, ate, pagina, 20);
         var lista = pedidos.ToList();
 
-        // Resolve nome e telefone dos clientes (UsuarioId -> dados) para exibir na listagem
         var ids = lista.Select(p => p.UsuarioId).Distinct().ToList();
         var clientes = await userManager.Users
             .Where(u => ids.Contains(u.Id))

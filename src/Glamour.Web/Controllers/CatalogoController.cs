@@ -40,7 +40,6 @@ public class CatalogoController(
         var relacionados = await produtoService.ObterRelacionadosAsync(produto.Id, Guid.Parse(produto.CategoriaId), 4);
         ViewBag.Relacionados = relacionados;
 
-        // SEO
         ViewBag.MetaDescription = $"{produto.Nome} — {produto.Marca}, {produto.Volume}. {produto.Descricao.Split('.').FirstOrDefault()?.Trim()}.";
         ViewBag.MetaKeywords = $"{produto.Nome}, {produto.Marca}, perfume, {produto.Genero}, {produto.CategoriaNome}";
         ViewBag.OgType = "product";

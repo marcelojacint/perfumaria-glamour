@@ -26,7 +26,6 @@ public class GlamourDbContext : IdentityDbContext<ApplicationUser>
         base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(typeof(GlamourDbContext).Assembly);
 
-        // Renomeia tabelas Identity para snake_case / português
         builder.Entity<ApplicationUser>().ToTable("usuarios");
     }
 }

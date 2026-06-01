@@ -71,11 +71,10 @@ public class ContaController(
         var resultado = await signInManager.PasswordSignInAsync(dto.Email, dto.Senha, dto.LembrarMe, lockoutOnFailure: true);
         if (resultado.Succeeded)
         {
-            // Se houver returnUrl explícito, respeita
+
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                 return LocalRedirect(returnUrl);
 
-            // Admin vai direto para o dashboard; cliente para a home
             var usuario = await userManager.FindByEmailAsync(dto.Email);
             if (usuario != null && await userManager.IsInRoleAsync(usuario, RolesUsuario.Admin))
                 return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
@@ -98,8 +97,6 @@ public class ContaController(
         await signInManager.SignOutAsync();
         return RedirectToAction("Index", "Home");
     }
-
-    // ===== Login externo (Google) =====
 
     [HttpPost("login-externo")]
     public IActionResult LoginExterno(string provider, string? returnUrl = null)
@@ -125,14 +122,12 @@ public class ContaController(
             return RedirectToAction(nameof(Login));
         }
 
-        // Tenta logar com a conta externa já vinculada
         var resultado = await signInManager.ExternalLoginSignInAsync(
             info.LoginProvider, info.ProviderKey, isPersistent: true, bypassTwoFactor: true);
 
         if (resultado.Succeeded)
             return await RedirecionarPosLoginAsync(info.Principal.FindFirstValue(System.Security.Claims.ClaimTypes.Email), returnUrl);
 
-        // Primeiro acesso via Google: cria a conta automaticamente
         var email = info.Principal.FindFirstValue(System.Security.Claims.ClaimTypes.Email);
         var nome = info.Principal.FindFirstValue(System.Security.Claims.ClaimTypes.Name) ?? email;
 
@@ -157,7 +152,6 @@ public class ContaController(
             await userManager.AddToRoleAsync(usuario, RolesUsuario.Cliente);
         }
 
-        // Vincula o login externo à conta (se ainda não vinculado)
         await userManager.AddLoginAsync(usuario, info);
         await signInManager.SignInAsync(usuario, isPersistent: true);
 

@@ -8,7 +8,7 @@ namespace Glamour.Web.Services;
 public class ImagemService(IWebHostEnvironment env, IProdutoRepository produtoRepo)
 {
     private static readonly string[] _extensoesPermitidas = [".jpg", ".jpeg", ".png", ".webp", ".avif"];
-    private const long TamanhoMaxBytes = 5 * 1024 * 1024; // 5 MB
+    private const long TamanhoMaxBytes = 5 * 1024 * 1024;
 
     public async Task<(bool ok, string? urlOuErro)> SalvarImagemAsync(IFormFile arquivo)
     {

@@ -44,7 +44,6 @@ public class PedidoService(
         Cupom? cupom = null;
         decimal subtotalEstimado = itensCarrinho.Sum(i => i.Preco * i.Quantidade);
 
-        // Validação de frete por localização (entrega)
         if (dto.TipoEntrega == TipoEntrega.Entrega)
         {
             var endereco = await enderecoRepo.ObterPorIdAsync(dto.EnderecoId!.Value);
@@ -53,7 +52,7 @@ public class PedidoService(
                 notificacoes.Adicionar("Endereco", "Endereço de entrega não encontrado.");
                 return Guid.Empty;
             }
-            // Fora da área de entrega: cliente deve entrar em contato (não cria entrega automática)
+
             if (!freteService.MesmaLocalidade(endereco.Cidade, endereco.UF))
             {
                 notificacoes.Adicionar("Frete",
@@ -87,7 +86,6 @@ public class PedidoService(
             await produtoRepo.AtualizarAsync(produto);
         }
 
-        // Frete calculado no servidor (fonte de verdade), com base no subtotal real e no endereço
         if (dto.TipoEntrega == TipoEntrega.Entrega)
         {
             var endereco = await enderecoRepo.ObterPorIdAsync(dto.EnderecoId!.Value);
@@ -117,7 +115,6 @@ public class PedidoService(
         await pedidoRepo.AtualizarAsync(pedido);
         await pedidoRepo.SalvarAsync();
 
-        // Credita pontos quando pedido é entregue (1 ponto por R$1)
         if (dto.NovoStatus == StatusPedido.Entregue && statusAnterior != StatusPedido.Entregue)
             await fidelidadeService.CreditarPontosAsync(pedido.UsuarioId, pedido.Total);
 

@@ -6,7 +6,7 @@ namespace Glamour.Infrastructure.Services;
 
 public class FidelidadeService(UserManager<ApplicationUser> userManager) : IFidelidadeService
 {
-    // 1 ponto por R$ 1 gasto; 100 pontos = R$ 1 de desconto
+
     public async Task CreditarPontosAsync(string usuarioId, decimal valorPedido)
     {
         var usuario = await userManager.FindByIdAsync(usuarioId);

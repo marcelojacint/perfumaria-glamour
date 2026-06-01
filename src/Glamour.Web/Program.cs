@@ -23,7 +23,6 @@ try
     var builder = WebApplication.CreateBuilder(args);
     builder.Host.UseSerilog();
 
-    // MVC — decimais parseados com InvariantCulture (inputs HTML number usam ponto)
     builder.Services.AddControllersWithViews(opt =>
     {
         opt.ModelBinderProviders.Insert(0, new Glamour.Web.ModelBinding.InvariantDecimalModelBinderProvider());
@@ -31,7 +30,6 @@ try
     builder.Services.AddApplication();
     builder.Services.AddInfrastructure(builder.Configuration);
 
-    // Identity cookie (Lax para permitir retorno do OAuth externo)
     builder.Services.ConfigureApplicationCookie(opt =>
     {
         opt.LoginPath = "/conta/login";
@@ -44,7 +42,6 @@ try
         opt.SlidingExpiration = true;
     });
 
-    // Login externo com Google (registrado apenas se houver credenciais configuradas)
     var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
     var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
     if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
@@ -57,7 +54,6 @@ try
         });
     }
 
-    // Sessão
     builder.Services.AddDistributedMemoryCache();
     builder.Services.AddSession(opt =>
     {
@@ -67,9 +63,6 @@ try
         opt.Cookie.SameSite = SameSiteMode.Strict;
     });
 
-    // Output cache — sem política base global (apenas endpoints marcados com [OutputCache]
-    // são cacheados). Páginas autenticadas/dinâmicas (checkout, carrinho, conta, admin)
-    // nunca são cacheadas, evitando vazamento de dados entre sessões.
     builder.Services.AddOutputCache(opt =>
     {
         opt.AddPolicy("home", b => b.Expire(TimeSpan.FromMinutes(5)).Tag("home"));
@@ -77,7 +70,6 @@ try
         opt.AddPolicy("produto", b => b.Expire(TimeSpan.FromMinutes(10)).Tag("produto"));
     });
 
-    // Compressão Brotli/Gzip
     builder.Services.AddResponseCompression(opt =>
     {
         opt.EnableForHttps = true;
@@ -87,7 +79,6 @@ try
     builder.Services.Configure<BrotliCompressionProviderOptions>(opt => opt.Level = CompressionLevel.Fastest);
     builder.Services.Configure<GzipCompressionProviderOptions>(opt => opt.Level = CompressionLevel.Fastest);
 
-    // Rate limiting
     builder.Services.AddRateLimiter(opt =>
     {
         opt.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -114,7 +105,6 @@ try
 
     var app = builder.Build();
 
-    // Migrations e seed automáticos
     using (var scope = app.Services.CreateScope())
     {
         var db = scope.ServiceProvider.GetRequiredService<GlamourDbContext>();
@@ -136,7 +126,6 @@ try
     app.UseStatusCodePagesWithReExecute("/erro/{0}");
     app.UseHttpsRedirection();
 
-    // Headers de segurança
     app.Use(async (ctx, next) =>
     {
         ctx.Response.Headers.Append("X-Content-Type-Options", "nosniff");

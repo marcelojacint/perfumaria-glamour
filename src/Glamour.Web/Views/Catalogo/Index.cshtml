@@ -7,7 +7,6 @@
     int totalPaginas = ViewBag.TotalPaginas ?? 1;
 
     var genero = Context.Request.Query["genero"].ToString();
-    // Tema visual conforme o gênero navegado
     var tema = genero switch
     {
         "Feminino" => "tema-feminino",
@@ -26,7 +25,7 @@
 }
 
 <div class="@tema">
-    <!-- Hero temático -->
+
     <section class="hero-genero">
         <div class="max-w-7xl mx-auto px-4 py-14 text-center">
             <p class="text-accent text-xs tracking-[0.5em] uppercase mb-3 font-semibold">@(temGenero ? "Coleção" : "Explore")</p>
@@ -35,7 +34,6 @@
             </h1>
             <p class="text-white/55 text-sm max-w-xl mx-auto">@heroSub</p>
 
-            <!-- Navegação rápida por gênero -->
             <div class="flex flex-wrap items-center justify-center gap-3 mt-7">
                 @foreach (var (val, lbl) in new[] { ("", "Todos"), ("Feminino", "Feminino"), ("Masculino", "Masculino"), ("Unissex", "Unissex") })
                 {
@@ -54,7 +52,7 @@
         <p class="text-white/40 text-sm mb-8">@total produto(s) encontrado(s)</p>
 
         <div class="flex flex-col lg:flex-row gap-10">
-            <!-- Filtros -->
+
             <aside class="lg:w-64 flex-shrink-0">
                 <form method="get" action="/catalogo" class="space-y-8">
                     <div>
@@ -104,7 +102,6 @@
                 </form>
             </aside>
 
-            <!-- Grid de produtos -->
             <div class="flex-1">
                 @if (!produtos.Any())
                 {

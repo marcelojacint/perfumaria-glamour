@@ -33,10 +33,9 @@
           x-data="checkout()" x-init="init()">
         @Html.AntiForgeryToken()
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
-            <!-- Formulário -->
+
             <div class="lg:col-span-2 space-y-8">
 
-                <!-- Tipo de entrega -->
                 <div class="border border-gold/20 bg-zinc-900/50 p-6">
                     <h2 class="font-playfair text-xl font-semibold mb-5">Como deseja receber?</h2>
                     <div class="grid grid-cols-2 gap-4">
@@ -62,7 +61,6 @@
                         </label>
                     </div>
 
-                    <!-- Endereço (apenas para entrega) -->
                     <div x-show="tipoEntrega === 'Entrega'" x-transition class="mt-6 space-y-4">
 
                         @if (enderecos.Any())
@@ -100,7 +98,6 @@
                             </div>
                         }
 
-                        <!-- Formulário de novo endereço (autopreenchimento por CEP) -->
                         <div x-show="@(enderecos.Any() ? "enderecoOpcao === 'novo'" : "true")" x-transition
                              class="grid grid-cols-2 gap-4 pt-2">
                             <div class="col-span-2">
@@ -144,7 +141,6 @@
                             </div>
                         </div>
 
-                        <!-- Aviso: fora da área de entrega -->
                         <div x-show="freteCalculado && !dentroDaArea" x-transition
                              class="border border-amber-600/40 bg-amber-950/20 p-4 text-sm">
                             <p class="text-amber-400 font-semibold mb-1">📍 Fora da nossa área de entrega</p>
@@ -159,7 +155,6 @@
                         </div>
                     </div>
 
-                    <!-- Info retirada -->
                     <div x-show="tipoEntrega === 'RetiradaNaLoja'" x-transition class="mt-6 border border-gold/20 bg-gold/5 p-4 text-sm text-white/70">
                         <p class="font-semibold text-gold mb-2">Endereço da Loja</p>
                         <p>@lojaEndereco</p>
@@ -167,7 +162,6 @@
                     </div>
                 </div>
 
-                <!-- Forma de pagamento -->
                 <div class="border border-gold/20 bg-zinc-900/50 p-6">
                     <h2 class="font-playfair text-xl font-semibold mb-5">Forma de Pagamento</h2>
                     <p class="text-white/40 text-sm mb-4">Informe como deseja pagar. O pagamento será realizado no momento da entrega ou retirada.</p>
@@ -198,7 +192,6 @@
                     </div>
                 </div>
 
-                <!-- Cupom e observações -->
                 <div class="border border-gold/20 bg-zinc-900/50 p-6 space-y-4">
                     <div>
                         <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">Cupom de Desconto</label>
@@ -213,7 +206,6 @@
                 </div>
             </div>
 
-            <!-- Resumo -->
             <div>
                 <div class="border border-gold/20 bg-zinc-900/50 p-6 sticky top-24">
                     <h2 class="font-playfair text-xl font-semibold mb-5">Resumo do Pedido</h2>
@@ -303,8 +295,6 @@ function checkout() {
                 const r = await fetch('https://viacep.com.br/ws/' + cep + '/json/');
                 const d = await r.json();
                 if (!d.erro) {
-                    // Só preenche quando o ViaCEP retorna valor — não apaga o que o usuário digitou
-                    // (CEPs gerais de cidades pequenas vêm sem logradouro/bairro)
                     if (d.logradouro) this.$refs.logradouro.value = d.logradouro;
                     if (d.bairro) this.$refs.bairro.value = d.bairro;
                     if (d.localidade) this.$refs.cidade.value = d.localidade;

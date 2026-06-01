@@ -5,12 +5,6 @@ using Microsoft.Extensions.Configuration;
 
 namespace Glamour.Application.Services;
 
-/// <summary>
-/// Calcula o frete com base na cidade de entrega.
-/// Regra: entrega automática apenas na cidade atendida (zona urbana + raio configurado).
-/// Frete grátis acima do valor mínimo; taxa fixa abaixo dele.
-/// Fora da área, o cliente deve entrar em contato com a loja.
-/// </summary>
 public class FreteService(IConfiguration config)
 {
     private string CidadeAtendida => config["Frete:CidadeAtendida"] ?? "Cacimba de Dentro";

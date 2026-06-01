@@ -55,7 +55,7 @@ public class ProdutoRepository(GlamourDbContext context) : BaseRepository<Produt
     public async Task<IEnumerable<Produto>> ObterPromocoesAsync(int quantidade) =>
         await _dbSet.Include(p => p.Imagens)
             .Where(p => p.Ativo && p.PrecoPromo != null && p.PrecoPromo < p.Preco)
-            .OrderByDescending(p => (p.Preco - p.PrecoPromo!.Value) / p.Preco) // maior desconto primeiro
+            .OrderByDescending(p => (p.Preco - p.PrecoPromo!.Value) / p.Preco)
             .Take(quantidade).ToListAsync();
 
     public async Task<IEnumerable<Produto>> ObterRelacionadosAsync(Guid produtoId, Guid categoriaId, int quantidade) =>

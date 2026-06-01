@@ -13,7 +13,6 @@
         </p>
     </div>
 
-    <!-- Barra de progresso -->
     <div style="background:rgba(255,255,255,0.08); height:2px; border-radius:1px; margin-bottom:2.5rem; overflow:hidden;">
         <div :style="'width:' + (etapa/total*100) + '%'" style="background:linear-gradient(90deg,#D4AF37,#F0D060); height:100%; transition:width 0.4s;"></div>
     </div>
@@ -21,7 +20,6 @@
     <form method="post" action="/quiz/resultado">
         @Html.AntiForgeryToken()
 
-        <!-- Etapa 1: Ocasião -->
         <div x-show="etapa === 1" x-transition>
             <h2 class="font-playfair" style="font-size:1.5rem; font-weight:600; text-align:center; margin-bottom:2rem;">
                 Para qual ocasião?
@@ -46,7 +44,6 @@
             </div>
         </div>
 
-        <!-- Etapa 2: Intensidade -->
         <div x-show="etapa === 2" x-transition>
             <h2 class="font-playfair" style="font-size:1.5rem; font-weight:600; text-align:center; margin-bottom:2rem;">
                 Prefere fragrâncias...
@@ -71,7 +68,6 @@
             </div>
         </div>
 
-        <!-- Etapa 3: Família olfativa -->
         <div x-show="etapa === 3" x-transition>
             <h2 class="font-playfair" style="font-size:1.5rem; font-weight:600; text-align:center; margin-bottom:2rem;">
                 Qual aroma te atrai?
@@ -96,7 +92,6 @@
             </div>
         </div>
 
-        <!-- Etapa 4: Gênero -->
         <div x-show="etapa === 4" x-transition>
             <h2 class="font-playfair" style="font-size:1.5rem; font-weight:600; text-align:center; margin-bottom:2rem;">
                 Buscando para...
@@ -121,7 +116,6 @@
             </div>
         </div>
 
-        <!-- Voltar -->
         <div style="text-align:center; margin-top:1.5rem;" x-show="etapa > 1">
             <button type="button" @@click="etapa--"
                     style="background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.4); font-size:0.8rem;">

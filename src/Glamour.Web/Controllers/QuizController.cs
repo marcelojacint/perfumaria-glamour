@@ -13,7 +13,7 @@ public class QuizController(ProdutoService produtoService) : Controller
     public async Task<IActionResult> Resultado(
         string ocasiao, string intensidade, string familia, string genero)
     {
-        // Mapeamento simples de respostas → slugs recomendados
+
         var recomendados = (ocasiao, intensidade, familia, genero) switch
         {
             (_, _, "floral", "feminino") => new[] { "la-vie-est-belle", "black-opium", "bombshell" },

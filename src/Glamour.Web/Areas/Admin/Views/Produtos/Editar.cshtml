@@ -14,7 +14,7 @@
 }
 
 <div style="display:grid; grid-template-columns:2fr 1fr; gap:2rem; max-width:1000px;">
-    <!-- Formulário principal -->
+
     <div>
         <form method="post" action="/admin/produtos/editar" style="display:flex; flex-direction:column; gap:1.25rem;">
             @Html.AntiForgeryToken()
@@ -108,12 +108,10 @@
         </form>
     </div>
 
-    <!-- Gerenciador de imagens -->
     <div>
         <div style="border:1px solid rgba(212,175,55,0.2); background:rgba(24,24,27,0.5); padding:1.25rem;">
             <h3 style="font-size:0.8rem; color:#D4AF37; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1rem;">Imagens (@imagens.Count())</h3>
 
-            <!-- Imagens existentes -->
             @if (imagens.Any())
             {
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-bottom:1rem;">
@@ -130,7 +128,6 @@
                 </div>
             }
 
-            <!-- Upload de arquivo -->
             <form method="post" action="/admin/imagens/upload/@Model.Id" enctype="multipart/form-data" style="margin-bottom:0.75rem;">
                 @Html.AntiForgeryToken()
                 <label style="font-size:0.65rem; color:rgba(212,175,55,0.6); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:0.4rem;">Upload de arquivo</label>
@@ -145,7 +142,6 @@
                 <p style="font-size:0.65rem; color:rgba(255,255,255,0.25); margin-top:0.3rem;">JPG, PNG, WebP · máx. 5 MB</p>
             </form>
 
-            <!-- Adicionar por URL -->
             <form method="post" action="/admin/imagens/url/@Model.Id">
                 @Html.AntiForgeryToken()
                 <label style="font-size:0.65rem; color:rgba(212,175,55,0.6); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:0.4rem;">Ou adicionar por URL</label>

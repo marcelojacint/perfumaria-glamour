@@ -9,7 +9,6 @@ public static class DataSeeder
     {
         if (await db.Categorias.AnyAsync()) return;
 
-        // Categorias
         var feminino = new Categoria("Feminino", "feminino", 1);
         var masculino = new Categoria("Masculino", "masculino", 2);
         var unissex = new Categoria("Unissex", "unissex", 3);
@@ -18,7 +17,6 @@ public static class DataSeeder
         await db.Categorias.AddRangeAsync(feminino, masculino, unissex, kits);
         await db.SaveChangesAsync();
 
-        // Produtos femininos
         var produtos = new List<Produto>
         {
             CriarProduto("La Vie Est Belle", "la-vie-est-belle", feminino.Id,
@@ -45,7 +43,6 @@ public static class DataSeeder
                 199.90m, 159.90m, 20, false,
                 "https://images.unsplash.com/photo-1588776814546-daab30f310ce?w=600&q=80"),
 
-            // Masculinos
             CriarProduto("Bleu de Chanel", "bleu-de-chanel", masculino.Id,
                 "Chanel", "100ml", "Masculino",
                 "Frescor mediterrâneo com notas de limão siciliano, gengibre e cedro.",
@@ -70,7 +67,6 @@ public static class DataSeeder
                 399.90m, null, 7, false,
                 "https://images.unsplash.com/photo-1595425959377-a15c3e0b7b7f?w=600&q=80"),
 
-            // Unissex
             CriarProduto("Oud Wood", "oud-wood", unissex.Id,
                 "Tom Ford", "50ml", "Unissex",
                 "A madeira rara oud encontra cardamomo e sândalo em uma composição única.",
@@ -83,7 +79,6 @@ public static class DataSeeder
                 499.90m, 439.90m, 9, true,
                 "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80"),
 
-            // Kit
             CriarProduto("Kit Presente Luxury", "kit-presente-luxury", kits.Id,
                 "Glamour Selection", "Variado", "Unissex",
                 "Kit presente especial com 3 miniaturas exclusivas + nécessaire de couro. Ideal para presentear.",
