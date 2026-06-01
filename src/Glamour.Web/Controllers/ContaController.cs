@@ -12,7 +12,8 @@ namespace Glamour.Web.Controllers;
 public class ContaController(
     UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager,
-    PedidoService pedidoService) : Controller
+    PedidoService pedidoService,
+    EnderecoService enderecoService) : Controller
 {
     [HttpGet("registrar")]
     public IActionResult Registrar() => View();
@@ -56,13 +57,18 @@ public class ContaController(
     }
 
     [HttpPost("login")]
+    [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("login")]
     public async Task<IActionResult> Login(LoginDto dto, string? returnUrl = null)
     {
         var resultado = await signInManager.PasswordSignInAsync(dto.Email, dto.Senha, dto.LembrarMe, lockoutOnFailure: true);
         if (resultado.Succeeded)
             return LocalRedirect(returnUrl ?? "/");
 
-        ModelState.AddModelError("", "E-mail ou senha inválidos.");
+        if (resultado.IsLockedOut)
+            ModelState.AddModelError("", "Conta bloqueada. Aguarde alguns minutos.");
+        else
+            ModelState.AddModelError("", "E-mail ou senha inválidos.");
+
         return View(dto);
     }
 
@@ -81,6 +87,68 @@ public class ContaController(
         var usuarioId = userManager.GetUserId(User)!;
         var pedidos = await pedidoService.ObterPorUsuarioAsync(usuarioId);
         return View(pedidos);
+    }
+
+    [HttpGet("perfil")]
+    [Authorize]
+    public async Task<IActionResult> Perfil()
+    {
+        var usuario = await userManager.GetUserAsync(User);
+        if (usuario == null) return NotFound();
+        var enderecos = await enderecoService.ListarPorUsuarioAsync(usuario.Id);
+        ViewBag.Enderecos = enderecos;
+        ViewBag.PontosLoyalty = usuario.PontosLoyalty;
+        return View(usuario);
+    }
+
+    [HttpPost("perfil")]
+    [Authorize]
+    public async Task<IActionResult> AtualizarPerfil(string nome, string? telefone)
+    {
+        var usuario = await userManager.GetUserAsync(User);
+        if (usuario == null) return NotFound();
+        usuario.Nome = nome;
+        usuario.Telefone = telefone;
+        await userManager.UpdateAsync(usuario);
+        TempData["Sucesso"] = "Perfil atualizado.";
+        return RedirectToAction(nameof(Perfil));
+    }
+
+    [HttpPost("alterar-senha")]
+    [Authorize]
+    public async Task<IActionResult> AlterarSenha(AlterarSenhaDto dto)
+    {
+        var usuario = await userManager.GetUserAsync(User);
+        if (usuario == null) return NotFound();
+
+        var resultado = await userManager.ChangePasswordAsync(usuario, dto.SenhaAtual, dto.NovaSenha);
+        if (!resultado.Succeeded)
+        {
+            TempData["Erro"] = "Senha atual incorreta.";
+            return RedirectToAction(nameof(Perfil));
+        }
+
+        TempData["Sucesso"] = "Senha alterada com sucesso.";
+        return RedirectToAction(nameof(Perfil));
+    }
+
+    [HttpPost("enderecos/adicionar")]
+    [Authorize]
+    public async Task<IActionResult> AdicionarEndereco(CriarEnderecoDto dto)
+    {
+        var usuarioId = userManager.GetUserId(User)!;
+        await enderecoService.CriarAsync(usuarioId, dto);
+        TempData["Sucesso"] = "Endereço adicionado.";
+        return RedirectToAction(nameof(Perfil));
+    }
+
+    [HttpPost("enderecos/principal/{id}")]
+    [Authorize]
+    public async Task<IActionResult> DefinirEnderecoParincipal(Guid id)
+    {
+        var usuarioId = userManager.GetUserId(User)!;
+        await enderecoService.DefinirPrincipalAsync(id, usuarioId);
+        return RedirectToAction(nameof(Perfil));
     }
 
     [HttpGet("acesso-negado")]

@@ -1,0 +1,49 @@
+@model IEnumerable<Glamour.Application.DTOs.AvaliacaoDto>
+@{
+    ViewBag.Title = "Avaliações Pendentes";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    var lista = Model.ToList();
+}
+
+<p style="color:rgba(255,255,255,0.4); font-size:0.8rem; margin-bottom:1.5rem;">@lista.Count avaliação(ões) aguardando moderação</p>
+
+@if (!lista.Any())
+{
+    <div style="border:1px solid rgba(255,255,255,0.08); padding:2rem; text-align:center; color:rgba(255,255,255,0.3); font-size:0.875rem;">
+        Nenhuma avaliação pendente.
+    </div>
+}
+else
+{
+    <div style="display:flex; flex-direction:column; gap:1rem;">
+        @foreach (var av in lista)
+        {
+            <div style="border:1px solid rgba(255,255,255,0.08); background:rgba(24,24,27,0.5); padding:1.25rem; display:flex; justify-content:space-between; align-items:flex-start; gap:1.5rem;">
+                <div style="flex:1;">
+                    <div style="display:flex; align-items:center; gap:1rem; margin-bottom:0.5rem;">
+                        <span style="font-weight:600; font-size:0.875rem;">@av.NomeUsuario</span>
+                        <div style="color:#D4AF37; font-size:0.8rem; letter-spacing:0.05em;">
+                            @for (int i = 1; i <= 5; i++) { <span>@(i <= av.Nota ? "★" : "☆")</span> }
+                        </div>
+                        <span style="color:rgba(255,255,255,0.3); font-size:0.7rem;">@av.CriadoEm.ToString("dd/MM/yyyy")</span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(av.Comentario))
+                    {
+                        <p style="color:rgba(255,255,255,0.55); font-size:0.875rem; line-height:1.6;">@av.Comentario</p>
+                    }
+                    <a href="/produto/@av.ProdutoId" target="_blank" style="color:rgba(212,175,55,0.5); font-size:0.7rem;">Ver produto →</a>
+                </div>
+                <div style="display:flex; gap:0.75rem; flex-shrink:0;">
+                    <form method="post" action="/admin/avaliacoes/aprovar/@av.Id">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-gold" style="padding:0.4rem 1rem; font-size:0.75rem;">Aprovar</button>
+                    </form>
+                    <form method="post" action="/admin/avaliacoes/remover/@av.Id">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" style="background:none; border:1px solid rgba(248,113,113,0.4); color:rgba(248,113,113,0.7); padding:0.4rem 1rem; font-size:0.75rem; cursor:pointer;">Remover</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+}

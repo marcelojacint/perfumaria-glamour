@@ -1,8 +1,12 @@
+using System.IO.Compression;
+using System.Threading.RateLimiting;
 using Glamour.Application;
 using Glamour.Infrastructure;
 using Glamour.Infrastructure.Data;
 using Glamour.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
@@ -19,10 +23,12 @@ try
     var builder = WebApplication.CreateBuilder(args);
     builder.Host.UseSerilog();
 
+    // MVC
     builder.Services.AddControllersWithViews();
     builder.Services.AddApplication();
     builder.Services.AddInfrastructure(builder.Configuration);
 
+    // Identity cookie
     builder.Services.ConfigureApplicationCookie(opt =>
     {
         opt.LoginPath = "/conta/login";
@@ -30,16 +36,60 @@ try
         opt.AccessDeniedPath = "/conta/acesso-negado";
         opt.Cookie.HttpOnly = true;
         opt.Cookie.SameSite = SameSiteMode.Strict;
+        opt.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
         opt.ExpireTimeSpan = TimeSpan.FromDays(7);
         opt.SlidingExpiration = true;
     });
 
+    // Sessão
     builder.Services.AddDistributedMemoryCache();
     builder.Services.AddSession(opt =>
     {
         opt.IdleTimeout = TimeSpan.FromDays(7);
         opt.Cookie.HttpOnly = true;
         opt.Cookie.IsEssential = true;
+        opt.Cookie.SameSite = SameSiteMode.Strict;
+    });
+
+    // Output cache
+    builder.Services.AddOutputCache(opt =>
+    {
+        opt.AddBasePolicy(b => b.Expire(TimeSpan.FromMinutes(2)));
+        opt.AddPolicy("home", b => b.Expire(TimeSpan.FromMinutes(5)).Tag("home"));
+        opt.AddPolicy("catalogo", b => b.Expire(TimeSpan.FromMinutes(2)).Tag("catalogo"));
+        opt.AddPolicy("produto", b => b.Expire(TimeSpan.FromMinutes(10)).Tag("produto"));
+    });
+
+    // Compressão Brotli/Gzip
+    builder.Services.AddResponseCompression(opt =>
+    {
+        opt.EnableForHttps = true;
+        opt.Providers.Add<BrotliCompressionProvider>();
+        opt.Providers.Add<GzipCompressionProvider>();
+    });
+    builder.Services.Configure<BrotliCompressionProviderOptions>(opt => opt.Level = CompressionLevel.Fastest);
+    builder.Services.Configure<GzipCompressionProviderOptions>(opt => opt.Level = CompressionLevel.Fastest);
+
+    // Rate limiting
+    builder.Services.AddRateLimiter(opt =>
+    {
+        opt.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+        opt.AddFixedWindowLimiter("login", o =>
+        {
+            o.Window = TimeSpan.FromMinutes(5);
+            o.PermitLimit = 10;
+            o.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+            o.QueueLimit = 0;
+        });
+
+        opt.AddFixedWindowLimiter("api", o =>
+        {
+            o.Window = TimeSpan.FromMinutes(1);
+            o.PermitLimit = 60;
+            o.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+            o.QueueLimit = 0;
+        });
     });
 
     builder.Services.AddHttpContextAccessor();
@@ -55,7 +105,7 @@ try
         var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var roleMgr = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         await SeedAsync(userMgr, roleMgr);
-        await Glamour.Infrastructure.Data.DataSeeder.SeedDadosDemoAsync(db);
+        await DataSeeder.SeedDadosDemoAsync(db);
     }
 
     if (!app.Environment.IsDevelopment())
@@ -64,9 +114,31 @@ try
         app.UseHsts();
     }
 
+    app.UseResponseCompression();
     app.UseHttpsRedirection();
-    app.UseStaticFiles();
+
+    // Headers de segurança
+    app.Use(async (ctx, next) =>
+    {
+        ctx.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+        ctx.Response.Headers.Append("X-Frame-Options", "SAMEORIGIN");
+        ctx.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+        ctx.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+        ctx.Response.Headers.Append("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
+        await next();
+    });
+
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        OnPrepareResponse = ctx =>
+        {
+            ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=2592000,immutable");
+        }
+    });
+
     app.UseRouting();
+    app.UseRateLimiter();
+    app.UseOutputCache();
     app.UseSession();
     app.UseAuthentication();
     app.UseAuthorization();

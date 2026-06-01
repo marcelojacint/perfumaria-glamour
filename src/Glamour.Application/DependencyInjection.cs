@@ -1,4 +1,6 @@
+using FluentValidation;
 using Glamour.Application.Services;
+using Glamour.Application.Validators;
 using Glamour.Domain.Notifications;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -8,6 +10,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
+        services.AddValidatorsFromAssemblyContaining<RegistrarUsuarioValidator>();
         services.AddScoped<NotificacaoContext>();
         services.AddScoped<ProdutoService>();
         services.AddScoped<CategoriaService>();

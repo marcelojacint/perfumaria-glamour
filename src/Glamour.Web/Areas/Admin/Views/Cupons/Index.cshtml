@@ -1,0 +1,90 @@
+@model IEnumerable<Glamour.Domain.Entities.Cupom>
+@{
+    ViewBag.Title = "Cupons";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+    <p style="color:rgba(255,255,255,0.4); font-size:0.8rem; margin:0;">@Model.Count() cupom(ns)</p>
+    <button onclick="document.getElementById('form-criar').style.display='block'" class="btn-gold" style="padding:0.5rem 1.25rem; font-size:0.75rem;">+ Novo Cupom</button>
+</div>
+
+<!-- Formulário de criação -->
+<div id="form-criar" style="display:none; border:1px solid rgba(212,175,55,0.2); background:rgba(24,24,27,0.5); padding:1.5rem; margin-bottom:2rem;">
+    <h3 style="font-size:0.8rem; color:#D4AF37; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1.25rem;">Novo Cupom</h3>
+    <form method="post" action="/admin/cupons/criar" style="display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; align-items:end;">
+        @Html.AntiForgeryToken()
+        @{
+            void C(string label, string name, string type = "text", string? placeholder = null)
+            {
+                <div>
+                    <label style="font-size:0.65rem; color:rgba(212,175,55,0.6); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:0.3rem;">@label</label>
+                    <input type="@type" name="@name" placeholder="@placeholder"
+                           style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.75rem; font-size:0.8rem; box-sizing:border-box;" />
+                </div>;
+            }
+        }
+        @{ C("Código", "codigo", placeholder: "PROMO10"); }
+        <div>
+            <label style="font-size:0.65rem; color:rgba(212,175,55,0.6); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:0.3rem;">Tipo</label>
+            <select name="tipoDesconto" style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.75rem; font-size:0.8rem;">
+                <option value="Percentual">Percentual (%)</option>
+                <option value="ValorFixo">Valor Fixo (R$)</option>
+            </select>
+        </div>
+        @{ C("Valor", "valor", "number", "10"); }
+        @{ C("Validade", "validade", "date"); }
+        @{ C("Uso Máximo (0 = ilimitado)", "usoMaximo", "number", "0"); }
+        @{ C("Valor Mínimo do Pedido (R$)", "valorMinimoPedido", "number"); }
+        <div style="grid-column:span 3; display:flex; gap:1rem; padding-top:0.5rem;">
+            <button type="submit" class="btn-gold" style="padding:0.6rem 1.5rem; font-size:0.75rem;">Criar Cupom</button>
+            <button type="button" onclick="document.getElementById('form-criar').style.display='none'"
+                    style="background:none; border:1px solid rgba(255,255,255,0.2); color:rgba(255,255,255,0.5); padding:0.6rem 1rem; font-size:0.75rem; cursor:pointer;">Cancelar</button>
+        </div>
+    </form>
+</div>
+
+<div style="border:1px solid rgba(255,255,255,0.08); overflow:hidden;">
+    <table style="width:100%; border-collapse:collapse; font-size:0.8rem;">
+        <thead>
+            <tr style="background:rgba(212,175,55,0.05); border-bottom:1px solid rgba(255,255,255,0.08);">
+                @foreach (var col in new[] { "Código", "Tipo", "Desconto", "Usos", "Validade", "Status", "" })
+                {
+                    <th style="text-align:left; padding:0.6rem 0.875rem; color:rgba(212,175,55,0.7); font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase; font-weight:600;">@col</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var c in Model)
+            {
+                <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <td style="padding:0.6rem 0.875rem; font-weight:600; font-family:monospace;">@c.Codigo</td>
+                    <td style="padding:0.6rem 0.875rem; color:rgba(255,255,255,0.5);">@c.TipoDesconto</td>
+                    <td style="padding:0.6rem 0.875rem; color:#D4AF37; font-weight:600;">
+                        @(c.TipoDesconto == Glamour.Domain.Enums.TipoDesconto.Percentual ? $"{c.Valor}%" : $"R$ {c.Valor:N2}")
+                    </td>
+                    <td style="padding:0.6rem 0.875rem; color:rgba(255,255,255,0.5);">
+                        @c.UsoAtual / @(c.UsoMaximo == 0 ? "∞" : c.UsoMaximo.ToString())
+                    </td>
+                    <td style="padding:0.6rem 0.875rem; color:rgba(255,255,255,0.4); font-size:0.75rem;">
+                        @(c.Validade.HasValue ? c.Validade.Value.ToString("dd/MM/yyyy") : "Sem limite")
+                    </td>
+                    <td style="padding:0.6rem 0.875rem;">
+                        <span style="font-size:0.65rem; padding:0.15rem 0.5rem; border:1px solid; @(c.Valido ? "border-color:rgba(74,222,128,0.4); color:rgb(74,222,128);" : "border-color:rgba(255,255,255,0.1); color:rgba(255,255,255,0.3);")">
+                            @(c.Valido ? "Ativo" : "Inativo")
+                        </span>
+                    </td>
+                    <td style="padding:0.6rem 0.875rem;">
+                        @if (c.Ativo)
+                        {
+                            <form method="post" action="/admin/cupons/desativar/@c.Id">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" style="background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.3); font-size:0.75rem;">Desativar</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

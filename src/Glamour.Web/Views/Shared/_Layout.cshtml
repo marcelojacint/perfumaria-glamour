@@ -8,6 +8,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#D4AF37" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="bg-black text-white font-inter antialiased">
@@ -105,6 +109,36 @@
             const badge = document.getElementById('badge-carrinho');
             if (q > 0) { badge.textContent = q; badge.classList.remove('hidden'); }
         }).catch(() => {});
+
+        // LGPD Cookie Banner
+        (function() {
+            if (!localStorage.getItem('glamour_cookie_consent')) {
+                const b = document.createElement('div');
+                b.id = 'cookie-banner';
+                b.innerHTML = `<div style="position:fixed;bottom:0;left:0;right:0;z-index:9999;background:rgba(9,9,11,0.97);border-top:1px solid rgba(212,175,55,0.2);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+                    <p style="color:rgba(255,255,255,0.6);font-size:0.8rem;margin:0;flex:1;">
+                        Usamos cookies para melhorar sua experiência. Ao continuar, você concorda com nossa
+                        <a href="#" style="color:#D4AF37;">Política de Privacidade</a>.
+                    </p>
+                    <div style="display:flex;gap:0.75rem;">
+                        <button onclick="document.getElementById('cookie-banner').remove();localStorage.setItem('glamour_cookie_consent','accepted');"
+                                style="background:linear-gradient(135deg,#D4AF37,#A08020);color:#000;border:none;padding:0.5rem 1.25rem;font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;">
+                            Aceitar
+                        </button>
+                        <button onclick="document.getElementById('cookie-banner').remove();localStorage.setItem('glamour_cookie_consent','essential');"
+                                style="background:none;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.5);padding:0.5rem 1rem;font-size:0.75rem;cursor:pointer;">
+                            Apenas Essenciais
+                        </button>
+                    </div>
+                </div>`;
+                document.body.appendChild(b);
+            }
+        })();
+
+        // PWA Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+        }
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
