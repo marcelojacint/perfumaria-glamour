@@ -8,7 +8,7 @@ public interface IPedidoRepository : IRepository<Pedido>
     Task<IEnumerable<Pedido>> ObterPorUsuarioAsync(string usuarioId);
     Task<(IEnumerable<Pedido> Pedidos, int Total)> ListarAdminAsync(
         string? busca, string? status, DateTime? de, DateTime? ate,
-        int pagina, int tamanhoPagina);
+        int pagina, int tamanhoPagina, bool incluirItens = false);
     Task<decimal> TotalVendasHojeAsync();
     Task<int> TotalPedidosPendentesAsync();
 }

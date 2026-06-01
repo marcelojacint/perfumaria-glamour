@@ -50,7 +50,7 @@ public class RelatoriosController(IPedidoRepository pedidoRepo) : Controller
         var inicio = de ?? DateTime.UtcNow.AddDays(-30);
         var fim = ate ?? DateTime.UtcNow;
 
-        var (pedidos, _) = await pedidoRepo.ListarAdminAsync(null, StatusPedido.Entregue.ToString(), inicio, fim, 1, 10000);
+        var (pedidos, _) = await pedidoRepo.ListarAdminAsync(null, StatusPedido.Entregue.ToString(), inicio, fim, 1, 10000, incluirItens: true);
 
         var sb = new StringBuilder();
         sb.AppendLine("Produto;Quantidade;Total");

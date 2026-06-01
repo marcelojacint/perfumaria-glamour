@@ -30,6 +30,9 @@ public class ProdutoService(IProdutoRepository produtoRepo, ICategoriaRepository
         return (produtos.Select(MapListagemDto), total);
     }
 
+    public async Task<IEnumerable<ProdutoListagemDto>> ObterListagemPorIdsAsync(IEnumerable<Guid> ids) =>
+        (await produtoRepo.ObterPorIdsAsync(ids)).Select(MapListagemDto);
+
     public async Task<IEnumerable<ProdutoListagemDto>> ObterDestaqueAsync(int quantidade = 8) =>
         (await produtoRepo.ObterDestaqueAsync(quantidade)).Select(MapListagemDto);
 

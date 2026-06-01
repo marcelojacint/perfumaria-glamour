@@ -54,7 +54,12 @@ try
         });
     }
 
-    builder.Services.AddDistributedMemoryCache();
+    var redisConn = builder.Configuration.GetConnectionString("Redis");
+    if (!string.IsNullOrWhiteSpace(redisConn))
+        builder.Services.AddStackExchangeRedisCache(opt => opt.Configuration = redisConn);
+    else
+        builder.Services.AddDistributedMemoryCache();
+
     builder.Services.AddSession(opt =>
     {
         opt.IdleTimeout = TimeSpan.FromDays(7);

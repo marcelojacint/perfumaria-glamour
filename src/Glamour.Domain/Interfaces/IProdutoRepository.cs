@@ -5,6 +5,7 @@ namespace Glamour.Domain.Interfaces;
 public interface IProdutoRepository : IRepository<Produto>
 {
     Task<Produto?> ObterPorSlugAsync(string slug);
+    Task<IEnumerable<Produto>> ObterPorIdsAsync(IEnumerable<Guid> ids);
     Task<(IEnumerable<Produto> Produtos, int Total)> ListarAsync(
         string? busca, Guid? categoriaId, string? genero,
         decimal? precoMin, decimal? precoMax,

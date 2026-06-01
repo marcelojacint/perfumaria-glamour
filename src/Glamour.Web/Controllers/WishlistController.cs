@@ -15,15 +15,7 @@ public class WishlistController(IWishlistService wishlist, ProdutoService produt
     public async Task<IActionResult> Index()
     {
         var ids = await wishlist.ObterAsync(UsuarioId);
-        var produtos = new List<Glamour.Application.DTOs.ProdutoListagemDto>();
-        foreach (var id in ids)
-        {
-            var p = await produtoService.ObterPorIdAsync(id);
-            if (p != null)
-                produtos.Add(new(p.Id, p.Nome, p.Slug, p.Preco, p.PrecoPromo, p.Marca,
-                    p.Volume, p.Destaque, p.Estoque,
-                    p.Imagens.FirstOrDefault(i => i.Principal)?.Url ?? p.Imagens.FirstOrDefault()?.Url));
-        }
+        var produtos = await produtoService.ObterListagemPorIdsAsync(ids);
         return View(produtos);
     }
 

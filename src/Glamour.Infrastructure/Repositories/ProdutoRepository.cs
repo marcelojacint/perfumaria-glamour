@@ -8,8 +8,17 @@ namespace Glamour.Infrastructure.Repositories;
 public class ProdutoRepository(GlamourDbContext context) : BaseRepository<Produto>(context), IProdutoRepository
 {
     public async Task<Produto?> ObterPorSlugAsync(string slug) =>
-        await _dbSet.Include(p => p.Imagens).Include(p => p.Categoria)
+        await _dbSet.AsNoTracking().Include(p => p.Imagens).Include(p => p.Categoria)
             .FirstOrDefaultAsync(p => p.Slug == slug);
+
+    public async Task<IEnumerable<Produto>> ObterPorIdsAsync(IEnumerable<Guid> ids)
+    {
+        var lista = ids.Distinct().ToList();
+        if (lista.Count == 0) return [];
+        return await _dbSet.AsNoTracking().Include(p => p.Imagens)
+            .Where(p => lista.Contains(p.Id))
+            .ToListAsync();
+    }
 
     public async Task<(IEnumerable<Produto> Produtos, int Total)> ListarAsync(
         string? busca, Guid? categoriaId, string? genero,
@@ -17,7 +26,7 @@ public class ProdutoRepository(GlamourDbContext context) : BaseRepository<Produt
         string ordenarPor, bool descrescente,
         int pagina, int tamanhoPagina)
     {
-        var query = _dbSet.Include(p => p.Imagens).Include(p => p.Categoria)
+        var query = _dbSet.AsNoTracking().Include(p => p.Imagens).Include(p => p.Categoria)
             .Where(p => p.Ativo).AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(busca))
@@ -49,17 +58,17 @@ public class ProdutoRepository(GlamourDbContext context) : BaseRepository<Produt
     }
 
     public async Task<IEnumerable<Produto>> ObterDestaqueAsync(int quantidade) =>
-        await _dbSet.Include(p => p.Imagens).Where(p => p.Ativo && p.Destaque)
+        await _dbSet.AsNoTracking().Include(p => p.Imagens).Where(p => p.Ativo && p.Destaque)
             .OrderByDescending(p => p.CriadoEm).Take(quantidade).ToListAsync();
 
     public async Task<IEnumerable<Produto>> ObterPromocoesAsync(int quantidade) =>
-        await _dbSet.Include(p => p.Imagens)
+        await _dbSet.AsNoTracking().Include(p => p.Imagens)
             .Where(p => p.Ativo && p.PrecoPromo != null && p.PrecoPromo < p.Preco)
             .OrderByDescending(p => (p.Preco - p.PrecoPromo!.Value) / p.Preco)
             .Take(quantidade).ToListAsync();
 
     public async Task<IEnumerable<Produto>> ObterRelacionadosAsync(Guid produtoId, Guid categoriaId, int quantidade) =>
-        await _dbSet.Include(p => p.Imagens)
+        await _dbSet.AsNoTracking().Include(p => p.Imagens)
             .Where(p => p.Ativo && p.CategoriaId == categoriaId && p.Id != produtoId)
             .OrderBy(_ => EF.Functions.Random()).Take(quantidade).ToListAsync();
 }

@@ -44,16 +44,17 @@ public class PedidoService(
         Cupom? cupom = null;
         decimal subtotalEstimado = itensCarrinho.Sum(i => i.Preco * i.Quantidade);
 
+        Endereco? enderecoEntrega = null;
         if (dto.TipoEntrega == TipoEntrega.Entrega)
         {
-            var endereco = await enderecoRepo.ObterPorIdAsync(dto.EnderecoId!.Value);
-            if (endereco == null)
+            enderecoEntrega = await enderecoRepo.ObterPorIdAsync(dto.EnderecoId!.Value);
+            if (enderecoEntrega == null)
             {
                 notificacoes.Adicionar("Endereco", "Endereço de entrega não encontrado.");
                 return Guid.Empty;
             }
 
-            if (!freteService.MesmaLocalidade(endereco.Cidade, endereco.UF))
+            if (!freteService.MesmaLocalidade(enderecoEntrega.Cidade, enderecoEntrega.UF))
             {
                 notificacoes.Adicionar("Frete",
                     "Não realizamos entrega automática para esse endereço. Entre em contato com a loja ou escolha retirada na loja.");
@@ -86,10 +87,9 @@ public class PedidoService(
             await produtoRepo.AtualizarAsync(produto);
         }
 
-        if (dto.TipoEntrega == TipoEntrega.Entrega)
+        if (enderecoEntrega != null)
         {
-            var endereco = await enderecoRepo.ObterPorIdAsync(dto.EnderecoId!.Value);
-            var resultadoFrete = freteService.Calcular(endereco!.Cidade, endereco.UF, pedido.Subtotal);
+            var resultadoFrete = freteService.Calcular(enderecoEntrega.Cidade, enderecoEntrega.UF, pedido.Subtotal);
             pedido.DefinirFrete(resultadoFrete.Valor);
         }
 

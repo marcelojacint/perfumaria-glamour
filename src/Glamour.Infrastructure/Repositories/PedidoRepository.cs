@@ -16,14 +16,15 @@ public class PedidoRepository(GlamourDbContext context) : BaseRepository<Pedido>
             .FirstOrDefaultAsync(p => p.Id == pedidoId);
 
     public async Task<IEnumerable<Pedido>> ObterPorUsuarioAsync(string usuarioId) =>
-        await _dbSet.Include(p => p.Itens).Where(p => p.UsuarioId == usuarioId)
+        await _dbSet.AsNoTracking().Include(p => p.Itens).Where(p => p.UsuarioId == usuarioId)
             .OrderByDescending(p => p.CriadoEm).ToListAsync();
 
     public async Task<(IEnumerable<Pedido> Pedidos, int Total)> ListarAdminAsync(
         string? busca, string? status, DateTime? de, DateTime? ate,
-        int pagina, int tamanhoPagina)
+        int pagina, int tamanhoPagina, bool incluirItens = false)
     {
-        var query = _dbSet.Include(p => p.Itens).AsQueryable();
+        var query = _dbSet.AsNoTracking().AsQueryable();
+        if (incluirItens) query = query.Include(p => p.Itens);
 
         if (!string.IsNullOrWhiteSpace(busca))
             query = query.Where(p => p.Id.ToString().Contains(busca)

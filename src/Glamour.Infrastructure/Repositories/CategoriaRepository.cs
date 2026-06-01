@@ -8,8 +8,8 @@ namespace Glamour.Infrastructure.Repositories;
 public class CategoriaRepository(GlamourDbContext context) : BaseRepository<Categoria>(context), ICategoriaRepository
 {
     public async Task<Categoria?> ObterPorSlugAsync(string slug) =>
-        await _dbSet.FirstOrDefaultAsync(c => c.Slug == slug);
+        await _dbSet.AsNoTracking().FirstOrDefaultAsync(c => c.Slug == slug);
 
     public async Task<IEnumerable<Categoria>> ObterAtivasAsync() =>
-        await _dbSet.Where(c => c.Ativo).OrderBy(c => c.Ordem).ThenBy(c => c.Nome).ToListAsync();
+        await _dbSet.AsNoTracking().Where(c => c.Ativo).OrderBy(c => c.Ordem).ThenBy(c => c.Nome).ToListAsync();
 }
