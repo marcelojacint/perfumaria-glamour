@@ -1,0 +1,29 @@
+@model Glamour.Application.DTOs.CriarCategoriaDto
+@{
+    ViewBag.Title = "Nova Categoria";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div style="max-width:500px;">
+    <form method="post" action="/admin/categorias/criar" style="display:flex; flex-direction:column; gap:1.25rem;">
+        @Html.AntiForgeryToken()
+        @{
+            void Campo(string label, string name, string? valor = null, string type = "text")
+            {
+                <div>
+                    <label style="font-size:0.7rem; color:rgba(212,175,55,0.7); text-transform:uppercase; letter-spacing:0.1em; display:block; margin-bottom:0.4rem;">@label</label>
+                    <input type="@type" name="@name" value="@valor" required
+                           style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.6rem 0.75rem; font-size:0.875rem; box-sizing:border-box;" />
+                </div>;
+            }
+        }
+        @{ Campo("Nome", "Nome", Model?.Nome); }
+        @{ Campo("Slug (URL)", "Slug", Model?.Slug); }
+        @{ Campo("Ordem de exibição", "Ordem", Model?.Ordem.ToString(), "number"); }
+
+        <div style="display:flex; gap:1rem; padding-top:0.5rem;">
+            <button type="submit" class="btn-gold" style="padding:0.75rem 2rem; font-size:0.8rem;">Criar Categoria</button>
+            <a href="/admin/categorias" style="padding:0.75rem 1.5rem; border:1px solid rgba(255,255,255,0.2); color:rgba(255,255,255,0.5); text-decoration:none; font-size:0.8rem;">Cancelar</a>
+        </div>
+    </form>
+</div>

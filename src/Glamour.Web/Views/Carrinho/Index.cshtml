@@ -1,0 +1,100 @@
+@model IEnumerable<Glamour.Domain.Interfaces.ItemCarrinho>
+@{
+    ViewBag.Title = "Carrinho";
+    var itens = Model.ToList();
+    var subtotal = itens.Sum(i => i.Preco * i.Quantidade);
+}
+
+<div class="max-w-5xl mx-auto px-4 py-12">
+    <div class="mb-10">
+        <p class="text-gold text-xs tracking-[0.4em] uppercase mb-2">Compra</p>
+        <h1 class="font-playfair text-4xl font-bold">Meu Carrinho</h1>
+    </div>
+
+    @if (!itens.Any())
+    {
+        <div class="text-center py-24 text-white/30">
+            <div class="text-6xl mb-6 font-playfair">✦</div>
+            <p class="text-lg mb-4">Seu carrinho está vazio.</p>
+            <a href="/catalogo" class="btn-gold px-8 py-3 text-sm tracking-widest uppercase inline-block">Ver Catálogo</a>
+        </div>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <!-- Itens -->
+            <div class="lg:col-span-2 space-y-4">
+                @foreach (var item in itens)
+                {
+                    <div class="border border-white/10 bg-zinc-900/50 p-4 flex gap-4">
+                        <div class="w-20 h-20 bg-zinc-800 flex-shrink-0 flex items-center justify-center">
+                            @if (!string.IsNullOrEmpty(item.UrlImagem))
+                            {
+                                <img src="@item.UrlImagem" alt="@item.Nome" class="w-full h-full object-cover" />
+                            }
+                            else
+                            {
+                                <span class="text-white/20 font-playfair">G</span>
+                            }
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-sm font-medium mb-1">@item.Nome</h3>
+                            <p class="text-gold text-sm font-semibold">R$ @item.Preco.ToString("N2")</p>
+                        </div>
+                        <div class="flex flex-col items-end gap-2">
+                            <form method="post" action="/carrinho/atualizar" class="flex items-center border border-white/20">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="produtoId" value="@item.ProdutoId" />
+                                <button type="submit" name="quantidade" value="@(item.Quantidade - 1)"
+                                        class="px-3 py-1 text-white/60 hover:text-white transition-colors text-sm">−</button>
+                                <span class="px-3 text-sm">@item.Quantidade</span>
+                                <button type="submit" name="quantidade" value="@(item.Quantidade + 1)"
+                                        class="px-3 py-1 text-white/60 hover:text-white transition-colors text-sm">+</button>
+                            </form>
+                            <p class="text-white/60 text-xs">R$ @((item.Preco * item.Quantidade).ToString("N2"))</p>
+                            <form method="post" action="/carrinho/remover/@item.ProdutoId">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="text-red-400/60 hover:text-red-400 text-xs transition-colors">Remover</button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Resumo -->
+            <div>
+                <div class="border border-gold/20 bg-zinc-900/50 p-6">
+                    <h2 class="font-playfair text-xl font-semibold mb-6">Resumo</h2>
+                    <div class="space-y-3 text-sm text-white/60 mb-6">
+                        <div class="flex justify-between">
+                            <span>Subtotal</span>
+                            <span class="text-white">R$ @subtotal.ToString("N2")</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Frete</span>
+                            <span class="text-white">Calculado no checkout</span>
+                        </div>
+                    </div>
+                    <div class="border-t border-white/10 pt-4 mb-6 flex justify-between font-semibold">
+                        <span>Total estimado</span>
+                        <span class="text-gold text-lg">R$ @subtotal.ToString("N2")</span>
+                    </div>
+                    <div class="space-y-3">
+                        <a href="/checkout" class="btn-gold block text-center py-4 text-sm tracking-widest uppercase">
+                            Finalizar Pedido
+                        </a>
+                        <a href="/catalogo" class="block text-center text-white/40 hover:text-white text-xs py-2 transition-colors">
+                            Continuar Comprando
+                        </a>
+                    </div>
+                    <div class="mt-6 pt-6 border-t border-white/10">
+                        <p class="text-white/30 text-xs text-center leading-relaxed">
+                            Pagamento realizado na entrega ou retirada na loja.<br/>
+                            Aceitamos dinheiro, cartão e PIX.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

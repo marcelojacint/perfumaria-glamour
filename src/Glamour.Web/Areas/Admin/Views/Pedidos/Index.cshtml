@@ -1,0 +1,58 @@
+@{
+    ViewBag.Title = "Pedidos";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    var pedidos = ViewBag.Pedidos as IEnumerable<Glamour.Domain.Entities.Pedido> ?? [];
+    int total = ViewBag.Total ?? 0;
+    int paginaAtual = ViewBag.PaginaAtual ?? 1;
+    int totalPaginas = ViewBag.TotalPaginas ?? 1;
+}
+
+<div style="display:flex; justify-content:space-between; margin-bottom:1.5rem;">
+    <p style="color:rgba(255,255,255,0.4); font-size:0.8rem; margin:0;">@total pedido(s)</p>
+</div>
+
+<form method="get" style="display:flex; gap:1rem; margin-bottom:1.5rem; flex-wrap:wrap;">
+    <input type="text" name="busca" value="@Context.Request.Query["busca"]" placeholder="ID ou usuário..."
+           style="flex:1; min-width:150px; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 1rem; font-size:0.8rem;" />
+    <select name="status" style="background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 1rem; font-size:0.8rem;">
+        <option value="">Todos os status</option>
+        @foreach (var s in Enum.GetNames<Glamour.Domain.Enums.StatusPedido>())
+        {
+            <option value="@s" selected="@(Context.Request.Query["status"] == s)">@s</option>
+        }
+    </select>
+    <button type="submit" class="btn-gold" style="padding:0.5rem 1.25rem; font-size:0.75rem;">Filtrar</button>
+</form>
+
+<div style="border:1px solid rgba(255,255,255,0.08); overflow-x:auto;">
+    <table style="width:100%; border-collapse:collapse; font-size:0.875rem;">
+        <thead>
+            <tr style="background:rgba(212,175,55,0.05); border-bottom:1px solid rgba(255,255,255,0.08);">
+                @foreach (var col in new[] { "Pedido", "Data", "Tipo", "Pagamento", "Total", "Status", "" })
+                {
+                    <th style="text-align:left; padding:0.75rem 1rem; color:rgba(212,175,55,0.7); font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; font-weight:600;">@col</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in pedidos)
+            {
+                <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <td style="padding:0.75rem 1rem; font-family:monospace; color:rgba(255,255,255,0.7);">#@p.Id.ToString()[..8].ToUpper()</td>
+                    <td style="padding:0.75rem 1rem; color:rgba(255,255,255,0.4); font-size:0.8rem;">@p.CriadoEm.ToString("dd/MM/yy HH:mm")</td>
+                    <td style="padding:0.75rem 1rem; color:rgba(255,255,255,0.5); font-size:0.8rem;">@p.TipoEntrega</td>
+                    <td style="padding:0.75rem 1rem; color:rgba(255,255,255,0.5); font-size:0.8rem;">@p.MetodoPagamento</td>
+                    <td style="padding:0.75rem 1rem; color:#D4AF37; font-weight:600;">R$ @p.Total.ToString("N2")</td>
+                    <td style="padding:0.75rem 1rem;">
+                        <span style="font-size:0.7rem; padding:0.2rem 0.6rem; border:1px solid; @(p.Status == Glamour.Domain.Enums.StatusPedido.Entregue ? "border-color:rgba(74,222,128,0.5); color:rgb(74,222,128);" : p.Status == Glamour.Domain.Enums.StatusPedido.Cancelado ? "border-color:rgba(248,113,113,0.5); color:rgb(248,113,113);" : "border-color:rgba(212,175,55,0.4); color:#D4AF37;")">
+                            @p.Status
+                        </span>
+                    </td>
+                    <td style="padding:0.75rem 1rem;">
+                        <a href="/admin/pedidos/@p.Id" style="color:#D4AF37; font-size:0.75rem; text-decoration:none;">Detalhe</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

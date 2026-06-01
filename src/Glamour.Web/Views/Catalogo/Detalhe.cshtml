@@ -1,0 +1,136 @@
+@model Glamour.Application.DTOs.ProdutoDto
+@{
+    ViewBag.Title = Model.Nome;
+    var imagemPrincipal = Model.Imagens.FirstOrDefault(i => i.Principal) ?? Model.Imagens.FirstOrDefault();
+}
+
+<div class="max-w-7xl mx-auto px-4 py-12">
+    <!-- Breadcrumb -->
+    <nav class="text-xs text-white/30 mb-8 tracking-wider uppercase">
+        <a href="/" class="hover:text-gold transition-colors">Início</a>
+        <span class="mx-2">/</span>
+        <a href="/catalogo" class="hover:text-gold transition-colors">Catálogo</a>
+        <span class="mx-2">/</span>
+        <span class="text-white/60">@Model.Nome</span>
+    </nav>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
+        <!-- Galeria -->
+        <div x-data="{ ativa: '@(imagemPrincipal?.Url ?? "")' }">
+            <div class="aspect-square bg-zinc-900 border border-white/10 mb-4 overflow-hidden flex items-center justify-center">
+                <template x-if="ativa">
+                    <img :src="ativa" alt="@Model.Nome" class="w-full h-full object-cover" />
+                </template>
+                <template x-if="!ativa">
+                    <span class="text-white/10 text-8xl font-playfair">G</span>
+                </template>
+            </div>
+            @if (Model.Imagens.Count() > 1)
+            {
+                <div class="grid grid-cols-4 gap-2">
+                    @foreach (var img in Model.Imagens.OrderBy(i => i.Ordem))
+                    {
+                        <button @@click="ativa = '@img.Url'"
+                                class="aspect-square bg-zinc-900 border border-white/10 hover:border-gold/40 transition-colors overflow-hidden">
+                            <img src="@img.Url" alt="Imagem @img.Ordem" class="w-full h-full object-cover" />
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Info -->
+        <div>
+            <p class="text-gold text-xs tracking-[0.4em] uppercase mb-3">@Model.Marca</p>
+            <h1 class="font-playfair text-3xl font-bold mb-2">@Model.Nome</h1>
+
+            @if (!string.IsNullOrEmpty(Model.Volume))
+            {
+                <p class="text-white/40 text-sm mb-4">@Model.Volume @(!string.IsNullOrEmpty(Model.Genero) ? $"· {Model.Genero}" : "")</p>
+            }
+
+            <!-- Avaliações -->
+            @if (Model.TotalAvaliacoes > 0)
+            {
+                <div class="flex items-center gap-2 mb-6">
+                    <div class="flex text-gold text-sm">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <span>@(i <= Math.Round(Model.NotaMedia) ? "★" : "☆")</span>
+                        }
+                    </div>
+                    <span class="text-white/40 text-xs">(@Model.TotalAvaliacoes avaliações)</span>
+                </div>
+            }
+
+            <!-- Preço -->
+            <div class="mb-8">
+                @if (Model.PrecoPromo.HasValue)
+                {
+                    <div class="text-white/40 text-sm line-through mb-1">R$ @Model.Preco.ToString("N2")</div>
+                    <div class="text-gold font-playfair text-4xl font-bold">R$ @Model.PrecoPromo.Value.ToString("N2")</div>
+                }
+                else
+                {
+                    <div class="text-white font-playfair text-4xl font-bold">R$ @Model.Preco.ToString("N2")</div>
+                }
+                <p class="text-white/30 text-xs mt-2">Pagamento na entrega ou retirada</p>
+            </div>
+
+            <!-- Formas de pagamento aceitas -->
+            <div class="border border-gold/20 bg-zinc-900/50 p-4 mb-8 text-sm">
+                <p class="text-gold text-xs tracking-wider uppercase mb-3 font-semibold">Formas de Pagamento Aceitas</p>
+                <div class="grid grid-cols-2 gap-2 text-white/60 text-xs">
+                    <div class="flex items-center gap-2"><span class="text-gold">◇</span> Dinheiro</div>
+                    <div class="flex items-center gap-2"><span class="text-gold">◇</span> Cartão de Crédito</div>
+                    <div class="flex items-center gap-2"><span class="text-gold">◇</span> Cartão de Débito</div>
+                    <div class="flex items-center gap-2"><span class="text-gold">◇</span> PIX</div>
+                </div>
+                <p class="text-white/30 text-xs mt-3">Pagamento realizado no momento da entrega ou retirada na loja.</p>
+            </div>
+
+            @if (Model.Estoque > 0)
+            {
+                <form method="post" action="/carrinho/adicionar" class="mb-6">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="produtoId" value="@Model.Id" />
+                    <div class="flex gap-4 mb-4">
+                        <div class="flex items-center border border-white/20">
+                            <button type="button" onclick="decrementar()" class="px-4 py-3 text-white/60 hover:text-white transition-colors">−</button>
+                            <input type="number" name="quantidade" id="qtd" value="1" min="1" max="@Model.Estoque"
+                                   class="w-16 bg-transparent text-center text-white focus:outline-none" />
+                            <button type="button" onclick="incrementar(@Model.Estoque)" class="px-4 py-3 text-white/60 hover:text-white transition-colors">+</button>
+                        </div>
+                        <button type="submit" class="btn-gold flex-1 py-3 text-sm tracking-widest uppercase">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
+                </form>
+            }
+            else
+            {
+                <div class="border border-red-900/40 bg-red-950/20 text-red-400 text-sm text-center py-4 mb-6">
+                    Produto temporariamente indisponível
+                </div>
+            }
+
+            <div class="text-white/50 text-sm leading-relaxed">
+                <p class="text-gold text-xs tracking-[0.3em] uppercase mb-3">Sobre o Produto</p>
+                @Model.Descricao
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function decrementar() {
+    const i = document.getElementById('qtd');
+    if (parseInt(i.value) > 1) i.value = parseInt(i.value) - 1;
+}
+function incrementar(max) {
+    const i = document.getElementById('qtd');
+    if (parseInt(i.value) < max) i.value = parseInt(i.value) + 1;
+}
+</script>
+}

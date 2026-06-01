@@ -1,0 +1,168 @@
+@model IEnumerable<Glamour.Domain.Interfaces.ItemCarrinho>
+@{
+    ViewBag.Title = "Checkout";
+    var itens = Model.ToList();
+    var subtotal = itens.Sum(i => i.Preco * i.Quantidade);
+}
+
+<div class="max-w-5xl mx-auto px-4 py-12">
+    <div class="mb-10">
+        <p class="text-gold text-xs tracking-[0.4em] uppercase mb-2">Finalizar</p>
+        <h1 class="font-playfair text-4xl font-bold">Checkout</h1>
+    </div>
+
+    <form method="post" action="/checkout" x-data="{ tipoEntrega: 'Entrega' }">
+        @Html.AntiForgeryToken()
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <!-- Formulário -->
+            <div class="lg:col-span-2 space-y-8">
+
+                <!-- Tipo de entrega -->
+                <div class="border border-gold/20 bg-zinc-900/50 p-6">
+                    <h2 class="font-playfair text-xl font-semibold mb-5">Como deseja receber?</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="tipoEntrega" value="Entrega"
+                                   x-model="tipoEntrega" class="sr-only" checked />
+                            <div :class="tipoEntrega === 'Entrega' ? 'border-gold bg-gold/10' : 'border-white/20 hover:border-white/40'"
+                                 class="border p-4 text-center transition-all">
+                                <div class="text-2xl mb-2">🚚</div>
+                                <div class="font-semibold text-sm">Entrega</div>
+                                <div class="text-white/40 text-xs mt-1">Receba em casa</div>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="tipoEntrega" value="RetiradaNaLoja"
+                                   x-model="tipoEntrega" class="sr-only" />
+                            <div :class="tipoEntrega === 'RetiradaNaLoja' ? 'border-gold bg-gold/10' : 'border-white/20 hover:border-white/40'"
+                                 class="border p-4 text-center transition-all">
+                                <div class="text-2xl mb-2">🏪</div>
+                                <div class="font-semibold text-sm">Retirada na Loja</div>
+                                <div class="text-white/40 text-xs mt-1">Sem custo de frete</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Endereço (apenas para entrega) -->
+                    <div x-show="tipoEntrega === 'Entrega'" x-transition class="mt-6 space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="col-span-2">
+                                <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">CEP</label>
+                                <input type="text" name="cep" placeholder="00000-000" maxlength="9"
+                                       class="w-full bg-zinc-800 border border-white/10 text-white px-4 py-3 text-sm focus:border-gold/60 focus:outline-none" />
+                            </div>
+                            <div class="col-span-2">
+                                <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">Logradouro</label>
+                                <input type="text" name="logradouro"
+                                       class="w-full bg-zinc-800 border border-white/10 text-white px-4 py-3 text-sm focus:border-gold/60 focus:outline-none" />
+                            </div>
+                            <div>
+                                <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">Número</label>
+                                <input type="text" name="numero"
+                                       class="w-full bg-zinc-800 border border-white/10 text-white px-4 py-3 text-sm focus:border-gold/60 focus:outline-none" />
+                            </div>
+                            <div>
+                                <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">Complemento</label>
+                                <input type="text" name="complemento"
+                                       class="w-full bg-zinc-800 border border-white/10 text-white px-4 py-3 text-sm focus:border-gold/60 focus:outline-none" />
+                            </div>
+                            <div>
+                                <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">Cidade</label>
+                                <input type="text" name="cidade"
+                                       class="w-full bg-zinc-800 border border-white/10 text-white px-4 py-3 text-sm focus:border-gold/60 focus:outline-none" />
+                            </div>
+                            <div>
+                                <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">Estado</label>
+                                <input type="text" name="uf" maxlength="2"
+                                       class="w-full bg-zinc-800 border border-white/10 text-white px-4 py-3 text-sm focus:border-gold/60 focus:outline-none" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Info retirada -->
+                    <div x-show="tipoEntrega === 'RetiradaNaLoja'" x-transition class="mt-6 border border-gold/20 bg-gold/5 p-4 text-sm text-white/70">
+                        <p class="font-semibold text-gold mb-2">Endereço da Loja</p>
+                        <p>Rua das Flores, 123 - Centro</p>
+                        <p class="text-white/40 text-xs mt-2">Seg-Sex: 9h às 18h | Sáb: 9h às 14h</p>
+                    </div>
+                </div>
+
+                <!-- Forma de pagamento -->
+                <div class="border border-gold/20 bg-zinc-900/50 p-6">
+                    <h2 class="font-playfair text-xl font-semibold mb-5">Forma de Pagamento</h2>
+                    <p class="text-white/40 text-sm mb-5">Informe como deseja pagar. O pagamento será realizado no momento da entrega ou retirada.</p>
+                    <div class="grid grid-cols-2 gap-3" x-data="{ metodo: 'Dinheiro' }">
+                        @foreach (var (val, nome, icon) in new[] {
+                            ("Dinheiro", "Dinheiro", "💵"),
+                            ("CartaoCredito", "Crédito", "💳"),
+                            ("CartaoDebito", "Débito", "💳"),
+                            ("Pix", "PIX", "⚡")
+                        })
+                        {
+                            <label class="cursor-pointer">
+                                <input type="radio" name="metodoPagamento" value="@val"
+                                       x-model="metodo" class="sr-only" @(val == "Dinheiro" ? "checked" : "") />
+                                <div :class="metodo === '@val' ? 'border-gold bg-gold/10' : 'border-white/20 hover:border-white/40'"
+                                     class="border p-3 text-center transition-all">
+                                    <div class="text-xl mb-1">@icon</div>
+                                    <div class="text-sm font-medium">@nome</div>
+                                </div>
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                <!-- Cupom e observações -->
+                <div class="border border-gold/20 bg-zinc-900/50 p-6 space-y-4">
+                    <div>
+                        <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">Cupom de Desconto</label>
+                        <input type="text" name="cupomCodigo" placeholder="CÓDIGO DO CUPOM"
+                               class="w-full bg-zinc-800 border border-white/10 text-white px-4 py-3 text-sm focus:border-gold/60 focus:outline-none uppercase" />
+                    </div>
+                    <div>
+                        <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">Observações</label>
+                        <textarea name="observacoes" rows="3" placeholder="Observações sobre o pedido..."
+                                  class="w-full bg-zinc-800 border border-white/10 text-white px-4 py-3 text-sm focus:border-gold/60 focus:outline-none resize-none"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumo -->
+            <div>
+                <div class="border border-gold/20 bg-zinc-900/50 p-6 sticky top-24">
+                    <h2 class="font-playfair text-xl font-semibold mb-5">Resumo do Pedido</h2>
+                    <div class="space-y-3 mb-5">
+                        @foreach (var item in itens)
+                        {
+                            <div class="flex justify-between text-sm text-white/60">
+                                <span>@item.Nome <span class="text-white/30">×@item.Quantidade</span></span>
+                                <span class="text-white">R$ @((item.Preco * item.Quantidade).ToString("N2"))</span>
+                            </div>
+                        }
+                    </div>
+                    <div class="border-t border-white/10 pt-4 space-y-2 text-sm text-white/60 mb-5">
+                        <div class="flex justify-between">
+                            <span>Subtotal</span>
+                            <span class="text-white">R$ @subtotal.ToString("N2")</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Frete</span>
+                            <span x-text="tipoEntrega === 'RetiradaNaLoja' ? 'Grátis' : 'A combinar'"></span>
+                        </div>
+                    </div>
+                    <div class="border-t border-white/10 pt-4 flex justify-between font-semibold mb-6">
+                        <span>Total</span>
+                        <span class="text-gold text-lg">R$ @subtotal.ToString("N2")</span>
+                    </div>
+                    <button type="submit" class="btn-gold w-full py-4 text-sm tracking-widest uppercase">
+                        Confirmar Pedido
+                    </button>
+                    <p class="text-white/20 text-xs text-center mt-4 leading-relaxed">
+                        Pagamento na entrega ou retirada.<br/>
+                        Seu pedido será confirmado por e-mail.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

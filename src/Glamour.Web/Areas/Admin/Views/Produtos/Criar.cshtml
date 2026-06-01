@@ -1,0 +1,86 @@
+@model Glamour.Application.DTOs.CriarProdutoDto
+@{
+    ViewBag.Title = "Novo Produto";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    var categorias = ViewBag.Categorias as IEnumerable<Glamour.Application.DTOs.CategoriaDto> ?? [];
+}
+
+<div style="max-width:700px;">
+    <form method="post" action="/admin/produtos/criar" style="display:flex; flex-direction:column; gap:1.25rem;">
+        @Html.AntiForgeryToken()
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div style="border:1px solid rgba(248,113,113,0.4); background:rgba(127,29,29,0.2); color:rgb(248,113,113); padding:0.75rem 1rem; font-size:0.875rem;">
+                @foreach (var e in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <div>@e.ErrorMessage</div>
+                }
+            </div>
+        }
+
+        @{
+            void Campo(string label, string name, string type = "text", string? valor = null, bool required = true)
+            {
+                <div>
+                    <label style="font-size:0.7rem; color:rgba(212,175,55,0.7); text-transform:uppercase; letter-spacing:0.1em; display:block; margin-bottom:0.4rem;">@label</label>
+                    <input type="@type" name="@name" value="@valor" required="@required"
+                           style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.6rem 0.75rem; font-size:0.875rem; box-sizing:border-box;" />
+                </div>;
+            }
+        }
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem;">
+            @{ Campo("Nome", "Nome", valor: Model?.Nome); }
+            @{ Campo("Slug (URL)", "Slug", valor: Model?.Slug); }
+        </div>
+
+        <div>
+            <label style="font-size:0.7rem; color:rgba(212,175,55,0.7); text-transform:uppercase; letter-spacing:0.1em; display:block; margin-bottom:0.4rem;">Descrição</label>
+            <textarea name="Descricao" rows="4" required
+                      style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.6rem 0.75rem; font-size:0.875rem; resize:vertical; box-sizing:border-box;">@Model?.Descricao</textarea>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem;">
+            @{ Campo("Preço (R$)", "Preco", "number", Model?.Preco.ToString()); }
+            @{ Campo("Promoção (R$)", "PrecoPromo", "number", Model?.PrecoPromo?.ToString(), false); }
+            @{ Campo("Estoque", "Estoque", "number", Model?.Estoque.ToString()); }
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem;">
+            @{ Campo("Marca", "Marca", valor: Model?.Marca); }
+            @{ Campo("Volume (ex: 100ml)", "Volume", valor: Model?.Volume, required: false); }
+            <div>
+                <label style="font-size:0.7rem; color:rgba(212,175,55,0.7); text-transform:uppercase; letter-spacing:0.1em; display:block; margin-bottom:0.4rem;">Gênero</label>
+                <select name="Genero" style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.6rem 0.75rem; font-size:0.875rem;">
+                    <option value="">Selecione</option>
+                    @foreach (var g in new[] { "Feminino", "Masculino", "Unissex" })
+                    {
+                        <option value="@g" selected="@(Model?.Genero == g)">@g</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:2fr 1fr; gap:1.25rem; align-items:end;">
+            <div>
+                <label style="font-size:0.7rem; color:rgba(212,175,55,0.7); text-transform:uppercase; letter-spacing:0.1em; display:block; margin-bottom:0.4rem;">Categoria</label>
+                <select name="CategoriaId" required style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.6rem 0.75rem; font-size:0.875rem;">
+                    <option value="">Selecionar...</option>
+                    @foreach (var cat in categorias)
+                    {
+                        <option value="@cat.Id" selected="@(Model?.CategoriaId == cat.Id)">@cat.Nome</option>
+                    }
+                </select>
+            </div>
+            <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; padding-bottom:0.6rem;">
+                <input type="checkbox" name="Destaque" value="true" checked="@(Model?.Destaque)" style="accent-color:#D4AF37;" />
+                <span style="font-size:0.875rem; color:rgba(255,255,255,0.7);">Produto em destaque</span>
+            </label>
+        </div>
+
+        <div style="display:flex; gap:1rem; padding-top:0.5rem;">
+            <button type="submit" class="btn-gold" style="padding:0.75rem 2rem; font-size:0.8rem;">Criar Produto</button>
+            <a href="/admin/produtos" style="padding:0.75rem 1.5rem; border:1px solid rgba(255,255,255,0.2); color:rgba(255,255,255,0.5); text-decoration:none; font-size:0.8rem;">Cancelar</a>
+        </div>
+    </form>
+</div>

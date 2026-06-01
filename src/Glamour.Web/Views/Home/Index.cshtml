@@ -1,0 +1,120 @@
+@{
+    ViewBag.Title = "Início";
+    var destaques = ViewBag.Destaques as IEnumerable<Glamour.Application.DTOs.ProdutoListagemDto> ?? [];
+    var categorias = ViewBag.Categorias as IEnumerable<Glamour.Application.DTOs.CategoriaDto> ?? [];
+}
+
+<!-- Hero -->
+<section class="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-black via-zinc-900 to-black"></div>
+    <div class="absolute inset-0 opacity-30"
+         style="background-image: radial-gradient(ellipse at 60% 50%, rgba(212,175,55,0.4) 0%, transparent 70%);">
+    </div>
+    <div class="relative text-center px-4 max-w-3xl mx-auto">
+        <p class="text-gold text-xs tracking-[0.5em] uppercase mb-6 font-semibold">Nova Coleção 2026</p>
+        <h1 class="font-playfair text-5xl md:text-7xl font-bold leading-tight mb-6">
+            A Essência da<br/><span class="text-gradient">Elegância</span>
+        </h1>
+        <p class="text-white/60 text-lg mb-10 leading-relaxed">
+            Perfumes exclusivos e acessórios sofisticados para quem valoriza o refinamento em cada detalhe.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/catalogo" class="btn-gold px-10 py-4 text-sm tracking-widest uppercase">
+                Explorar Coleção
+            </a>
+            <a href="/catalogo?genero=Feminino" class="border border-gold/40 text-gold px-10 py-4 text-sm tracking-widest uppercase hover:bg-gold/10 transition-colors">
+                Femininos
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Benefícios -->
+<section class="border-y border-gold/10 bg-zinc-950/80">
+    <div class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+        <div class="py-4">
+            <div class="text-gold text-2xl mb-2">✦</div>
+            <div class="text-white text-sm font-semibold mb-1">Entrega Segura</div>
+            <div class="text-white/40 text-xs">Para todo o Brasil</div>
+        </div>
+        <div class="py-4">
+            <div class="text-gold text-2xl mb-2">◈</div>
+            <div class="text-white text-sm font-semibold mb-1">Retirada na Loja</div>
+            <div class="text-white/40 text-xs">Sem custo adicional</div>
+        </div>
+        <div class="py-4">
+            <div class="text-gold text-2xl mb-2">◇</div>
+            <div class="text-white text-sm font-semibold mb-1">Pague na Entrega</div>
+            <div class="text-white/40 text-xs">Dinheiro, cartão ou PIX</div>
+        </div>
+        <div class="py-4">
+            <div class="text-gold text-2xl mb-2">✧</div>
+            <div class="text-white text-sm font-semibold mb-1">Produtos Originais</div>
+            <div class="text-white/40 text-xs">100% autênticos</div>
+        </div>
+    </div>
+</section>
+
+<!-- Categorias -->
+@if (categorias.Any())
+{
+    <section class="max-w-7xl mx-auto px-4 py-16">
+        <div class="text-center mb-12">
+            <p class="text-gold text-xs tracking-[0.4em] uppercase mb-3">Explore</p>
+            <h2 class="font-playfair text-3xl font-bold">Nossas Categorias</h2>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            @foreach (var cat in categorias.Take(4))
+            {
+                <a href="/catalogo?categoriaId=@cat.Id" class="group border border-gold/20 bg-zinc-900 hover:border-gold/60 transition-all duration-300 p-8 text-center block">
+                    <div class="font-playfair text-xl font-semibold group-hover:text-gold transition-colors">@cat.Nome</div>
+                    <div class="text-gold/0 group-hover:text-gold/60 text-xs tracking-widest uppercase mt-2 transition-all">Ver produtos →</div>
+                </a>
+            }
+        </div>
+    </section>
+}
+
+<!-- Destaques -->
+@if (destaques.Any())
+{
+    <section class="max-w-7xl mx-auto px-4 pb-20">
+        <div class="text-center mb-12">
+            <p class="text-gold text-xs tracking-[0.4em] uppercase mb-3">Seleção Especial</p>
+            <h2 class="font-playfair text-3xl font-bold">Destaques</h2>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            @foreach (var produto in destaques)
+            {
+                <a href="/produto/@produto.Slug" class="group">
+                    <div class="aspect-square bg-zinc-900 border border-white/5 group-hover:border-gold/30 transition-all duration-300 mb-4 overflow-hidden flex items-center justify-center">
+                        @if (!string.IsNullOrEmpty(produto.UrlImagemPrincipal))
+                        {
+                            <img src="@produto.UrlImagemPrincipal" alt="@produto.Nome" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                        }
+                        else
+                        {
+                            <span class="text-white/10 text-5xl font-playfair">G</span>
+                        }
+                    </div>
+                    <div class="text-white/40 text-xs uppercase tracking-wider mb-1">@produto.Marca</div>
+                    <h3 class="text-sm font-medium group-hover:text-gold transition-colors">@produto.Nome</h3>
+                    <div class="mt-2 flex items-center gap-2">
+                        @if (produto.PrecoPromo.HasValue)
+                        {
+                            <span class="text-gold font-semibold">R$ @produto.PrecoPromo.Value.ToString("N2")</span>
+                            <span class="text-white/30 text-xs line-through">R$ @produto.Preco.ToString("N2")</span>
+                        }
+                        else
+                        {
+                            <span class="text-white font-semibold">R$ @produto.Preco.ToString("N2")</span>
+                        }
+                    </div>
+                </a>
+            }
+        </div>
+        <div class="text-center mt-12">
+            <a href="/catalogo" class="btn-gold-outline px-12 py-4 text-sm tracking-widest uppercase inline-block">Ver Todos os Produtos</a>
+        </div>
+    </section>
+}

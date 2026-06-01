@@ -1,0 +1,62 @@
+@model Glamour.Application.DTOs.RegistrarUsuarioDto
+@{
+    ViewBag.Title = "Criar Conta";
+}
+
+<div class="min-h-[80vh] flex items-center justify-center px-4 py-16">
+    <div class="w-full max-w-md">
+        <div class="text-center mb-10">
+            <span class="font-playfair text-4xl font-bold text-gradient">Glamour</span>
+            <p class="text-white/30 text-sm mt-2 tracking-wider">Criar nova conta</p>
+        </div>
+
+        <div class="border border-gold/20 bg-zinc-900/80 p-8">
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="border border-red-900/40 bg-red-950/20 text-red-400 text-sm p-4 mb-6">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <p>@error.ErrorMessage</p>
+                    }
+                </div>
+            }
+
+            <form method="post" action="/conta/registrar" class="space-y-5">
+                @Html.AntiForgeryToken()
+                <div>
+                    <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">Nome Completo</label>
+                    <input type="text" name="Nome" value="@Model?.Nome" required autocomplete="name"
+                           class="w-full bg-zinc-800 border border-white/10 text-white px-4 py-3 text-sm focus:border-gold/60 focus:outline-none" />
+                </div>
+                <div>
+                    <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">E-mail</label>
+                    <input type="email" name="Email" value="@Model?.Email" required autocomplete="email"
+                           class="w-full bg-zinc-800 border border-white/10 text-white px-4 py-3 text-sm focus:border-gold/60 focus:outline-none" />
+                </div>
+                <div>
+                    <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">Telefone (opcional)</label>
+                    <input type="tel" name="Telefone" value="@Model?.Telefone" autocomplete="tel"
+                           class="w-full bg-zinc-800 border border-white/10 text-white px-4 py-3 text-sm focus:border-gold/60 focus:outline-none" />
+                </div>
+                <div>
+                    <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">Senha</label>
+                    <input type="password" name="Senha" required autocomplete="new-password" minlength="8"
+                           class="w-full bg-zinc-800 border border-white/10 text-white px-4 py-3 text-sm focus:border-gold/60 focus:outline-none" />
+                </div>
+                <div>
+                    <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">Confirmar Senha</label>
+                    <input type="password" name="ConfirmacaoSenha" required autocomplete="new-password"
+                           class="w-full bg-zinc-800 border border-white/10 text-white px-4 py-3 text-sm focus:border-gold/60 focus:outline-none" />
+                </div>
+                <button type="submit" class="btn-gold w-full py-4 text-sm tracking-widest uppercase">
+                    Criar Conta
+                </button>
+            </form>
+
+            <div class="mt-6 text-center text-sm text-white/30">
+                Já tem conta?
+                <a href="/conta/login" class="text-gold hover:underline ml-1">Entrar</a>
+            </div>
+        </div>
+    </div>
+</div>

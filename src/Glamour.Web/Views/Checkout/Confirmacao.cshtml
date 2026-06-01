@@ -1,0 +1,69 @@
+@model Glamour.Application.DTOs.PedidoDto
+@{
+    ViewBag.Title = "Pedido Confirmado";
+}
+
+<div class="max-w-2xl mx-auto px-4 py-20 text-center">
+    <div class="text-gold text-6xl mb-6">✦</div>
+    <h1 class="font-playfair text-4xl font-bold mb-4">Pedido Confirmado!</h1>
+    <p class="text-white/50 mb-10 leading-relaxed">
+        Seu pedido foi recebido com sucesso.<br/>
+        @if (Model.TipoEntrega == Glamour.Domain.Enums.TipoEntrega.RetiradaNaLoja)
+        {
+            <span>Retire na loja no endereço: <strong class="text-white">Rua das Flores, 123 - Centro</strong></span>
+        }
+        else
+        {
+            <span>Você receberá a confirmação e atualizações por e-mail.</span>
+        }
+    </p>
+
+    <div class="border border-gold/20 bg-zinc-900/50 p-8 text-left mb-10">
+        <h2 class="font-playfair text-xl font-semibold mb-5 text-gold">Detalhes do Pedido</h2>
+
+        <div class="space-y-3 text-sm text-white/60 mb-6">
+            <div class="flex justify-between">
+                <span>Número do Pedido</span>
+                <span class="text-white font-mono">@Model.Id.ToString()[..8].ToUpper()</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Data</span>
+                <span class="text-white">@Model.CriadoEm.ToString("dd/MM/yyyy HH:mm")</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Tipo de Entrega</span>
+                <span class="text-white">@(Model.TipoEntrega == Glamour.Domain.Enums.TipoEntrega.RetiradaNaLoja ? "Retirada na Loja" : "Entrega")</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Forma de Pagamento</span>
+                <span class="text-white">@Model.MetodoPagamento</span>
+            </div>
+        </div>
+
+        <div class="border-t border-white/10 pt-5 space-y-2 text-sm text-white/60 mb-4">
+            @foreach (var item in Model.Itens)
+            {
+                <div class="flex justify-between">
+                    <span>@item.NomeProduto ×@item.Quantidade</span>
+                    <span class="text-white">R$ @item.Subtotal.ToString("N2")</span>
+                </div>
+            }
+        </div>
+
+        <div class="border-t border-white/10 pt-4 flex justify-between font-semibold">
+            <span>Total</span>
+            <span class="text-gold text-lg">R$ @Model.Total.ToString("N2")</span>
+        </div>
+    </div>
+
+    <div class="border border-amber-600/30 bg-amber-950/20 p-5 text-sm text-amber-200/70 mb-10 text-left">
+        <p class="font-semibold text-amber-400 mb-2">Lembrete sobre Pagamento</p>
+        <p>O pagamento será realizado no momento da @(Model.TipoEntrega == Glamour.Domain.Enums.TipoEntrega.RetiradaNaLoja ? "retirada" : "entrega").
+           Separe o valor em <strong class="text-white">@Model.MetodoPagamento</strong> para o entregador ou na loja.</p>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/conta/meus-pedidos" class="btn-gold px-8 py-3 text-sm tracking-widest uppercase">Ver Meus Pedidos</a>
+        <a href="/" class="btn-gold-outline px-8 py-3 text-sm tracking-widest uppercase">Voltar à Loja</a>
+    </div>
+</div>

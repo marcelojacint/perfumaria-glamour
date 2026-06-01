@@ -1,0 +1,59 @@
+@model IEnumerable<Glamour.Application.DTOs.PedidoDto>
+@{
+    ViewBag.Title = "Meus Pedidos";
+    var pedidos = Model.ToList();
+}
+
+<div class="max-w-4xl mx-auto px-4 py-12">
+    <div class="mb-10">
+        <p class="text-gold text-xs tracking-[0.4em] uppercase mb-2">Minha Conta</p>
+        <h1 class="font-playfair text-4xl font-bold">Meus Pedidos</h1>
+    </div>
+
+    @if (!pedidos.Any())
+    {
+        <div class="text-center py-20 text-white/30">
+            <div class="text-5xl mb-4 font-playfair">✦</div>
+            <p>Você ainda não fez pedidos.</p>
+            <a href="/catalogo" class="text-gold hover:underline text-sm mt-2 inline-block">Ver catálogo</a>
+        </div>
+    }
+    else
+    {
+        <div class="space-y-4">
+            @foreach (var pedido in pedidos)
+            {
+                <div class="border border-white/10 bg-zinc-900/50 p-5">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <p class="text-xs text-white/30 font-mono mb-1">Pedido #@pedido.Id.ToString()[..8].ToUpper()</p>
+                            <p class="text-xs text-white/40">@pedido.CriadoEm.ToString("dd/MM/yyyy HH:mm")</p>
+                        </div>
+                        <span class="text-xs px-3 py-1 border @(pedido.Status == Glamour.Domain.Enums.StatusPedido.Entregue ? "border-green-600/50 text-green-400" : pedido.Status == Glamour.Domain.Enums.StatusPedido.Cancelado ? "border-red-600/50 text-red-400" : "border-gold/40 text-gold")">
+                            @pedido.Status
+                        </span>
+                    </div>
+
+                    <div class="space-y-1 mb-4 text-sm text-white/50">
+                        @foreach (var item in pedido.Itens.Take(3))
+                        {
+                            <div>@item.NomeProduto <span class="text-white/30">×@item.Quantidade</span></div>
+                        }
+                        @if (pedido.Itens.Count() > 3)
+                        {
+                            <div class="text-white/30 text-xs">+ @(pedido.Itens.Count() - 3) item(s)</div>
+                        }
+                    </div>
+
+                    <div class="flex items-center justify-between text-sm border-t border-white/10 pt-4">
+                        <div class="text-white/40 text-xs">
+                            @(pedido.TipoEntrega == Glamour.Domain.Enums.TipoEntrega.RetiradaNaLoja ? "Retirada na Loja" : "Entrega")
+                            · @pedido.MetodoPagamento
+                        </div>
+                        <span class="text-gold font-semibold">R$ @pedido.Total.ToString("N2")</span>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

@@ -1,0 +1,49 @@
+@model IEnumerable<Glamour.Application.DTOs.CategoriaDto>
+@{
+    ViewBag.Title = "Categorias";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+    <p style="color:rgba(255,255,255,0.4); font-size:0.8rem; margin:0;">@Model.Count() categoria(s)</p>
+    <a href="/admin/categorias/criar" class="btn-gold" style="padding:0.5rem 1.25rem; font-size:0.75rem;">+ Nova Categoria</a>
+</div>
+
+<div style="border:1px solid rgba(255,255,255,0.08);">
+    <table style="width:100%; border-collapse:collapse; font-size:0.875rem;">
+        <thead>
+            <tr style="background:rgba(212,175,55,0.05); border-bottom:1px solid rgba(255,255,255,0.08);">
+                @foreach (var col in new[] { "Nome", "Slug", "Ordem", "Status", "Ações" })
+                {
+                    <th style="text-align:left; padding:0.75rem 1rem; color:rgba(212,175,55,0.7); font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; font-weight:600;">@col</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cat in Model.OrderBy(c => c.Ordem))
+            {
+                <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <td style="padding:0.75rem 1rem; font-weight:500;">@cat.Nome</td>
+                    <td style="padding:0.75rem 1rem; color:rgba(255,255,255,0.4); font-family:monospace; font-size:0.8rem;">@cat.Slug</td>
+                    <td style="padding:0.75rem 1rem; color:rgba(255,255,255,0.4);">@cat.Ordem</td>
+                    <td style="padding:0.75rem 1rem;">
+                        <span style="font-size:0.7rem; padding:0.2rem 0.6rem; border:1px solid; @(cat.Ativo ? "border-color:rgba(74,222,128,0.4); color:rgb(74,222,128);" : "border-color:rgba(255,255,255,0.1); color:rgba(255,255,255,0.3);")">
+                            @(cat.Ativo ? "Ativa" : "Inativa")
+                        </span>
+                    </td>
+                    <td style="padding:0.75rem 1rem;">
+                        <div style="display:flex; gap:1rem;">
+                            <a href="/admin/categorias/editar/@cat.Id" style="color:#D4AF37; font-size:0.75rem; text-decoration:none;">Editar</a>
+                            <form method="post" action="/admin/categorias/toggle/@cat.Id" style="display:inline;">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" style="background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.4); font-size:0.75rem;">
+                                    @(cat.Ativo ? "Desativar" : "Ativar")
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
