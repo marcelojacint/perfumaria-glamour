@@ -18,7 +18,75 @@ h1, h2, h3, h4, h5, h6 { font-weight: inherit; }
     --black: #0A0A0A;
     --zinc-900: #18181b;
     --zinc-950: #09090b;
+
+    /* Acento temático — por padrão é o dourado da marca.
+       Muda conforme o gênero navegado (feminino, masculino, unissex). */
+    --accent: #D4AF37;
+    --accent-light: #F0D060;
+    --accent-dark: #A08020;
+    --accent-rgb: 212, 175, 55;
+    --accent-grad: linear-gradient(135deg, #F0D060 0%, #D4AF37 50%, #A08020 100%);
+    --accent-soft: rgba(212, 175, 55, 0.12);
+    --accent-glow: rgba(212, 175, 55, 0.25);
 }
+
+/* Tema Feminino — rosé gold */
+.tema-feminino {
+    --accent: #E6A4B4;
+    --accent-light: #F6CAD4;
+    --accent-dark: #C2718A;
+    --accent-rgb: 230, 164, 180;
+    --accent-grad: linear-gradient(135deg, #F6CAD4 0%, #E6A4B4 45%, #C2718A 100%);
+    --accent-soft: rgba(230, 164, 180, 0.12);
+    --accent-glow: rgba(230, 164, 180, 0.28);
+}
+
+/* Tema Masculino — azul-aço / prata */
+.tema-masculino {
+    --accent: #8FB8D8;
+    --accent-light: #BCD6EC;
+    --accent-dark: #4E7CA3;
+    --accent-rgb: 143, 184, 216;
+    --accent-grad: linear-gradient(135deg, #BCD6EC 0%, #8FB8D8 45%, #4E7CA3 100%);
+    --accent-soft: rgba(143, 184, 216, 0.12);
+    --accent-glow: rgba(143, 184, 216, 0.28);
+}
+
+/* Tema Unissex — champagne dourado (marca) */
+.tema-unissex {
+    --accent: #D4AF37;
+    --accent-light: #F0D060;
+    --accent-dark: #A08020;
+    --accent-rgb: 212, 175, 55;
+    --accent-grad: linear-gradient(135deg, #F0D060 0%, #D4AF37 50%, #A08020 100%);
+    --accent-soft: rgba(212, 175, 55, 0.12);
+    --accent-glow: rgba(212, 175, 55, 0.25);
+}
+
+/* Utilitários de acento (seguem o tema ativo) */
+.text-accent { color: var(--accent); }
+.bg-accent { background-color: var(--accent); }
+.border-accent { border-color: var(--accent); }
+.accent-gradient-text {
+    background: var(--accent-grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.btn-accent {
+    display: inline-block;
+    background: var(--accent-grad);
+    color: #0A0A0A;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: center;
+    border: none;
+    cursor: pointer;
+    transition: filter 0.2s, transform 0.1s, box-shadow 0.2s;
+}
+.btn-accent:hover { filter: brightness(1.08); box-shadow: 0 6px 24px var(--accent-glow); }
+.btn-accent:active { transform: scale(0.99); }
 
 /* Reset base */
 *, *::before, *::after { box-sizing: border-box; }
@@ -65,7 +133,7 @@ body {
     transition: opacity 0.2s, transform 0.1s;
     text-align: center;
 }
-.btn-gold:hover { opacity: 0.9; }
+.btn-gold:hover { filter: brightness(1.08); box-shadow: 0 6px 24px rgba(212,175,55,0.28); }
 .btn-gold:active { transform: scale(0.99); }
 
 .btn-gold-outline {
@@ -83,6 +151,69 @@ body {
 }
 .btn-gold-outline:hover {
     background-color: rgba(212, 175, 55, 0.1);
+    box-shadow: 0 4px 18px rgba(212,175,55,0.15);
+}
+
+/* ===== Refino visual de produtos e banners ===== */
+
+/* Card de produto: elevação e glow do acento no hover */
+.produto-card {
+    display: block;
+    transition: transform 0.3s cubic-bezier(.2,.7,.3,1);
+}
+.produto-card .produto-thumb {
+    position: relative;
+    aspect-ratio: 1;
+    background: #18181b;
+    border: 1px solid rgba(255,255,255,0.06);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+.produto-card:hover { transform: translateY(-4px); }
+.produto-card:hover .produto-thumb {
+    border-color: rgba(var(--accent-rgb), 0.5);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(var(--accent-rgb),0.25);
+}
+.produto-card .produto-thumb img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.6s cubic-bezier(.2,.7,.3,1);
+}
+.produto-card:hover .produto-thumb img { transform: scale(1.07); }
+
+/* Selo de desconto temático */
+.selo-desconto {
+    position: absolute; top: 0; left: 0; z-index: 2;
+    background: var(--accent-grad);
+    color: #0A0A0A; font-weight: 700; font-size: 0.78rem;
+    padding: 0.35rem 0.7rem; border-bottom-right-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.45);
+}
+
+/* Hero temático do catálogo */
+.hero-genero {
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(var(--accent-rgb), 0.25);
+}
+.hero-genero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+        radial-gradient(ellipse at 25% 30%, rgba(var(--accent-rgb), 0.30) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 70%, rgba(var(--accent-rgb), 0.16) 0%, transparent 55%),
+        linear-gradient(180deg, #0A0A0A 0%, #111 100%);
+    z-index: 0;
+}
+.hero-genero > * { position: relative; z-index: 1; }
+
+/* Chip de navegação de gênero ativo */
+.genero-chip {
+    border: 1px solid rgba(var(--accent-rgb), 0.4);
+    color: var(--accent);
+    background: var(--accent-soft);
 }
 
 /* Layout utilitários (Tailwind-like manual para as classes principais) */
@@ -102,6 +233,8 @@ body {
 .py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
 .py-8 { padding-top: 2rem; padding-bottom: 2rem; }
 .py-12 { padding-top: 3rem; padding-bottom: 3rem; }
+.py-14 { padding-top: 3.5rem; padding-bottom: 3.5rem; }
+.flex-wrap { flex-wrap: wrap; }
 .py-16 { padding-top: 4rem; padding-bottom: 4rem; }
 .py-20 { padding-top: 5rem; padding-bottom: 5rem; }
 .pb-20 { padding-bottom: 5rem; }
@@ -128,6 +261,7 @@ body {
 .mt-3 { margin-top: 0.75rem; }
 .mt-4 { margin-top: 1rem; }
 .mt-6 { margin-top: 1.5rem; }
+.mt-7 { margin-top: 1.75rem; }
 .mt-8 { margin-top: 2rem; }
 .mt-10 { margin-top: 2.5rem; }
 .mt-12 { margin-top: 3rem; }
