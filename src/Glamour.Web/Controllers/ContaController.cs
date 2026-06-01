@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Glamour.Application.DTOs;
 using Glamour.Application.Services;
 using Glamour.Domain.Enums;
@@ -16,7 +17,12 @@ public class ContaController(
     EnderecoService enderecoService) : Controller
 {
     [HttpGet("registrar")]
-    public IActionResult Registrar() => View();
+    public async Task<IActionResult> Registrar()
+    {
+        ViewBag.GoogleDisponivel = (await signInManager.GetExternalAuthenticationSchemesAsync())
+            .Any(s => s.Name == "Google");
+        return View();
+    }
 
     [HttpPost("registrar")]
     public async Task<IActionResult> Registrar(RegistrarUsuarioDto dto)
@@ -50,9 +56,11 @@ public class ContaController(
     }
 
     [HttpGet("login")]
-    public IActionResult Login(string? returnUrl = null)
+    public async Task<IActionResult> Login(string? returnUrl = null)
     {
         ViewBag.ReturnUrl = returnUrl;
+        ViewBag.GoogleDisponivel = (await signInManager.GetExternalAuthenticationSchemesAsync())
+            .Any(s => s.Name == "Google");
         return View();
     }
 
@@ -88,6 +96,85 @@ public class ContaController(
     public async Task<IActionResult> Logout()
     {
         await signInManager.SignOutAsync();
+        return RedirectToAction("Index", "Home");
+    }
+
+    // ===== Login externo (Google) =====
+
+    [HttpPost("login-externo")]
+    public IActionResult LoginExterno(string provider, string? returnUrl = null)
+    {
+        var redirectUrl = Url.Action(nameof(LoginExternoCallback), "Conta", new { returnUrl });
+        var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+        return Challenge(properties, provider);
+    }
+
+    [HttpGet("login-externo-callback")]
+    public async Task<IActionResult> LoginExternoCallback(string? returnUrl = null, string? remoteError = null)
+    {
+        if (remoteError != null)
+        {
+            TempData["Erro"] = $"Erro no provedor externo: {remoteError}";
+            return RedirectToAction(nameof(Login));
+        }
+
+        var info = await signInManager.GetExternalLoginInfoAsync();
+        if (info == null)
+        {
+            TempData["Erro"] = "Não foi possível obter informações do provedor externo.";
+            return RedirectToAction(nameof(Login));
+        }
+
+        // Tenta logar com a conta externa já vinculada
+        var resultado = await signInManager.ExternalLoginSignInAsync(
+            info.LoginProvider, info.ProviderKey, isPersistent: true, bypassTwoFactor: true);
+
+        if (resultado.Succeeded)
+            return await RedirecionarPosLoginAsync(info.Principal.FindFirstValue(System.Security.Claims.ClaimTypes.Email), returnUrl);
+
+        // Primeiro acesso via Google: cria a conta automaticamente
+        var email = info.Principal.FindFirstValue(System.Security.Claims.ClaimTypes.Email);
+        var nome = info.Principal.FindFirstValue(System.Security.Claims.ClaimTypes.Name) ?? email;
+
+        if (string.IsNullOrEmpty(email))
+        {
+            TempData["Erro"] = "O provedor externo não forneceu um e-mail.";
+            return RedirectToAction(nameof(Login));
+        }
+
+        var usuario = await userManager.FindByEmailAsync(email);
+        if (usuario == null)
+        {
+            usuario = new ApplicationUser
+            {
+                UserName = email,
+                Email = email,
+                Nome = nome ?? email,
+                EmailConfirmed = true,
+                Ativo = true
+            };
+            await userManager.CreateAsync(usuario);
+            await userManager.AddToRoleAsync(usuario, RolesUsuario.Cliente);
+        }
+
+        // Vincula o login externo à conta (se ainda não vinculado)
+        await userManager.AddLoginAsync(usuario, info);
+        await signInManager.SignInAsync(usuario, isPersistent: true);
+
+        return await RedirecionarPosLoginAsync(email, returnUrl);
+    }
+
+    private async Task<IActionResult> RedirecionarPosLoginAsync(string? email, string? returnUrl)
+    {
+        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            return LocalRedirect(returnUrl);
+
+        if (!string.IsNullOrEmpty(email))
+        {
+            var usuario = await userManager.FindByEmailAsync(email);
+            if (usuario != null && await userManager.IsInRoleAsync(usuario, RolesUsuario.Admin))
+                return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
+        }
         return RedirectToAction("Index", "Home");
     }
 

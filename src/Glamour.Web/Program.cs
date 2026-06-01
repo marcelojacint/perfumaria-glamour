@@ -28,18 +28,31 @@ try
     builder.Services.AddApplication();
     builder.Services.AddInfrastructure(builder.Configuration);
 
-    // Identity cookie
+    // Identity cookie (Lax para permitir retorno do OAuth externo)
     builder.Services.ConfigureApplicationCookie(opt =>
     {
         opt.LoginPath = "/conta/login";
         opt.LogoutPath = "/conta/logout";
         opt.AccessDeniedPath = "/conta/acesso-negado";
         opt.Cookie.HttpOnly = true;
-        opt.Cookie.SameSite = SameSiteMode.Strict;
+        opt.Cookie.SameSite = SameSiteMode.Lax;
         opt.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
         opt.ExpireTimeSpan = TimeSpan.FromDays(7);
         opt.SlidingExpiration = true;
     });
+
+    // Login externo com Google (registrado apenas se houver credenciais configuradas)
+    var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+    var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+    if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
+    {
+        builder.Services.AddAuthentication().AddGoogle(opt =>
+        {
+            opt.ClientId = googleClientId;
+            opt.ClientSecret = googleClientSecret;
+            opt.CallbackPath = "/signin-google";
+        });
+    }
 
     // Sessão
     builder.Services.AddDistributedMemoryCache();
