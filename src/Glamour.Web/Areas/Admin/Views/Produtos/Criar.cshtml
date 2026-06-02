@@ -29,9 +29,22 @@
             }
         }
 
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem;">
-            @{ Campo("Nome", "Nome", valor: Model?.Nome); }
-            @{ Campo("Slug (URL)", "Slug", valor: Model?.Slug); }
+        <div x-data="{ nome: '', slug: '', editado: false,
+                       slugify(s){ return (s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); } }"
+             style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem;">
+            <div>
+                <label style="font-size:0.7rem; color:rgba(212,175,55,0.7); text-transform:uppercase; letter-spacing:0.1em; display:block; margin-bottom:0.4rem;">Nome</label>
+                <input type="text" name="Nome" required x-model="nome" @@input="if(!editado) slug = slugify(nome)"
+                       style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.6rem 0.75rem; font-size:0.875rem; box-sizing:border-box;" />
+            </div>
+            <div>
+                <label style="font-size:0.7rem; color:rgba(212,175,55,0.7); text-transform:uppercase; letter-spacing:0.1em; display:block; margin-bottom:0.4rem;">
+                    Slug (URL) <span style="text-transform:none; letter-spacing:normal; color:rgba(255,255,255,0.3);">— gerado do nome</span>
+                </label>
+                <input type="text" name="Slug" x-model="slug" @@input="editado = true" placeholder="gerado automaticamente"
+                       style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.6rem 0.75rem; font-size:0.875rem; box-sizing:border-box;" />
+                <p style="font-size:0.68rem; color:rgba(255,255,255,0.3); margin-top:0.3rem;" x-show="slug">Endereço: /produto/<span x-text="slug" style="color:rgba(212,175,55,0.7);"></span></p>
+            </div>
         </div>
 
         <div>

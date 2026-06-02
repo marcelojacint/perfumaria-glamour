@@ -47,9 +47,11 @@ public class ProdutoService(IProdutoRepository produtoRepo, ICategoriaRepository
         var categoria = await categoriaRepo.ObterPorIdAsync(dto.CategoriaId);
         if (categoria == null) { notificacoes.Adicionar("CategoriaId", "Categoria não encontrada."); return Guid.Empty; }
 
-        var produto = new Produto(dto.Nome, dto.Slug, dto.Descricao, dto.Preco,
+        var slug = await GerarSlugUnicoAsync(dto.Slug, dto.Nome, null);
+
+        var produto = new Produto(dto.Nome, slug, dto.Descricao, dto.Preco,
             dto.Estoque, dto.CategoriaId, dto.Marca, dto.Volume, dto.Genero);
-        produto.Atualizar(dto.Nome, dto.Slug, dto.Descricao, dto.Preco, dto.PrecoPromo,
+        produto.Atualizar(dto.Nome, slug, dto.Descricao, dto.Preco, dto.PrecoPromo,
             dto.CategoriaId, dto.Marca, dto.Volume, dto.Genero, dto.Destaque);
 
         await produtoRepo.AdicionarAsync(produto);
@@ -62,12 +64,31 @@ public class ProdutoService(IProdutoRepository produtoRepo, ICategoriaRepository
         var produto = await produtoRepo.ObterPorIdAsync(dto.Id);
         if (produto == null) { notificacoes.Adicionar("Id", "Produto não encontrado."); return false; }
 
-        produto.Atualizar(dto.Nome, dto.Slug, dto.Descricao, dto.Preco, dto.PrecoPromo,
+        var slug = await GerarSlugUnicoAsync(dto.Slug, dto.Nome, dto.Id);
+
+        produto.Atualizar(dto.Nome, slug, dto.Descricao, dto.Preco, dto.PrecoPromo,
             dto.CategoriaId, dto.Marca, dto.Volume, dto.Genero, dto.Destaque);
 
         await produtoRepo.AtualizarAsync(produto);
         await produtoRepo.SalvarAsync();
         return true;
+    }
+
+    private async Task<string> GerarSlugUnicoAsync(string? slugInformado, string nome, Guid? ignorarId)
+    {
+        var baseSlug = SlugHelper.Gerar(slugInformado);
+        if (string.IsNullOrEmpty(baseSlug)) baseSlug = SlugHelper.Gerar(nome);
+        if (string.IsNullOrEmpty(baseSlug)) baseSlug = "produto";
+
+        var slug = baseSlug;
+        var sufixo = 2;
+        while (true)
+        {
+            var existente = await produtoRepo.ObterPorSlugAsync(slug);
+            if (existente == null || existente.Id == ignorarId) break;
+            slug = $"{baseSlug}-{sufixo++}";
+        }
+        return slug;
     }
 
     public async Task<bool> RemoverAsync(Guid id)
