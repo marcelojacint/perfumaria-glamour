@@ -39,8 +39,7 @@
                 {
                     var ativo = genero == val;
                     <a href="/catalogo@(string.IsNullOrEmpty(val) ? "" : "?genero=" + val)"
-                       class="px-5 py-2 text-xs tracking-widest uppercase transition-all @(ativo ? "genero-chip" : "border border-white/15 text-white/50 hover:border-white/35 hover:text-white/80")"
-                       style="border-radius:2px;">
+                       class="@(ativo ? "btn-accent" : "btn-accent-outline") py-2 text-xs tracking-widest uppercase">
                         @lbl
                     </a>
                 }
