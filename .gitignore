@@ -484,3 +484,7 @@ $RECYCLE.BIN/
 .env.*
 *.pfx
 appsettings.Production.json
+
+# Uploads de usuário (não versionar)
+src/Glamour.Web/wwwroot/uploads/produtos/*
+!src/Glamour.Web/wwwroot/uploads/produtos/.gitkeep
