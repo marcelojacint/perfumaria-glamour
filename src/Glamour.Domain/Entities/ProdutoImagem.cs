@@ -17,4 +17,7 @@ public class ProdutoImagem : BaseEntity
         Ordem = ordem;
         Principal = principal;
     }
+
+    public void MarcarPrincipal() => Principal = true;
+    public void RemoverPrincipal() => Principal = false;
 }

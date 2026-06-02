@@ -45,6 +45,7 @@ public static class DependencyInjection
         services.AddScoped<IRepository<Glamour.Domain.Entities.Avaliacao>, BaseRepository<Glamour.Domain.Entities.Avaliacao>>();
         services.AddScoped<IRepository<Glamour.Domain.Entities.NotificacaoEstoque>, BaseRepository<Glamour.Domain.Entities.NotificacaoEstoque>>();
         services.AddScoped<IRepository<Glamour.Domain.Entities.Newsletter>, BaseRepository<Glamour.Domain.Entities.Newsletter>>();
+        services.AddScoped<IRepository<Glamour.Domain.Entities.ProdutoImagem>, BaseRepository<Glamour.Domain.Entities.ProdutoImagem>>();
 
         return services;
     }

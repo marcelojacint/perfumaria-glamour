@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Glamour.Web.Services;
 
-public class ImagemService(IWebHostEnvironment env, IProdutoRepository produtoRepo)
+public class ImagemService(IWebHostEnvironment env, IProdutoRepository produtoRepo, IRepository<ProdutoImagem> imagemRepo)
 {
     private static readonly string[] _extensoesPermitidas = [".jpg", ".jpeg", ".png", ".webp", ".avif"];
     private const long TamanhoMaxBytes = 5 * 1024 * 1024;
@@ -35,10 +35,21 @@ public class ImagemService(IWebHostEnvironment env, IProdutoRepository produtoRe
         var produto = await produtoRepo.ObterPorIdAsync(produtoId);
         if (produto == null) return;
 
-        var ordem = produto.Imagens.Count + 1;
-        produto.AdicionarImagem(new ProdutoImagem(produtoId, url, ordem, principal || !produto.Imagens.Any()));
-        await produtoRepo.AtualizarAsync(produto);
-        await produtoRepo.SalvarAsync();
+        var existentes = (await imagemRepo.BuscarAsync(i => i.ProdutoId == produtoId)).ToList();
+        var virarPrincipal = principal || existentes.Count == 0;
+
+        if (virarPrincipal)
+        {
+            foreach (var img in existentes.Where(i => i.Principal))
+            {
+                img.RemoverPrincipal();
+                await imagemRepo.AtualizarAsync(img);
+            }
+        }
+
+        var ordem = existentes.Count + 1;
+        await imagemRepo.AdicionarAsync(new ProdutoImagem(produtoId, url, ordem, virarPrincipal));
+        await imagemRepo.SalvarAsync();
     }
 
     public void ExcluirArquivoLocal(string url)
