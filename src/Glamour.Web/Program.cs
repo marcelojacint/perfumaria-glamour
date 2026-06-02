@@ -156,6 +156,27 @@ try
     app.UseAuthentication();
     app.UseAuthorization();
 
+    app.Use(async (context, next) =>
+    {
+        var usuario = context.User;
+        if (usuario.Identity?.IsAuthenticated == true
+            && usuario.IsInRole(Glamour.Domain.Enums.RolesUsuario.Admin)
+            && usuario.FindFirst(Glamour.Web.Controllers.ContaController.ClaimMetodoLogin)?.Value
+               != Glamour.Web.Controllers.ContaController.MetodoGoogle)
+        {
+            var path = context.Request.Path.Value ?? "";
+            var liberado = path.StartsWith("/Admin", StringComparison.OrdinalIgnoreCase)
+                || path.StartsWith("/conta", StringComparison.OrdinalIgnoreCase)
+                || path.StartsWith("/erro", StringComparison.OrdinalIgnoreCase);
+            if (!liberado)
+            {
+                context.Response.Redirect("/Admin");
+                return;
+            }
+        }
+        await next();
+    });
+
     app.MapControllerRoute("areas", "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
     app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
 

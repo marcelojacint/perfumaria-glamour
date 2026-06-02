@@ -16,6 +16,10 @@ public class ContaController(
     PedidoService pedidoService,
     EnderecoService enderecoService) : Controller
 {
+    public const string ClaimMetodoLogin = "AuthMethod";
+    public const string MetodoSenha = "Password";
+    public const string MetodoGoogle = "Google";
+
     [HttpGet("registrar")]
     public async Task<IActionResult> Registrar()
     {
@@ -71,13 +75,17 @@ public class ContaController(
         var resultado = await signInManager.PasswordSignInAsync(dto.Email, dto.Senha, dto.LembrarMe, lockoutOnFailure: true);
         if (resultado.Succeeded)
         {
+            var usuario = await userManager.FindByEmailAsync(dto.Email);
+            var ehAdmin = usuario != null && await userManager.IsInRoleAsync(usuario, RolesUsuario.Admin);
+
+            if (usuario != null)
+                await signInManager.SignInWithClaimsAsync(usuario, dto.LembrarMe, [new Claim(ClaimMetodoLogin, MetodoSenha)]);
+
+            if (ehAdmin)
+                return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
 
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                 return LocalRedirect(returnUrl);
-
-            var usuario = await userManager.FindByEmailAsync(dto.Email);
-            if (usuario != null && await userManager.IsInRoleAsync(usuario, RolesUsuario.Admin))
-                return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
 
             return RedirectToAction("Index", "Home");
         }
@@ -126,7 +134,12 @@ public class ContaController(
             info.LoginProvider, info.ProviderKey, isPersistent: true, bypassTwoFactor: true);
 
         if (resultado.Succeeded)
+        {
+            var existente = await userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+            if (existente != null)
+                await signInManager.SignInWithClaimsAsync(existente, isPersistent: true, [new Claim(ClaimMetodoLogin, MetodoGoogle)]);
             return await RedirecionarPosLoginAsync(info.Principal.FindFirstValue(System.Security.Claims.ClaimTypes.Email), returnUrl);
+        }
 
         var email = info.Principal.FindFirstValue(System.Security.Claims.ClaimTypes.Email);
         var nome = info.Principal.FindFirstValue(System.Security.Claims.ClaimTypes.Name) ?? email;
@@ -153,7 +166,7 @@ public class ContaController(
         }
 
         await userManager.AddLoginAsync(usuario, info);
-        await signInManager.SignInAsync(usuario, isPersistent: true);
+        await signInManager.SignInWithClaimsAsync(usuario, isPersistent: true, [new Claim(ClaimMetodoLogin, MetodoGoogle)]);
 
         return await RedirecionarPosLoginAsync(email, returnUrl);
     }
