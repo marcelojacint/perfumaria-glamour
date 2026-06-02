@@ -10,7 +10,7 @@ public class ImagemService(IWebHostEnvironment env, IProdutoRepository produtoRe
     private static readonly string[] _extensoesPermitidas = [".jpg", ".jpeg", ".png", ".webp", ".avif"];
     private const long TamanhoMaxBytes = 5 * 1024 * 1024;
 
-    public async Task<(bool ok, string? urlOuErro)> SalvarImagemAsync(IFormFile arquivo)
+    public async Task<(bool ok, string? urlOuErro)> SalvarImagemAsync(IFormFile arquivo, string subpasta = "produtos")
     {
         var ext = Path.GetExtension(arquivo.FileName).ToLowerInvariant();
         if (!_extensoesPermitidas.Contains(ext))
@@ -20,14 +20,14 @@ public class ImagemService(IWebHostEnvironment env, IProdutoRepository produtoRe
             return (false, "Arquivo muito grande. Máximo 5 MB.");
 
         var nomeArquivo = $"{Guid.NewGuid():N}{ext}";
-        var pasta = Path.Combine(env.WebRootPath, "uploads", "produtos");
+        var pasta = Path.Combine(env.WebRootPath, "uploads", subpasta);
         Directory.CreateDirectory(pasta);
         var caminho = Path.Combine(pasta, nomeArquivo);
 
         await using var stream = File.Create(caminho);
         await arquivo.CopyToAsync(stream);
 
-        return (true, $"/uploads/produtos/{nomeArquivo}");
+        return (true, $"/uploads/{subpasta}/{nomeArquivo}");
     }
 
     public async Task AdicionarImagemProdutoAsync(Guid produtoId, string url, bool principal = false)

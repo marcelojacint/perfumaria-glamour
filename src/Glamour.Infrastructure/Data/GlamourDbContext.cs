@@ -20,6 +20,7 @@ public class GlamourDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Avaliacao> Avaliacoes => Set<Avaliacao>();
     public DbSet<NotificacaoEstoque> NotificacoesEstoque => Set<NotificacaoEstoque>();
     public DbSet<Newsletter> Newsletters => Set<Newsletter>();
+    public DbSet<ConfiguracaoHero> ConfiguracoesHero => Set<ConfiguracaoHero>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

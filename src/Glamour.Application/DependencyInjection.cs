@@ -18,6 +18,7 @@ public static class DependencyInjection
         services.AddScoped<EnderecoService>();
         services.AddScoped<AvaliacaoService>();
         services.AddScoped<FreteService>();
+        services.AddScoped<HeroService>();
         return services;
     }
 }
