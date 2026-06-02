@@ -65,7 +65,7 @@
                 <div x-show="aberto && resultados.length" style="position:absolute; top:calc(100% + 4px); right:0; min-width:280px; background:#18181b; border:1px solid rgba(212,175,55,0.2); z-index:200;">
                     <template x-for="p in resultados" :key="p.id">
                         <a :href="'/produto/'+p.slug" style="display:flex; align-items:center; gap:0.6rem; padding:0.5rem 0.75rem; border-bottom:1px solid rgba(255,255,255,0.04);">
-                            <template x-if="p.imagem"><img :src="p.imagem" style="width:2.25rem; height:2.25rem; object-fit:cover; flex-shrink:0;" /></template>
+                            <template x-if="p.imagem"><img :src="p.imagem" style="width:2.25rem; height:2.25rem; object-fit:cover; flex-shrink:0;" onerror="this.style.display='none'" /></template>
                             <div><div style="font-size:0.8rem; color:#fff;" x-text="p.nome"></div><div style="font-size:0.7rem; color:#D4AF37;" x-text="'R$ '+p.preco.toFixed(2).replace('.',',')"></div></div>
                         </a>
                     </template>

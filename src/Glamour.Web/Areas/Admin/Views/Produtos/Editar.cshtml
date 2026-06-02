@@ -118,7 +118,7 @@
                     @foreach (var img in imagens.OrderBy(i => i.Ordem))
                     {
                         <div style="position:relative; border:1px solid @(img.Principal ? "rgba(212,175,55,0.6)" : "rgba(255,255,255,0.08)");">
-                            <img src="@img.Url" style="width:100%; aspect-ratio:1; object-fit:cover; display:block;" loading="lazy" />
+                            <img src="@img.Url" style="width:100%; aspect-ratio:1; object-fit:cover; display:block;" loading="lazy" onerror="this.onerror=null;this.src='/img/placeholder-produto.svg'" />
                             @if (img.Principal)
                             {
                                 <span style="position:absolute; top:2px; left:2px; background:#D4AF37; color:#000; font-size:0.55rem; padding:1px 4px; font-weight:700; letter-spacing:0.05em;">PRINCIPAL</span>

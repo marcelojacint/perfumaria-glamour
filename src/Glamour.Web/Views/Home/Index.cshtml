@@ -52,7 +52,7 @@
                         <span class="selo-desconto">-@produto.PercentualDesconto%</span>
                         @if (!string.IsNullOrEmpty(produto.UrlImagemPrincipal))
                         {
-                            <img src="@produto.UrlImagemPrincipal" alt="@produto.Nome" loading="lazy" />
+                            <img src="@produto.UrlImagemPrincipal" alt="@produto.Nome" loading="lazy" onerror="this.onerror=null;this.src='/img/placeholder-produto.svg'" />
                         }
                         else
                         {
@@ -95,7 +95,7 @@
                         }
                         @if (!string.IsNullOrEmpty(produto.UrlImagemPrincipal))
                         {
-                            <img src="@produto.UrlImagemPrincipal" alt="@produto.Nome" loading="lazy" />
+                            <img src="@produto.UrlImagemPrincipal" alt="@produto.Nome" loading="lazy" onerror="this.onerror=null;this.src='/img/placeholder-produto.svg'" />
                         }
                         else
                         {
