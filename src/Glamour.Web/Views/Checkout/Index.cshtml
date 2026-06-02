@@ -14,6 +14,9 @@
     var lojaHorario = Config["Loja:HorarioFuncionamento"] ?? "";
     var lojaWhatsapp = Config["Loja:WhatsApp"] ?? "";
     var lojaTelefone = Config["Loja:Telefone"] ?? "";
+
+    var telefoneCliente = ViewBag.TelefoneCliente as string ?? "";
+    var temTelefone = !string.IsNullOrWhiteSpace(telefoneCliente);
 }
 
 <div class="max-w-5xl mx-auto px-4 py-12">
@@ -35,6 +38,24 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
 
             <div class="lg:col-span-2 space-y-8">
+
+                <div class="border border-gold/20 bg-zinc-900/50 p-6">
+                    <h2 class="font-playfair text-xl font-semibold mb-5">Telefone para contato</h2>
+                    @if (!temTelefone)
+                    {
+                        <div style="border:1px solid rgba(251,191,36,0.4); background:rgba(120,53,15,0.15); color:rgb(251,191,36); padding:0.75rem 1rem; margin-bottom:1.25rem; font-size:0.8rem; display:flex; align-items:center; gap:0.5rem;">
+                            <span style="font-size:1rem;">📱</span>
+                            <span>Você ainda não tem um telefone cadastrado. Informe um para que possamos confirmar seu pedido.</span>
+                        </div>
+                    }
+                    <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">Celular / WhatsApp</label>
+                    <input type="tel" name="telefone" value="@telefoneCliente" required
+                           placeholder="(83) 99999-9999" maxlength="16"
+                           pattern="\(?\d{2}\)?\s?\d{4,5}-?\d{4}"
+                           title="Informe um telefone válido com DDD. Ex.: (83) 99999-9999"
+                           class="w-full bg-zinc-800 border border-white/10 text-white px-4 py-3 text-sm focus:border-gold/60 focus:outline-none" />
+                    <p class="text-white/30 text-xs mt-1">Usaremos este número para confirmar o pedido e combinar a entrega ou retirada.</p>
+                </div>
 
                 <div class="border border-gold/20 bg-zinc-900/50 p-6">
                     <h2 class="font-playfair text-xl font-semibold mb-5">Como deseja receber?</h2>

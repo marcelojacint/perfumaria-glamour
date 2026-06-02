@@ -3,7 +3,9 @@ using Glamour.Application.Services;
 using Glamour.Domain.Enums;
 using Glamour.Domain.Interfaces;
 using Glamour.Domain.Notifications;
+using Glamour.Infrastructure.Identity;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Glamour.Web.Controllers;
@@ -15,6 +17,7 @@ public class CheckoutController(
     EnderecoService enderecoService,
     ICarrinhoService carrinhoService,
     FreteService freteService,
+    UserManager<ApplicationUser> userManager,
     NotificacaoContext notificacoes) : Controller
 {
     private string CarrinhoId => HttpContext.Session.GetString("CarrinhoId") ?? "";
@@ -26,6 +29,8 @@ public class CheckoutController(
         var itens = await carrinhoService.ObterCarrinhoAsync(CarrinhoId);
         if (!itens.Any()) return RedirectToAction("Index", "Carrinho");
 
+        var usuario = await userManager.GetUserAsync(User);
+        ViewBag.TelefoneCliente = usuario?.Telefone ?? usuario?.PhoneNumber ?? "";
         ViewBag.Enderecos = await enderecoService.ListarPorUsuarioAsync(UsuarioId);
         return View(itens);
     }
@@ -46,8 +51,26 @@ public class CheckoutController(
 
         string? cep, string? logradouro, string? numero,
         string? complemento, string? bairro, string? cidade, string? uf,
-        string? cupomCodigo, string? observacoes)
+        string? cupomCodigo, string? observacoes, string? telefone)
     {
+        var usuario = await userManager.GetUserAsync(User);
+        if (usuario == null) return Challenge();
+
+        var telefoneInformado = (telefone ?? "").Trim();
+        var telefoneCadastrado = usuario.Telefone ?? usuario.PhoneNumber;
+
+        if (string.IsNullOrWhiteSpace(telefoneInformado) && string.IsNullOrWhiteSpace(telefoneCadastrado))
+        {
+            TempData["Erro"] = "Informe um telefone para contato. Precisamos dele para confirmar seu pedido.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        if (!string.IsNullOrWhiteSpace(telefoneInformado) && telefoneInformado != usuario.Telefone)
+        {
+            usuario.Telefone = telefoneInformado;
+            await userManager.UpdateAsync(usuario);
+        }
+
         if (!Enum.TryParse<TipoEntrega>(tipoEntrega, out var tipo))
             tipo = TipoEntrega.Entrega;
 
