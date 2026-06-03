@@ -51,7 +51,31 @@ public class ClientesController(
         if (usuario == null) return NotFound();
         usuario.Ativo = !usuario.Ativo;
         await userManager.UpdateAsync(usuario);
-        TempData["Sucesso"] = usuario.Ativo ? "Conta ativada." : "Conta bloqueada.";
+        TempData["Sucesso"] = usuario.Ativo ? "Conta ativada." : "Conta inativada.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost("excluir/{id}")]
+    public async Task<IActionResult> Excluir(string id)
+    {
+        var usuario = await userManager.FindByIdAsync(id);
+        if (usuario == null) return NotFound();
+
+        if (usuario.Ativo)
+        {
+            TempData["Erro"] = "Só é possível excluir um cliente inativo. Inative a conta antes.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        if (await userManager.IsInRoleAsync(usuario, "Admin"))
+        {
+            TempData["Erro"] = "Não é possível excluir uma conta de administrador.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var resultado = await userManager.DeleteAsync(usuario);
+        TempData[resultado.Succeeded ? "Sucesso" : "Erro"] =
+            resultado.Succeeded ? "Cliente excluído." : "Não foi possível excluir o cliente.";
         return RedirectToAction(nameof(Index));
     }
 }

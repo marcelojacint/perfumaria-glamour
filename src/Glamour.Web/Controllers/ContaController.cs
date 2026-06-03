@@ -76,6 +76,14 @@ public class ContaController(
         if (resultado.Succeeded)
         {
             var usuario = await userManager.FindByEmailAsync(dto.Email);
+
+            if (usuario != null && !usuario.Ativo)
+            {
+                await signInManager.SignOutAsync();
+                ModelState.AddModelError("", "Esta conta está inativa. Entre em contato com a loja.");
+                return View(dto);
+            }
+
             var ehAdmin = usuario != null && await userManager.IsInRoleAsync(usuario, RolesUsuario.Admin);
 
             if (usuario != null)
@@ -137,6 +145,12 @@ public class ContaController(
         if (resultado.Succeeded)
         {
             var existente = await userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+            if (existente != null && !existente.Ativo)
+            {
+                await signInManager.SignOutAsync();
+                TempData["Erro"] = "Esta conta está inativa. Entre em contato com a loja.";
+                return RedirectToAction(nameof(Login));
+            }
             if (existente != null)
                 await signInManager.SignInWithClaimsAsync(existente, isPersistent: true, [new Claim(ClaimMetodoLogin, MetodoGoogle)]);
             return await RedirecionarPosLoginAsync(info.Principal.FindFirstValue(System.Security.Claims.ClaimTypes.Email), returnUrl);
