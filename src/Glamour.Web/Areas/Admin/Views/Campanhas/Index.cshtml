@@ -1,0 +1,55 @@
+@model IEnumerable<Glamour.Application.DTOs.CampanhaDto>
+@{
+    ViewBag.Title = "Campanhas";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+@if (TempData["Sucesso"] != null)
+{
+    <div style="border:1px solid rgba(74,222,128,0.3); background:rgba(74,222,128,0.05); color:rgb(74,222,128); padding:0.75rem 1rem; margin-bottom:1.5rem; font-size:0.875rem;">@TempData["Sucesso"]</div>
+}
+@if (TempData["Erro"] != null)
+{
+    <div style="border:1px solid rgba(248,113,113,0.4); background:rgba(127,29,29,0.15); color:rgb(248,113,113); padding:0.75rem 1rem; margin-bottom:1.5rem; font-size:0.875rem;">@TempData["Erro"]</div>
+}
+
+<div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1.5rem; flex-wrap:wrap;">
+    <p style="color:rgba(255,255,255,0.5); font-size:0.85rem; margin:0;">Cards de campanha exibidos na página inicial (Dia das Mães, Namorados, etc.).</p>
+    <a href="/admin/campanhas/criar" class="btn-gold" style="padding:0.55rem 1.25rem; font-size:0.8rem; white-space:nowrap;">+ Nova campanha</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div style="border:1px dashed rgba(255,255,255,0.15); padding:2.5rem; text-align:center; color:rgba(255,255,255,0.4); font-size:0.9rem;">
+        Nenhuma campanha cadastrada. Crie a primeira para destacar na home.
+    </div>
+}
+else
+{
+    <div style="display:flex; flex-direction:column; gap:0.75rem;">
+        @foreach (var c in Model)
+        {
+            <div style="display:flex; align-items:center; gap:1rem; border:1px solid rgba(255,255,255,0.08); background:rgba(24,24,27,0.5); padding:0.75rem 1rem;">
+                <div style="width:80px; height:48px; background:#18181b; flex-shrink:0; overflow:hidden; border:1px solid rgba(255,255,255,0.08);">
+                    @if (!string.IsNullOrEmpty(c.ImagemUrl))
+                    {
+                        <img src="@c.ImagemUrl" alt="@c.Titulo" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null;this.src='/img/placeholder-produto.svg'" />
+                    }
+                </div>
+                <div style="flex:1; min-width:0;">
+                    <div style="font-weight:600; font-size:0.9rem;">@c.Titulo</div>
+                    <div style="color:rgba(255,255,255,0.4); font-size:0.75rem;">@c.Subtitulo</div>
+                    <div style="color:rgba(212,175,55,0.7); font-size:0.72rem; margin-top:0.15rem;">↗ @c.Link · ordem @c.Ordem</div>
+                </div>
+                <span style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; padding:0.2rem 0.55rem; border:1px solid @(c.Ativa ? "rgba(74,222,128,0.4)" : "rgba(255,255,255,0.15)"); color:@(c.Ativa ? "rgb(74,222,128)" : "rgba(255,255,255,0.4)");">
+                    @(c.Ativa ? "Ativa" : "Inativa")
+                </span>
+                <a href="/admin/campanhas/editar/@c.Id" style="color:#D4AF37; font-size:0.78rem; text-decoration:none;">Editar</a>
+                <form method="post" action="/admin/campanhas/remover/@c.Id" style="margin:0;" onsubmit="return confirm('Remover esta campanha?');">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" style="background:none; border:none; color:rgba(248,113,113,0.7); font-size:0.78rem; cursor:pointer;">Remover</button>
+                </form>
+            </div>
+        }
+    </div>
+}

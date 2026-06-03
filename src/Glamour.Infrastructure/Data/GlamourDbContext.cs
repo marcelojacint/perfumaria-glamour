@@ -21,6 +21,7 @@ public class GlamourDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<NotificacaoEstoque> NotificacoesEstoque => Set<NotificacaoEstoque>();
     public DbSet<Newsletter> Newsletters => Set<Newsletter>();
     public DbSet<ConfiguracaoHero> ConfiguracoesHero => Set<ConfiguracaoHero>();
+    public DbSet<Campanha> Campanhas => Set<Campanha>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

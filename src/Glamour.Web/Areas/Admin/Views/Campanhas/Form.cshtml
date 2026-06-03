@@ -1,0 +1,78 @@
+@model Glamour.Application.DTOs.CampanhaDto?
+@{
+    var editar = Model != null;
+    ViewBag.Title = editar ? "Editar campanha" : "Nova campanha";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+@if (TempData["Erro"] != null)
+{
+    <div style="border:1px solid rgba(248,113,113,0.4); background:rgba(127,29,29,0.15); color:rgb(248,113,113); padding:0.75rem 1rem; margin-bottom:1.5rem; font-size:0.875rem;">@TempData["Erro"]</div>
+}
+
+<div style="max-width:620px;">
+    <form method="post" action="@(editar ? "/admin/campanhas/editar" : "/admin/campanhas/criar")" enctype="multipart/form-data"
+          style="display:flex; flex-direction:column; gap:1.25rem;">
+        @Html.AntiForgeryToken()
+        @if (editar)
+        {
+            <input type="hidden" name="id" value="@Model!.Id" />
+        }
+
+        <div style="border:1px solid rgba(212,175,55,0.2); background:rgba(24,24,27,0.5); padding:1.5rem; display:flex; flex-direction:column; gap:1rem;">
+            <div>
+                <label style="font-size:0.65rem; color:rgba(212,175,55,0.6); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:0.35rem;">Título</label>
+                <input type="text" name="titulo" value="@Model?.Titulo" required placeholder="Ex.: Dia das Mães"
+                       style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.75rem; font-size:0.875rem; box-sizing:border-box;" />
+            </div>
+            <div>
+                <label style="font-size:0.65rem; color:rgba(212,175,55,0.6); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:0.35rem;">Subtítulo (opcional)</label>
+                <input type="text" name="subtitulo" value="@Model?.Subtitulo" placeholder="Ex.: Presentes que encantam"
+                       style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.75rem; font-size:0.875rem; box-sizing:border-box;" />
+            </div>
+            <div style="display:grid; grid-template-columns:2fr 1fr; gap:1rem;">
+                <div>
+                    <label style="font-size:0.65rem; color:rgba(212,175,55,0.6); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:0.35rem;">Link de destino</label>
+                    <input type="text" name="link" value="@(Model?.Link ?? "/catalogo")" placeholder="/catalogo"
+                           style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.75rem; font-size:0.875rem; box-sizing:border-box;" />
+                </div>
+                <div>
+                    <label style="font-size:0.65rem; color:rgba(212,175,55,0.6); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:0.35rem;">Ordem</label>
+                    <input type="number" name="ordem" value="@(Model?.Ordem ?? 0)" min="0"
+                           style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.75rem; font-size:0.875rem; box-sizing:border-box;" />
+                </div>
+            </div>
+            <p style="font-size:0.68rem; color:rgba(255,255,255,0.3); margin:-0.5rem 0 0;">
+                Exemplos de link: <code>/catalogo</code> · <code>/catalogo?genero=Feminino</code> · <code>/catalogo?genero=Masculino</code>
+            </p>
+
+            <div>
+                <label style="font-size:0.65rem; color:rgba(212,175,55,0.6); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:0.35rem;">Imagem</label>
+                @if (editar && !string.IsNullOrEmpty(Model!.ImagemUrl))
+                {
+                    <div style="display:flex; align-items:center; gap:1rem; margin-bottom:0.6rem;">
+                        <img src="@Model.ImagemUrl" style="width:140px; height:70px; object-fit:cover; border:1px solid rgba(255,255,255,0.1);" />
+                        <label style="font-size:0.75rem; color:rgba(255,255,255,0.6); display:flex; align-items:center; gap:0.4rem; cursor:pointer;">
+                            <input type="checkbox" name="removerImagem" value="true" /> Remover imagem
+                        </label>
+                    </div>
+                }
+                <input type="file" name="imagem" accept="image/*"
+                       style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.75rem; font-size:0.8rem; box-sizing:border-box;" />
+                <p style="font-size:0.68rem; color:rgba(255,255,255,0.3); margin-top:0.35rem;">Recomendado: imagem larga (ex.: 1200×600). Sem imagem, o card usa um fundo dourado.</p>
+            </div>
+
+            @if (editar)
+            {
+                <label style="font-size:0.8rem; color:rgba(255,255,255,0.7); display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                    <input type="checkbox" name="ativa" value="true" @(Model!.Ativa ? "checked" : "") /> Campanha ativa (exibir na home)
+                </label>
+            }
+        </div>
+
+        <div style="display:flex; gap:0.75rem;">
+            <button type="submit" class="btn-gold" style="padding:0.7rem 2rem; font-size:0.8rem;">@(editar ? "Salvar alterações" : "Criar campanha")</button>
+            <a href="/admin/campanhas" style="color:rgba(255,255,255,0.5); font-size:0.8rem; align-self:center;">Cancelar</a>
+        </div>
+    </form>
+</div>
