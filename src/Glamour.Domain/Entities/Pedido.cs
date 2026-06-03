@@ -17,6 +17,8 @@ public class Pedido : BaseEntity
     public string? CupomCodigo { get; private set; }
     public string? CodigoRastreio { get; private set; }
     public string? Observacoes { get; private set; }
+    public OrigemPedido Origem { get; private set; } = OrigemPedido.Site;
+    public string? NomeCliente { get; private set; }
 
     private readonly List<PedidoItem> _itens = [];
     public IReadOnlyCollection<PedidoItem> Itens => _itens.AsReadOnly();
@@ -81,6 +83,14 @@ public class Pedido : BaseEntity
         if (Status == StatusPedido.Entregue)
             throw new InvalidOperationException("Pedido já entregue não pode ser cancelado.");
         Status = StatusPedido.Cancelado;
+        MarcarAtualizado();
+    }
+
+    public void RegistrarVendaLoja(string? nomeCliente)
+    {
+        Origem = OrigemPedido.Loja;
+        NomeCliente = string.IsNullOrWhiteSpace(nomeCliente) ? null : nomeCliente.Trim();
+        Status = StatusPedido.Entregue;
         MarcarAtualizado();
     }
 }

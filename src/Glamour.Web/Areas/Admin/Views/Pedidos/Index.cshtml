@@ -44,9 +44,19 @@
                             var clientes = ViewBag.Clientes as Dictionary<string, Glamour.Web.Areas.Admin.Controllers.ClienteResumo>;
                             Glamour.Web.Areas.Admin.Controllers.ClienteResumo? cli = null;
                             clientes?.TryGetValue(p.UsuarioId, out cli);
+                            var ehLoja = p.Origem == Glamour.Domain.Enums.OrigemPedido.Loja;
+                            var nomeExibir = ehLoja
+                                ? (string.IsNullOrEmpty(p.NomeCliente) ? "Cliente avulso" : p.NomeCliente)
+                                : (cli?.Nome ?? "Cliente");
                         }
-                        <div style="color:rgba(255,255,255,0.85); font-size:0.85rem;">@(cli?.Nome ?? "Cliente")</div>
-                        @if (!string.IsNullOrEmpty(cli?.Telefone))
+                        <div style="color:rgba(255,255,255,0.85); font-size:0.85rem; display:flex; align-items:center; gap:0.4rem;">
+                            @nomeExibir
+                            @if (ehLoja)
+                            {
+                                <span style="font-size:0.6rem; padding:0.1rem 0.4rem; background:rgba(212,175,55,0.15); color:#D4AF37; border:1px solid rgba(212,175,55,0.4); text-transform:uppercase; letter-spacing:0.05em;">Loja</span>
+                            }
+                        </div>
+                        @if (!ehLoja && !string.IsNullOrEmpty(cli?.Telefone))
                         {
                             <div style="color:rgba(255,255,255,0.4); font-size:0.72rem;">@cli.Telefone</div>
                         }

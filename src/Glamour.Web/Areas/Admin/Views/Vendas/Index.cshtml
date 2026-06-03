@@ -1,0 +1,151 @@
+@{
+    ViewBag.Title = "Venda na Loja";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    var produtos = ViewBag.Produtos as List<Glamour.Application.DTOs.ProdutoListagemDto> ?? new();
+    var produtosJson = System.Text.Json.JsonSerializer.Serialize(produtos.Select(p => new
+    {
+        id = p.Id,
+        nome = p.Nome,
+        marca = p.Marca,
+        preco = p.PrecoPromo ?? p.Preco,
+        estoque = p.Estoque
+    }));
+}
+
+@if (TempData["Sucesso"] != null)
+{
+    <div style="border:1px solid rgba(74,222,128,0.3); background:rgba(74,222,128,0.05); color:rgb(74,222,128); padding:0.75rem 1rem; margin-bottom:1.5rem; font-size:0.875rem;">@TempData["Sucesso"]</div>
+}
+@if (TempData["Erro"] != null)
+{
+    <div style="border:1px solid rgba(248,113,113,0.4); background:rgba(127,29,29,0.15); color:rgb(248,113,113); padding:0.75rem 1rem; margin-bottom:1.5rem; font-size:0.875rem;">@TempData["Erro"]</div>
+}
+
+<script type="application/json" id="produtos-data">@Html.Raw(produtosJson)</script>
+
+<p style="color:rgba(255,255,255,0.5); font-size:0.85rem; margin-bottom:1.25rem;">Registre vendas feitas na loja física. O estoque é baixado automaticamente e a venda entra no faturamento.</p>
+
+<form method="post" action="/admin/vendas/registrar" x-data="pdv()"
+      style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; align-items:start;">
+    @Html.AntiForgeryToken()
+
+    <div style="border:1px solid rgba(255,255,255,0.08); background:rgba(24,24,27,0.5); padding:1.25rem;">
+        <h2 style="font-size:0.8rem; color:#D4AF37; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1rem;">Produtos</h2>
+        <input type="text" x-model="busca" placeholder="Buscar por nome ou marca..."
+               style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.75rem; font-size:0.85rem; box-sizing:border-box; margin-bottom:0.75rem;" />
+        <div style="max-height:460px; overflow-y:auto; display:flex; flex-direction:column; gap:0.4rem;">
+            <template x-for="p in filtrados" :key="p.id">
+                <button type="button" @@click="adicionar(p)"
+                        style="display:flex; justify-content:space-between; align-items:center; gap:0.75rem; text-align:left; background:#27272a; border:1px solid rgba(255,255,255,0.06); padding:0.6rem 0.75rem; cursor:pointer;">
+                    <span style="min-width:0;">
+                        <span style="display:block; font-size:0.82rem; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" x-text="p.nome"></span>
+                        <span style="font-size:0.68rem; color:rgba(255,255,255,0.4);" x-text="(p.marca || '') + ' · estoque: ' + p.estoque"></span>
+                    </span>
+                    <span style="display:flex; align-items:center; gap:0.5rem; flex-shrink:0;">
+                        <span style="font-size:0.8rem; color:#D4AF37;" x-text="fmt(p.preco)"></span>
+                        <span style="color:#D4AF37; font-weight:700;">+</span>
+                    </span>
+                </button>
+            </template>
+            <p x-show="filtrados.length === 0" style="color:rgba(255,255,255,0.3); font-size:0.8rem; padding:1rem; text-align:center;">Nenhum produto encontrado.</p>
+        </div>
+    </div>
+
+    <div style="border:1px solid rgba(212,175,55,0.25); background:rgba(24,24,27,0.5); padding:1.25rem;">
+        <h2 style="font-size:0.8rem; color:#D4AF37; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1rem;">Venda</h2>
+
+        <div style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem; min-height:60px;">
+            <p x-show="itens.length === 0" style="color:rgba(255,255,255,0.3); font-size:0.8rem; text-align:center; padding:1rem;">Clique nos produtos para adicioná-los à venda.</p>
+            <template x-for="item in itens" :key="item.id">
+                <div style="display:flex; align-items:center; gap:0.5rem; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:0.5rem;">
+                    <input type="hidden" name="produtoId" :value="item.id" />
+                    <input type="hidden" name="quantidade" :value="item.qtd" />
+                    <span style="flex:1; min-width:0;">
+                        <span style="display:block; font-size:0.8rem; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" x-text="item.nome"></span>
+                        <span style="font-size:0.7rem; color:rgba(255,255,255,0.4);" x-text="fmt(item.preco) + ' un.'"></span>
+                    </span>
+                    <div style="display:flex; align-items:center; border:1px solid rgba(255,255,255,0.15);">
+                        <button type="button" @@click="dec(item)" style="padding:0.25rem 0.6rem; color:rgba(255,255,255,0.6); background:none; border:none; cursor:pointer;">−</button>
+                        <span style="font-size:0.8rem; min-width:1.5rem; text-align:center;" x-text="item.qtd"></span>
+                        <button type="button" @@click="inc(item)" style="padding:0.25rem 0.6rem; color:rgba(255,255,255,0.6); background:none; border:none; cursor:pointer;">+</button>
+                    </div>
+                    <span style="font-size:0.8rem; color:#fff; min-width:4.5rem; text-align:right;" x-text="fmt(item.preco * item.qtd)"></span>
+                    <button type="button" @@click="remover(item)" style="color:rgba(248,113,113,0.7); background:none; border:none; cursor:pointer; font-size:1rem;">×</button>
+                </div>
+            </template>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+            <div>
+                <label style="font-size:0.62rem; color:rgba(212,175,55,0.6); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:0.3rem;">Cliente (opcional)</label>
+                <input type="text" name="nomeCliente" placeholder="Nome do cliente"
+                       style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.45rem 0.6rem; font-size:0.82rem; box-sizing:border-box;" />
+            </div>
+            <div>
+                <label style="font-size:0.62rem; color:rgba(212,175,55,0.6); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:0.3rem;">Forma de pagamento</label>
+                <select name="metodoPagamento" x-model="metodo"
+                        style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.45rem 0.6rem; font-size:0.82rem; box-sizing:border-box;">
+                    <option value="Dinheiro">Dinheiro</option>
+                    <option value="Pix">PIX</option>
+                    <option value="CartaoCredito">Cartão de Crédito</option>
+                    <option value="CartaoDebito">Cartão de Débito</option>
+                </select>
+            </div>
+            <div>
+                <label style="font-size:0.62rem; color:rgba(212,175,55,0.6); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:0.3rem;">Desconto (R$)</label>
+                <input type="number" name="desconto" x-model.number="desconto" min="0" step="0.01" value="0"
+                       style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.45rem 0.6rem; font-size:0.82rem; box-sizing:border-box;" />
+            </div>
+            <div>
+                <label style="font-size:0.62rem; color:rgba(212,175,55,0.6); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:0.3rem;">Observação</label>
+                <input type="text" name="observacoes" placeholder="Opcional"
+                       style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.45rem 0.6rem; font-size:0.82rem; box-sizing:border-box;" />
+            </div>
+        </div>
+
+        <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:0.75rem; margin-bottom:1rem;">
+            <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:rgba(255,255,255,0.6);">
+                <span>Subtotal</span><span x-text="fmt(subtotal)"></span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:rgba(255,255,255,0.6); margin-top:0.25rem;" x-show="(parseFloat(desconto)||0) > 0">
+                <span>Desconto</span><span x-text="'- ' + fmt(parseFloat(desconto)||0)"></span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:1.1rem; font-weight:700; color:#D4AF37; margin-top:0.5rem;">
+                <span>Total</span><span x-text="fmt(total)"></span>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-gold" :disabled="itens.length === 0"
+                :style="itens.length === 0 ? 'opacity:0.4; cursor:not-allowed;' : ''"
+                style="width:100%; padding:0.75rem; font-size:0.85rem;">Registrar venda</button>
+    </div>
+</form>
+
+@section Scripts {
+<script>
+function pdv() {
+    return {
+        produtos: JSON.parse(document.getElementById('produtos-data').textContent),
+        busca: '',
+        itens: [],
+        metodo: 'Dinheiro',
+        desconto: 0,
+        get filtrados() {
+            const q = this.busca.toLowerCase();
+            return this.produtos.filter(p => p.nome.toLowerCase().includes(q) || (p.marca || '').toLowerCase().includes(q));
+        },
+        adicionar(p) {
+            const ex = this.itens.find(i => i.id === p.id);
+            if (ex) { if (ex.qtd < p.estoque) ex.qtd++; }
+            else this.itens.push({ id: p.id, nome: p.nome, preco: p.preco, estoque: p.estoque, qtd: 1 });
+        },
+        inc(i) { if (i.qtd < i.estoque) i.qtd++; },
+        dec(i) { if (i.qtd > 1) i.qtd--; },
+        remover(i) { this.itens = this.itens.filter(x => x !== i); },
+        get subtotal() { return this.itens.reduce((s, i) => s + i.preco * i.qtd, 0); },
+        get total() { return Math.max(0, this.subtotal - (parseFloat(this.desconto) || 0)); },
+        fmt(v) { return 'R$ ' + Number(v).toFixed(2).replace('.', ','); }
+    };
+}
+</script>
+}

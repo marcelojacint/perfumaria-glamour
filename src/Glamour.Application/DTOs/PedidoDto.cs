@@ -9,7 +9,18 @@ public record PedidoDto(
     string? CupomCodigo, string? CodigoRastreio, string? Observacoes,
     DateTime CriadoEm,
     EnderecoDto? Endereco,
-    IEnumerable<PedidoItemDto> Itens);
+    IEnumerable<PedidoItemDto> Itens,
+    OrigemPedido Origem = OrigemPedido.Site,
+    string? NomeCliente = null);
+
+public record ItemVendaLojaDto(Guid ProdutoId, int Quantidade);
+
+public record RegistrarVendaLojaDto(
+    IEnumerable<ItemVendaLojaDto> Itens,
+    MetodoPagamento MetodoPagamento,
+    string? NomeCliente,
+    decimal Desconto,
+    string? Observacoes);
 
 public record PedidoItemDto(
     Guid ProdutoId, string NomeProduto, int Quantidade, decimal PrecoUnitario, decimal Subtotal);

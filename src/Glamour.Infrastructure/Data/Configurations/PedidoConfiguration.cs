@@ -18,6 +18,8 @@ public class PedidoConfiguration : IEntityTypeConfiguration<Pedido>
         builder.Property(p => p.CupomCodigo).HasMaxLength(50);
         builder.Property(p => p.CodigoRastreio).HasMaxLength(50);
         builder.Property(p => p.Status).HasConversion<string>();
+        builder.Property(p => p.Origem).HasConversion<string>().HasMaxLength(20);
+        builder.Property(p => p.NomeCliente).HasMaxLength(120);
 
         builder.HasIndex(p => new { p.UsuarioId, p.CriadoEm });
 

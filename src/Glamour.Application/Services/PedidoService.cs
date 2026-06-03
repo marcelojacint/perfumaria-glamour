@@ -119,6 +119,43 @@ public class PedidoService(
         return pedido.Id;
     }
 
+    public async Task<Guid> RegistrarVendaLojaAsync(RegistrarVendaLojaDto dto, string adminId)
+    {
+        var itens = dto.Itens.Where(i => i.Quantidade > 0).ToList();
+        if (itens.Count == 0)
+        {
+            notificacoes.Adicionar("Itens", "Adicione ao menos um produto à venda.");
+            return Guid.Empty;
+        }
+
+        var pedido = new Pedido(adminId, TipoEntrega.RetiradaNaLoja, dto.MetodoPagamento,
+            enderecoId: null, frete: 0, cupomCodigo: null, observacoes: dto.Observacoes);
+
+        foreach (var item in itens)
+        {
+            var produto = await produtoRepo.ObterPorIdAsync(item.ProdutoId);
+            if (produto == null)
+            {
+                notificacoes.Adicionar("Produto", "Produto não encontrado.");
+                return Guid.Empty;
+            }
+            if (!produto.DebitarEstoque(item.Quantidade))
+            {
+                notificacoes.Adicionar("Estoque", $"'{produto.Nome}' sem estoque suficiente (disponível: {produto.Estoque}).");
+                return Guid.Empty;
+            }
+            pedido.AdicionarItem(new PedidoItem(pedido.Id, produto.Id, produto.Nome, item.Quantidade, produto.PrecoEfetivo));
+            await produtoRepo.AtualizarAsync(produto);
+        }
+
+        if (dto.Desconto > 0) pedido.AplicarDesconto(dto.Desconto);
+        pedido.RegistrarVendaLoja(dto.NomeCliente);
+
+        await pedidoRepo.AdicionarAsync(pedido);
+        await pedidoRepo.SalvarAsync();
+        return pedido.Id;
+    }
+
     public async Task<bool> AtualizarStatusAsync(AtualizarStatusPedidoDto dto)
     {
         var pedido = await pedidoRepo.ObterComItensAsync(dto.PedidoId);
@@ -145,5 +182,6 @@ public class PedidoService(
             p.Endereco.Id, p.Endereco.CEP, p.Endereco.Logradouro, p.Endereco.Numero,
             p.Endereco.Complemento, p.Endereco.Bairro, p.Endereco.Cidade, p.Endereco.UF,
             p.Endereco.Apelido, p.Endereco.Principal),
-        p.Itens.Select(i => new PedidoItemDto(i.ProdutoId, i.NomeProduto, i.Quantidade, i.PrecoUnitario, i.Subtotal)));
+        p.Itens.Select(i => new PedidoItemDto(i.ProdutoId, i.NomeProduto, i.Quantidade, i.PrecoUnitario, i.Subtotal)),
+        p.Origem, p.NomeCliente);
 }
