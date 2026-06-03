@@ -54,7 +54,7 @@
              x-data="{ total: @listaCampanhas.Count, atual: 0 }"
              x-init="if (total > 1) setInterval(() => { atual = (atual + 1) % total }, 4500)">
         <div style="position:relative; overflow:hidden; border:1px solid rgba(212,175,55,0.2);">
-            <div style="display:flex; transition:transform 0.7s ease;" x-bind:style="`transform: translateX(-${atual * 100}%)`">
+            <div style="display:flex; transition:transform 0.7s ease;" x-bind:style="{ transform: `translateX(-${atual * 100}%)` }">
                 @foreach (var camp in listaCampanhas)
                 {
                     <a href="@camp.Link" class="group" style="flex:0 0 100%; position:relative; display:flex; flex-direction:column; justify-content:flex-end; min-height:260px; overflow:hidden; text-decoration:none;">
@@ -85,7 +85,7 @@
                     {
                         <button type="button" @@click="atual = @i" aria-label="Ir para campanha @(i + 1)"
                                 style="width:9px; height:9px; border-radius:9999px; border:none; cursor:pointer; padding:0; transition:background 0.3s;"
-                                x-bind:style="atual === @i ? 'background:#D4AF37' : 'background:rgba(255,255,255,0.35)'"></button>
+                                x-bind:style="{ background: atual === @i ? '#D4AF37' : 'rgba(255,255,255,0.35)' }"></button>
                     }
                 </div>
             }
