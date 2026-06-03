@@ -236,6 +236,12 @@ public class ContaController(
         var usuario = await userManager.GetUserAsync(User);
         if (usuario == null) return NotFound();
 
+        if (dto.NovaSenha != dto.ConfirmacaoNovaSenha)
+        {
+            TempData["Erro"] = "A confirmação da nova senha não confere.";
+            return RedirectToAction(nameof(Perfil));
+        }
+
         var resultado = await userManager.ChangePasswordAsync(usuario, dto.SenhaAtual, dto.NovaSenha);
         if (!resultado.Succeeded)
         {
@@ -243,6 +249,7 @@ public class ContaController(
             return RedirectToAction(nameof(Perfil));
         }
 
+        await signInManager.RefreshSignInAsync(usuario);
         TempData["Sucesso"] = "Senha alterada com sucesso.";
         return RedirectToAction(nameof(Perfil));
     }
