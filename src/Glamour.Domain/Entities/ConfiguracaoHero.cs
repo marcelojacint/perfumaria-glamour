@@ -10,6 +10,7 @@ public class ConfiguracaoHero : BaseEntity
     public const string SubtituloPadrao = "Perfumes exclusivos e acessórios sofisticados para quem valoriza o refinamento.";
     public const string CorDestaquePadrao = "#D4AF37";
     public const string CorTextoPadrao = "#FFFFFF";
+    public const string FonteTituloPadrao = "Playfair Display";
 
     public string Eyebrow { get; private set; } = EyebrowPadrao;
     public string Titulo { get; private set; } = TituloPadrao;
@@ -17,6 +18,7 @@ public class ConfiguracaoHero : BaseEntity
     public string Subtitulo { get; private set; } = SubtituloPadrao;
     public string CorDestaque { get; private set; } = CorDestaquePadrao;
     public string CorTexto { get; private set; } = CorTextoPadrao;
+    public string FonteTitulo { get; private set; } = FonteTituloPadrao;
     public string? ImagemFundoUrl { get; private set; }
 
     protected ConfiguracaoHero() { }
@@ -46,6 +48,12 @@ public class ConfiguracaoHero : BaseEntity
         MarcarAtualizado();
     }
 
+    public void DefinirFonte(string? fonte)
+    {
+        FonteTitulo = string.IsNullOrWhiteSpace(fonte) ? FonteTituloPadrao : fonte.Trim();
+        MarcarAtualizado();
+    }
+
     public void RestaurarPadrao()
     {
         Eyebrow = EyebrowPadrao;
@@ -54,6 +62,7 @@ public class ConfiguracaoHero : BaseEntity
         Subtitulo = SubtituloPadrao;
         CorDestaque = CorDestaquePadrao;
         CorTexto = CorTextoPadrao;
+        FonteTitulo = FonteTituloPadrao;
         ImagemFundoUrl = null;
         MarcarAtualizado();
     }

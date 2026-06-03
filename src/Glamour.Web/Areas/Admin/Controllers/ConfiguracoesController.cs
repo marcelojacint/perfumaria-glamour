@@ -62,6 +62,14 @@ public class ConfiguracoesController(
         return RedirectToAction(nameof(Index));
     }
 
+    [HttpPost("fonte")]
+    public async Task<IActionResult> SalvarFonte(string? fonte)
+    {
+        await heroService.DefinirFonteAsync(Glamour.Web.Models.FontesSite.Validar(fonte));
+        TempData["Sucesso"] = "Fonte do site atualizada.";
+        return RedirectToAction(nameof(Index));
+    }
+
     [HttpPost]
     public async Task<IActionResult> Salvar(
         string nome, string telefone, string email,

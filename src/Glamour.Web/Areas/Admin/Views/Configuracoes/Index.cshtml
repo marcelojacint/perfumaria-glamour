@@ -43,6 +43,39 @@
         <button type="submit" class="btn-gold" style="padding:0.75rem 2rem; font-size:0.8rem; align-self:flex-start;">Salvar Configurações</button>
     </form>
 
+    <form method="post" action="/admin/configuracoes/fonte"
+          x-data="{ fonte: '@(hero?.FonteTitulo ?? "Playfair Display")' }"
+          style="display:flex; flex-direction:column; gap:1.25rem; margin-top:2rem;">
+        @Html.AntiForgeryToken()
+        <div style="border:1px solid rgba(212,175,55,0.2); background:rgba(24,24,27,0.5); padding:1.5rem; display:flex; flex-direction:column; gap:1rem;">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem;">
+                <h2 style="font-size:0.8rem; color:#D4AF37; text-transform:uppercase; letter-spacing:0.1em;">Tipografia (fonte dos títulos)</h2>
+                <span style="font-size:0.62rem; color:rgba(74,222,128,0.8); text-transform:uppercase; letter-spacing:0.08em;">aplicado no site todo</span>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; align-items:start;">
+                <div>
+                    <label style="font-size:0.65rem; color:rgba(212,175,55,0.6); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:0.35rem;">Fonte</label>
+                    <select name="fonte" x-model="fonte"
+                            style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.75rem; font-size:0.875rem; box-sizing:border-box;">
+                        @foreach (var f in Glamour.Web.Models.FontesSite.Disponiveis)
+                        {
+                            <option value="@f.Key">@f.Key — @f.Value</option>
+                        }
+                    </select>
+                    <button type="submit" class="btn-gold" style="margin-top:1rem; padding:0.6rem 1.5rem; font-size:0.78rem;">Aplicar fonte</button>
+                </div>
+                <div>
+                    <label style="font-size:0.65rem; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:0.35rem;">Prévia</label>
+                    <div style="border:1px solid rgba(255,255,255,0.08); background:#18181b; padding:1.25rem; text-align:center;"
+                         x-bind:style="`font-family: '${fonte}', Georgia, serif`">
+                        <div style="font-size:1.7rem; font-weight:700; color:#fff; line-height:1.1;">A Essência da <span style="color:#D4AF37;">Elegância</span></div>
+                        <div style="font-size:0.95rem; color:rgba(255,255,255,0.6); margin-top:0.4rem;">Glamour Perfumaria</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
     <form method="post" action="/admin/configuracoes/hero" enctype="multipart/form-data"
           style="display:flex; flex-direction:column; gap:1.25rem; margin-top:2rem;">
         @Html.AntiForgeryToken()

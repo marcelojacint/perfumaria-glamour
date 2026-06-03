@@ -7,4 +7,5 @@ public record HeroDto(
     string Subtitulo,
     string CorDestaque,
     string CorTexto,
+    string FonteTitulo,
     string? ImagemFundoUrl);

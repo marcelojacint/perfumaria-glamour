@@ -25,6 +25,14 @@ public class HeroService(IRepository<ConfiguracaoHero> repo)
         await repo.SalvarAsync();
     }
 
+    public async Task DefinirFonteAsync(string? fonte)
+    {
+        var configuracao = await ObterOuCriarAsync();
+        configuracao.DefinirFonte(fonte);
+        await repo.AtualizarAsync(configuracao);
+        await repo.SalvarAsync();
+    }
+
     public async Task RestaurarPadraoAsync()
     {
         var configuracao = await ObterOuCriarAsync();
@@ -45,5 +53,5 @@ public class HeroService(IRepository<ConfiguracaoHero> repo)
     }
 
     private static HeroDto Map(ConfiguracaoHero c) =>
-        new(c.Eyebrow, c.Titulo, c.TituloDestaque, c.Subtitulo, c.CorDestaque, c.CorTexto, c.ImagemFundoUrl);
+        new(c.Eyebrow, c.Titulo, c.TituloDestaque, c.Subtitulo, c.CorDestaque, c.CorTexto, c.FonteTitulo, c.ImagemFundoUrl);
 }

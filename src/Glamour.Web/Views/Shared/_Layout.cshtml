@@ -1,4 +1,5 @@
 @inject Microsoft.Extensions.Configuration.IConfiguration Config
+@inject Glamour.Application.Services.HeroService HeroSvc
 @{
     var lojaTelefone = Config["Loja:Telefone"] ?? "";
     var lojaWhatsapp = Config["Loja:WhatsApp"] ?? "";
@@ -7,6 +8,8 @@
     var lojaHorario = Config["Loja:HorarioFuncionamento"] ?? "";
     var mapaUrl = "https://www.google.com/maps/search/?api=1&query=" + Uri.EscapeDataString(lojaEndereco);
     var whatsappUrl = "https://wa.me/" + lojaWhatsapp;
+    var fonteSite = Glamour.Web.Models.FontesSite.Validar((await HeroSvc.ObterAsync()).FonteTitulo);
+    var fonteParam = Glamour.Web.Models.FontesSite.GoogleFontsParam(fonteSite);
 }
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -23,7 +26,8 @@
     <link rel="canonical" href="@(ViewBag.CanonicalUrl ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=@(fonteParam):wght@@400;600;700&family=Inter:wght@@300;400;500;600&display=swap" rel="stylesheet" />
+    <style>:root { --fonte-titulo: '@fonteSite', Georgia, 'Times New Roman', serif; }</style>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#D4AF37" />

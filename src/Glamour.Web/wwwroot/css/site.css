@@ -112,7 +112,7 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-.font-playfair { font-family: 'Playfair Display', serif; }
+.font-playfair { font-family: var(--fonte-titulo, 'Playfair Display'), serif; }
 .font-inter { font-family: 'Inter', sans-serif; }
 
 .text-gradient {
