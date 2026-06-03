@@ -126,8 +126,8 @@
         </div>
 
         <button type="submit" class="btn-gold" :disabled="itens.length === 0"
-                :style="itens.length === 0 ? 'opacity:0.4; cursor:not-allowed;' : ''"
-                style="width:100%; padding:0.75rem; font-size:0.85rem;">Registrar venda</button>
+                :style="itens.length === 0 ? { opacity: '0.4', cursor: 'not-allowed' } : {}"
+                style="width:100%; padding-top:1rem; padding-bottom:1rem; font-size:0.85rem;">Registrar venda</button>
     </div>
 </form>
 
