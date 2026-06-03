@@ -6,14 +6,7 @@ namespace Glamour.Web.Controllers;
 
 public class CarrinhoController(ICarrinhoService carrinhoService, ProdutoService produtoService) : Controller
 {
-    private string CarrinhoId => HttpContext.Session.GetString("CarrinhoId") ?? CriarCarrinhoId();
-
-    private string CriarCarrinhoId()
-    {
-        var id = Guid.NewGuid().ToString();
-        HttpContext.Session.SetString("CarrinhoId", id);
-        return id;
-    }
+    private string CarrinhoId => HttpContext.ObterCarrinhoId();
 
     [Route("carrinho")]
     public async Task<IActionResult> Index()

@@ -2,7 +2,6 @@ using System.Security.Claims;
 using Glamour.Application.DTOs;
 using Glamour.Application.Services;
 using Glamour.Domain.Enums;
-using Glamour.Domain.Interfaces;
 using Glamour.Infrastructure.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -15,8 +14,7 @@ public class ContaController(
     UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager,
     PedidoService pedidoService,
-    EnderecoService enderecoService,
-    ICarrinhoService carrinhoService) : Controller
+    EnderecoService enderecoService) : Controller
 {
     public const string ClaimMetodoLogin = "AuthMethod";
     public const string MetodoSenha = "Password";
@@ -104,10 +102,6 @@ public class ContaController(
     [Authorize]
     public async Task<IActionResult> Logout()
     {
-        var carrinhoId = HttpContext.Session.GetString("CarrinhoId");
-        if (!string.IsNullOrEmpty(carrinhoId))
-            await carrinhoService.LimparCarrinhoAsync(carrinhoId);
-
         HttpContext.Session.Clear();
         await signInManager.SignOutAsync();
         return RedirectToAction("Index", "Home");

@@ -21,7 +21,7 @@ public class CheckoutController(
     UserManager<ApplicationUser> userManager,
     NotificacaoContext notificacoes) : Controller
 {
-    private string CarrinhoId => HttpContext.Session.GetString("CarrinhoId") ?? "";
+    private string CarrinhoId => HttpContext.ObterCarrinhoId();
     private string UsuarioId => User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "";
 
     private async Task<bool> CarrinhoTemPromocaoAsync(IEnumerable<Glamour.Domain.Interfaces.ItemCarrinho> itens)
