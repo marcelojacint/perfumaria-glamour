@@ -16,12 +16,19 @@ public class CheckoutController(
     PedidoService pedidoService,
     EnderecoService enderecoService,
     ICarrinhoService carrinhoService,
+    ProdutoService produtoService,
     FreteService freteService,
     UserManager<ApplicationUser> userManager,
     NotificacaoContext notificacoes) : Controller
 {
     private string CarrinhoId => HttpContext.Session.GetString("CarrinhoId") ?? "";
     private string UsuarioId => User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "";
+
+    private async Task<bool> CarrinhoTemPromocaoAsync(IEnumerable<Glamour.Domain.Interfaces.ItemCarrinho> itens)
+    {
+        var produtos = await produtoService.ObterListagemPorIdsAsync(itens.Select(i => i.ProdutoId));
+        return produtos.Any(p => p.PrecoPromo.HasValue);
+    }
 
     [HttpGet]
     public async Task<IActionResult> Index()
@@ -31,6 +38,7 @@ public class CheckoutController(
 
         var usuario = await userManager.GetUserAsync(User);
         ViewBag.TelefoneCliente = usuario?.Telefone ?? usuario?.PhoneNumber ?? "";
+        ViewBag.TemPromocao = await CarrinhoTemPromocaoAsync(itens);
         ViewBag.Enderecos = await enderecoService.ListarPorUsuarioAsync(UsuarioId);
         return View(itens);
     }

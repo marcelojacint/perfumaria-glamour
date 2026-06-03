@@ -34,6 +34,20 @@ public class PedidoService(
             return Guid.Empty;
         }
 
+        var ehCartao = dto.MetodoPagamento is MetodoPagamento.CartaoCredito or MetodoPagamento.CartaoDebito;
+        if (ehCartao)
+        {
+            foreach (var item in itensCarrinho)
+            {
+                var produtoPromo = await produtoRepo.ObterPorIdAsync(item.ProdutoId);
+                if (produtoPromo?.PrecoPromo != null)
+                {
+                    notificacoes.Adicionar("Pagamento", "Itens em promoção só podem ser pagos com PIX ou dinheiro.");
+                    return Guid.Empty;
+                }
+            }
+        }
+
         if (dto.TipoEntrega == TipoEntrega.Entrega && dto.EnderecoId == null)
         {
             notificacoes.Adicionar("Endereco", "Endereço de entrega é obrigatório.");
