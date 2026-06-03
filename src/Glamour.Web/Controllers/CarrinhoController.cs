@@ -25,8 +25,11 @@ public class CarrinhoController(ICarrinhoService carrinhoService, ProdutoService
     [HttpPost, Route("carrinho/adicionar")]
     public async Task<IActionResult> Adicionar(Guid produtoId, int quantidade = 1)
     {
+        var ehAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+
         var produto = await produtoService.ObterPorIdAsync(produtoId);
-        if (produto == null) return RedirectToAction(nameof(Index));
+        if (produto == null)
+            return ehAjax ? Json(new { ok = false }) : RedirectToAction(nameof(Index));
 
         var imagem = produto.Imagens.FirstOrDefault(i => i.Principal)?.Url
                   ?? produto.Imagens.FirstOrDefault()?.Url;
@@ -39,6 +42,12 @@ public class CarrinhoController(ICarrinhoService carrinhoService, ProdutoService
         else
             await carrinhoService.AdicionarItemAsync(CarrinhoId,
                 new ItemCarrinho(produtoId, produto.Nome, imagem, produto.PrecoPromo ?? produto.Preco, quantidade));
+
+        if (ehAjax)
+        {
+            var total = await carrinhoService.ObterQuantidadeItensAsync(CarrinhoId);
+            return Json(new { ok = true, quantidade = total, mensagem = $"\"{produto.Nome}\" adicionado ao carrinho!" });
+        }
 
         TempData["Sucesso"] = $"\"{produto.Nome}\" adicionado ao carrinho!";
         return RedirectToAction(nameof(Index));

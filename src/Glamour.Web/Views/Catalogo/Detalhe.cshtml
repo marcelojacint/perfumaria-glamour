@@ -111,24 +111,69 @@
 
             @if (Model.Estoque > 0)
             {
-                <form method="post" action="/carrinho/adicionar" style="margin-bottom:1.5rem;">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="produtoId" value="@Model.Id" />
-                    <div style="display:flex; gap:1rem; margin-bottom:1rem;">
-                        <div style="display:flex; align-items:center; border:1px solid rgba(255,255,255,0.2);">
-                            <button type="button" onclick="decrementar()" style="padding:0.75rem 1rem; color:rgba(255,255,255,0.6); background:none; border:none; cursor:pointer; font-size:1rem;">−</button>
-                            <input type="number" name="quantidade" id="qtd" value="1" min="1" max="@Model.Estoque"
-                                   style="width:3.5rem; background:transparent; text-align:center; color:#fff; border:none; outline:none; font-size:0.875rem;" />
-                            <button type="button" onclick="incrementar(@Model.Estoque)" style="padding:0.75rem 1rem; color:rgba(255,255,255,0.6); background:none; border:none; cursor:pointer; font-size:1rem;">+</button>
+                <div x-data="addCarrinho(@Model.Estoque)" style="margin-bottom:1.5rem;">
+                    <form @@submit.prevent="adicionar('@Model.Id')">
+                        @Html.AntiForgeryToken()
+                        <div style="display:flex; gap:1rem; margin-bottom:1rem;">
+                            <div style="display:flex; align-items:center; border:1px solid rgba(255,255,255,0.2);">
+                                <button type="button" @@click="dec()" style="padding:0.75rem 1rem; color:rgba(255,255,255,0.6); background:none; border:none; cursor:pointer; font-size:1rem;">−</button>
+                                <input type="number" x-model.number="qtd" min="1" max="@Model.Estoque"
+                                       style="width:3.5rem; background:transparent; text-align:center; color:#fff; border:none; outline:none; font-size:0.875rem;" />
+                                <button type="button" @@click="inc()" style="padding:0.75rem 1rem; color:rgba(255,255,255,0.6); background:none; border:none; cursor:pointer; font-size:1rem;">+</button>
+                            </div>
+                            <button type="submit" class="btn-accent" :disabled="enviando" style="flex:1; padding:0.875rem; font-size:0.8rem; letter-spacing:0.1em;">
+                                <span x-show="!enviando">Adicionar ao Carrinho</span>
+                                <span x-show="enviando" x-cloak>Adicionando…</span>
+                            </button>
                         </div>
-                        <button type="submit" class="btn-accent" style="flex:1; padding:0.875rem; font-size:0.8rem; letter-spacing:0.1em;">
-                            Adicionar ao Carrinho
-                        </button>
+                        <p style="color:rgba(255,255,255,0.3); font-size:0.7rem;">
+                            @Model.Estoque unidade(s) disponível(is)
+                        </p>
+                    </form>
+
+                    <div x-show="adicionado" x-cloak x-transition
+                         style="margin-top:1rem; border:1px solid rgba(74,222,128,0.3); background:rgba(74,222,128,0.07); padding:1rem;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
+                            <span style="color:rgb(74,222,128); font-size:0.85rem;">✓ Adicionado ao carrinho!</span>
+                            <div style="display:flex; gap:0.6rem;">
+                                <button type="button" @@click="adicionado=false"
+                                        style="background:none; border:1px solid rgba(255,255,255,0.2); color:rgba(255,255,255,0.7); padding:0.4rem 0.9rem; font-size:0.7rem; cursor:pointer; text-transform:uppercase; letter-spacing:0.05em;">
+                                    Continuar comprando
+                                </button>
+                                <a href="/carrinho" class="btn-accent" style="padding:0.4rem 0.9rem; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em;">Ver carrinho</a>
+                            </div>
+                        </div>
+
+                        @{ var complementos = relacionados.Where(c => c.Estoque > 0).Take(3).ToList(); }
+                        @if (complementos.Any())
+                        {
+                            <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.08);">
+                                <p style="font-size:0.7rem; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.75rem;">Que tal incluir também?</p>
+                                <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+                                    @foreach (var c in complementos)
+                                    {
+                                        <div style="flex:1; min-width:150px; border:1px solid rgba(255,255,255,0.08); padding:0.6rem; display:flex; flex-direction:column; gap:0.45rem;">
+                                            <a href="/produto/@c.Slug" style="display:flex; gap:0.5rem; align-items:center; color:inherit; text-decoration:none;">
+                                                <div style="width:2.5rem; height:2.5rem; background:#18181b; flex-shrink:0; overflow:hidden;">
+                                                    <img src="@c.UrlImagemPrincipal" alt="@c.Nome" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null;this.src='/img/placeholder-produto.svg'" />
+                                                </div>
+                                                <div style="min-width:0;">
+                                                    <div style="font-size:0.72rem; line-height:1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">@c.Nome</div>
+                                                    <div style="font-size:0.72rem; color:var(--accent); font-weight:600;">R$ @((c.PrecoPromo ?? c.Preco).ToString("N2"))</div>
+                                                </div>
+                                            </a>
+                                            <button type="button" @@click="adicionarComplemento('@c.Id')" x-show="!adicionados['@c.Id']"
+                                                    style="background:none; border:1px solid rgba(var(--accent-rgb),0.5); color:var(--accent); padding:0.3rem; font-size:0.68rem; cursor:pointer; text-transform:uppercase; letter-spacing:0.05em;">
+                                                + Adicionar
+                                            </button>
+                                            <span x-show="adicionados['@c.Id']" x-cloak style="color:rgb(74,222,128); font-size:0.68rem; text-align:center; padding:0.3rem;">✓ Incluído</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
                     </div>
-                    <p style="color:rgba(255,255,255,0.3); font-size:0.7rem;">
-                        @Model.Estoque unidade(s) disponível(is)
-                    </p>
-                </form>
+                </div>
             }
             else
             {
@@ -274,13 +319,56 @@
 
 @section Scripts {
 <script>
-function decrementar() {
-    const i = document.getElementById('qtd');
-    if (parseInt(i.value) > 1) i.value = parseInt(i.value) - 1;
-}
-function incrementar(max) {
-    const i = document.getElementById('qtd');
-    if (parseInt(i.value) < max) i.value = parseInt(i.value) + 1;
+function addCarrinho(estoque) {
+    return {
+        qtd: 1,
+        estoque: estoque,
+        enviando: false,
+        adicionado: false,
+        adicionados: {},
+        inc() { if (this.qtd < this.estoque) this.qtd++; },
+        dec() { if (this.qtd > 1) this.qtd--; },
+        async adicionarComplemento(id) {
+            if (this.adicionados[id]) return;
+            try {
+                const fd = new FormData();
+                fd.append('produtoId', id);
+                fd.append('quantidade', 1);
+                const tk = this.$el.querySelector('input[name="__RequestVerificationToken"]');
+                if (tk) fd.append('__RequestVerificationToken', tk.value);
+                const r = await fetch('/carrinho/adicionar', {
+                    method: 'POST', body: fd, headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const d = await r.json();
+                if (d.ok) {
+                    this.adicionados[id] = true;
+                    if (window.atualizarBadgeCarrinho) window.atualizarBadgeCarrinho(d.quantidade);
+                }
+            } catch (e) { }
+        },
+        async adicionar(produtoId) {
+            if (this.enviando) return;
+            this.enviando = true;
+            try {
+                const fd = new FormData();
+                fd.append('produtoId', produtoId);
+                fd.append('quantidade', this.qtd);
+                const tk = this.$el.querySelector('input[name="__RequestVerificationToken"]');
+                if (tk) fd.append('__RequestVerificationToken', tk.value);
+                const r = await fetch('/carrinho/adicionar', {
+                    method: 'POST', body: fd, headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const d = await r.json();
+                if (d.ok) {
+                    this.adicionado = true;
+                    if (window.atualizarBadgeCarrinho) window.atualizarBadgeCarrinho(d.quantidade);
+                }
+            } catch (e) {
+            } finally {
+                this.enviando = false;
+            }
+        }
+    };
 }
 </script>
 }

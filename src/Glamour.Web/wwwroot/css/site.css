@@ -533,6 +533,8 @@ body {
 
 .accent-amber-400 { accent-color: rgb(251,191,36); }
 
+[x-cloak] { display: none !important; }
+
 .campo-senha { position: relative; }
 .campo-senha > input { padding-right: 2.75rem !important; }
 .campo-senha .ver-senha {

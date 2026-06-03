@@ -181,10 +181,13 @@
 
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
-        fetch('/carrinho/quantidade').then(r => r.json()).then(q => {
+        window.atualizarBadgeCarrinho = function(q) {
             const badge = document.getElementById('badge-carrinho');
+            if (!badge) return;
             if (q > 0) { badge.textContent = q; badge.classList.remove('hidden'); }
-        }).catch(() => {});
+            else { badge.classList.add('hidden'); }
+        };
+        fetch('/carrinho/quantidade').then(r => r.json()).then(window.atualizarBadgeCarrinho).catch(() => {});
 
         (function() {
             if (!localStorage.getItem('glamour_cookie_consent')) {
