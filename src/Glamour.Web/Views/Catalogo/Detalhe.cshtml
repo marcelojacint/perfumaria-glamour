@@ -112,7 +112,7 @@
             @if (Model.Estoque > 0)
             {
                 <div x-data="addCarrinho(@Model.Estoque)" style="margin-bottom:1.5rem;">
-                    <form @@submit.prevent="adicionar('@Model.Id')">
+                    <form x-on:submit.prevent="adicionar('@Model.Id')">
                         @Html.AntiForgeryToken()
                         <div style="display:flex; gap:1rem; margin-bottom:1rem;">
                             <div style="display:flex; align-items:center; border:1px solid rgba(255,255,255,0.2);">
