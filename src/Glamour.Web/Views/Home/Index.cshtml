@@ -49,29 +49,45 @@
 
 @if (campanhas.Any())
 {
-    <section class="max-w-7xl mx-auto px-4 pt-12 pb-4">
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.25rem;">
-            @foreach (var camp in campanhas)
-            {
-                <a href="@camp.Link" class="group" style="position:relative; display:flex; flex-direction:column; justify-content:flex-end; min-height:200px; overflow:hidden; border:1px solid rgba(212,175,55,0.2); text-decoration:none;">
-                    @if (!string.IsNullOrEmpty(camp.ImagemUrl))
-                    {
-                        <div style="position:absolute; inset:0; background-image:url('@camp.ImagemUrl'); background-size:cover; background-position:center; transition:transform 0.5s;" class="group-hover:scale-105"></div>
-                        <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.25));"></div>
-                    }
-                    else
-                    {
-                        <div style="position:absolute; inset:0; background:linear-gradient(135deg, rgba(212,175,55,0.25), rgba(24,24,27,0.95));"></div>
-                    }
-                    <div style="position:relative; padding:1.5rem;">
-                        <div class="font-playfair" style="font-size:1.5rem; font-weight:700; color:#fff; line-height:1.1;">@camp.Titulo</div>
-                        @if (!string.IsNullOrEmpty(camp.Subtitulo))
+    var listaCampanhas = campanhas.ToList();
+    <section class="max-w-7xl mx-auto px-4 pt-12 pb-4"
+             x-data="{ total: @listaCampanhas.Count, atual: 0 }"
+             x-init="if (total > 1) setInterval(() => { atual = (atual + 1) % total }, 4500)">
+        <div style="position:relative; overflow:hidden; border:1px solid rgba(212,175,55,0.2);">
+            <div style="display:flex; transition:transform 0.7s ease;" x-bind:style="`transform: translateX(-${atual * 100}%)`">
+                @foreach (var camp in listaCampanhas)
+                {
+                    <a href="@camp.Link" class="group" style="flex:0 0 100%; position:relative; display:flex; flex-direction:column; justify-content:flex-end; min-height:260px; overflow:hidden; text-decoration:none;">
+                        @if (!string.IsNullOrEmpty(camp.ImagemUrl))
                         {
-                            <div style="color:rgba(255,255,255,0.75); font-size:0.85rem; margin-top:0.35rem;">@camp.Subtitulo</div>
+                            <div style="position:absolute; inset:0; background-image:url('@camp.ImagemUrl'); background-size:cover; background-position:center;"></div>
+                            <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.2));"></div>
                         }
-                        <div class="text-gold" style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.15em; margin-top:0.75rem;">Ver coleção →</div>
-                    </div>
-                </a>
+                        else
+                        {
+                            <div style="position:absolute; inset:0; background:linear-gradient(135deg, rgba(212,175,55,0.25), rgba(24,24,27,0.95));"></div>
+                        }
+                        <div style="position:relative; padding:2rem; max-width:560px;">
+                            <div class="font-playfair" style="font-size:2rem; font-weight:700; color:#fff; line-height:1.1;">@camp.Titulo</div>
+                            @if (!string.IsNullOrEmpty(camp.Subtitulo))
+                            {
+                                <div style="color:rgba(255,255,255,0.8); font-size:0.95rem; margin-top:0.5rem;">@camp.Subtitulo</div>
+                            }
+                            <div class="text-gold" style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.15em; margin-top:1rem;">Ver coleção →</div>
+                        </div>
+                    </a>
+                }
+            </div>
+            @if (listaCampanhas.Count > 1)
+            {
+                <div style="position:absolute; bottom:1rem; left:0; right:0; display:flex; justify-content:center; gap:0.5rem;">
+                    @for (int i = 0; i < listaCampanhas.Count; i++)
+                    {
+                        <button type="button" @@click="atual = @i" aria-label="Ir para campanha @(i + 1)"
+                                style="width:9px; height:9px; border-radius:9999px; border:none; cursor:pointer; padding:0; transition:background 0.3s;"
+                                x-bind:style="atual === @i ? 'background:#D4AF37' : 'background:rgba(255,255,255,0.35)'"></button>
+                    }
+                </div>
             }
         </div>
     </section>
