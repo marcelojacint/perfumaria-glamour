@@ -212,7 +212,6 @@ public class ContaController(
         if (usuario == null) return NotFound();
         var enderecos = await enderecoService.ListarPorUsuarioAsync(usuario.Id);
         ViewBag.Enderecos = enderecos;
-        ViewBag.PontosLoyalty = usuario.PontosLoyalty;
         return View(usuario);
     }
 

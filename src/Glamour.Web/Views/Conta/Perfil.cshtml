@@ -2,16 +2,15 @@
 @{
     ViewBag.Title = "Meu Perfil";
     var enderecos = ViewBag.Enderecos as IEnumerable<Glamour.Application.DTOs.EnderecoDto> ?? [];
-    int pontos = ViewBag.PontosLoyalty ?? 0;
-    var nivelNome = pontos >= 5000 ? "Diamante" : pontos >= 2000 ? "Ouro" : pontos >= 500 ? "Prata" : "Bronze";
-    var proximoNivel = pontos >= 5000 ? 5000 : pontos >= 2000 ? 5000 : pontos >= 500 ? 2000 : 500;
-    var progresso = (int)Math.Min(100, (double)pontos / proximoNivel * 100);
 }
 
 <div class="max-w-4xl mx-auto px-4 py-12">
-    <div style="margin-bottom:2.5rem;">
-        <p class="text-gold" style="font-size:0.65rem; letter-spacing:0.4em; text-transform:uppercase; margin-bottom:0.5rem;">Minha Conta</p>
-        <h1 class="font-playfair" style="font-size:2.5rem; font-weight:700;">Perfil</h1>
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:1rem; flex-wrap:wrap; margin-bottom:2.5rem;">
+        <div>
+            <p class="text-gold" style="font-size:0.65rem; letter-spacing:0.4em; text-transform:uppercase; margin-bottom:0.5rem;">Minha Conta</p>
+            <h1 class="font-playfair" style="font-size:2.5rem; font-weight:700;">Perfil</h1>
+        </div>
+        <a href="/conta/meus-pedidos" class="btn-gold-outline" style="padding:0.6rem 1.5rem; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.1em; white-space:nowrap;">Meus Pedidos</a>
     </div>
 
     @if (TempData["Sucesso"] != null)
@@ -52,15 +51,24 @@
                     @Html.AntiForgeryToken()
                     <div>
                         <label style="font-size:0.65rem; color:rgba(212,175,55,0.6); text-transform:uppercase; letter-spacing:0.1em; display:block; margin-bottom:0.35rem;">Senha Atual</label>
-                        <input type="password" name="SenhaAtual" style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.75rem; font-size:0.875rem; box-sizing:border-box;" />
+                        <div class="campo-senha" x-data="{ ver:false }">
+                            <input :type="ver ? 'text' : 'password'" name="SenhaAtual" style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.75rem; font-size:0.875rem; box-sizing:border-box;" />
+                            <partial name="_ToggleSenha" />
+                        </div>
                     </div>
                     <div>
                         <label style="font-size:0.65rem; color:rgba(212,175,55,0.6); text-transform:uppercase; letter-spacing:0.1em; display:block; margin-bottom:0.35rem;">Nova Senha</label>
-                        <input type="password" name="NovaSenha" style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.75rem; font-size:0.875rem; box-sizing:border-box;" />
+                        <div class="campo-senha" x-data="{ ver:false }">
+                            <input :type="ver ? 'text' : 'password'" name="NovaSenha" style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.75rem; font-size:0.875rem; box-sizing:border-box;" />
+                            <partial name="_ToggleSenha" />
+                        </div>
                     </div>
                     <div>
                         <label style="font-size:0.65rem; color:rgba(212,175,55,0.6); text-transform:uppercase; letter-spacing:0.1em; display:block; margin-bottom:0.35rem;">Confirmar Nova Senha</label>
-                        <input type="password" name="ConfirmacaoNovaSenha" style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.75rem; font-size:0.875rem; box-sizing:border-box;" />
+                        <div class="campo-senha" x-data="{ ver:false }">
+                            <input :type="ver ? 'text' : 'password'" name="ConfirmacaoNovaSenha" style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.75rem; font-size:0.875rem; box-sizing:border-box;" />
+                            <partial name="_ToggleSenha" />
+                        </div>
                     </div>
                     <button type="submit" class="btn-gold-outline" style="padding:0.6rem 1.5rem; font-size:0.75rem; align-self:flex-start; display:inline-block;">Alterar Senha</button>
                 </form>
@@ -68,27 +76,6 @@
         </div>
 
         <div>
-
-            <div style="border:1px solid rgba(212,175,55,0.3); background:linear-gradient(135deg, rgba(212,175,55,0.08), rgba(24,24,27,0.5)); padding:1.5rem; margin-bottom:1.5rem;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                    <div>
-                        <h2 style="font-size:0.8rem; color:#D4AF37; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.25rem;">Programa Glamour ✦</h2>
-                        <p style="color:rgba(255,255,255,0.5); font-size:0.8rem;">Nível: @nivelNome</p>
-                    </div>
-                    <div style="text-align:right;">
-                        <div class="font-playfair" style="font-size:2rem; font-weight:700; color:#D4AF37;">@pontos</div>
-                        <div style="color:rgba(255,255,255,0.4); font-size:0.7rem; text-transform:uppercase; letter-spacing:0.1em;">pontos</div>
-                    </div>
-                </div>
-                <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:rgba(255,255,255,0.4); margin-bottom:0.4rem;">
-                    <span>@pontos pts</span>
-                    <span>@proximoNivel pts para próximo nível</span>
-                </div>
-                <div style="background:rgba(255,255,255,0.08); height:4px; border-radius:2px; overflow:hidden;">
-                    <div style="width:@progresso%; background:linear-gradient(90deg,#D4AF37,#F0D060); height:100%; border-radius:2px;"></div>
-                </div>
-                <p style="color:rgba(255,255,255,0.3); font-size:0.7rem; margin-top:0.75rem;">R$ 1 gasto = 1 ponto · 100 pontos = R$ 1 de desconto</p>
-            </div>
 
             <div style="border:1px solid rgba(255,255,255,0.08); background:rgba(24,24,27,0.5); padding:1.5rem;">
                 <h2 style="font-size:0.8rem; color:#D4AF37; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1.25rem;">Endereços</h2>
@@ -134,7 +121,6 @@
     </div>
 
     <div style="display:flex; gap:1.5rem; margin-top:2rem; padding-top:1.5rem; border-top:1px solid rgba(255,255,255,0.05);">
-        <a href="/conta/meus-pedidos" style="color:rgba(255,255,255,0.5); font-size:0.8rem;">Meus Pedidos</a>
         <a href="/favoritos" style="color:rgba(255,255,255,0.5); font-size:0.8rem;">Favoritos</a>
     </div>
 </div>

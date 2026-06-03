@@ -532,3 +532,21 @@ body {
 }
 
 .accent-amber-400 { accent-color: rgb(251,191,36); }
+
+.campo-senha { position: relative; }
+.campo-senha > input { padding-right: 2.75rem !important; }
+.campo-senha .ver-senha {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    line-height: 0;
+}
+.campo-senha .ver-senha:hover { color: #D4AF37; }

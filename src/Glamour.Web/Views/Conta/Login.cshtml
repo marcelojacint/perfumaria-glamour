@@ -30,8 +30,11 @@
                 </div>
                 <div>
                     <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">Senha</label>
-                    <input type="password" name="Senha" required autocomplete="current-password"
-                           class="w-full bg-zinc-800 border border-white/10 text-white px-4 py-3 text-sm focus:border-gold/60 focus:outline-none" />
+                    <div class="campo-senha" x-data="{ ver:false }">
+                        <input :type="ver ? 'text' : 'password'" name="Senha" required autocomplete="current-password"
+                               class="w-full bg-zinc-800 border border-white/10 text-white px-4 py-3 text-sm focus:border-gold/60 focus:outline-none" />
+                        <partial name="_ToggleSenha" />
+                    </div>
                 </div>
                 <label class="flex items-center gap-3 cursor-pointer">
                     <input type="checkbox" name="LembrarMe" value="true" class="accent-amber-400" />
