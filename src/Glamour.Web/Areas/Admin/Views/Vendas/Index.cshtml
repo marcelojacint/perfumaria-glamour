@@ -7,6 +7,7 @@
         id = p.Id,
         nome = p.Nome,
         marca = p.Marca,
+        volume = p.Volume,
         preco = p.PrecoPromo ?? p.Preco,
         estoque = p.Estoque
     }));
@@ -31,17 +32,26 @@
 
     <div style="border:1px solid rgba(255,255,255,0.08); background:rgba(24,24,27,0.5); padding:1.25rem;">
         <h2 style="font-size:0.8rem; color:#D4AF37; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1rem;">Produtos</h2>
-        <input type="text" x-model="busca" placeholder="Buscar por nome ou marca..."
-               style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 0.75rem; font-size:0.85rem; box-sizing:border-box; margin-bottom:0.75rem;" />
+        <div style="position:relative; margin-bottom:0.75rem;">
+            <input type="text" x-model="busca" x-ref="buscaInput" x-init="$el.focus()"
+                   @@keydown.enter.prevent="adicionarPrimeiro()"
+                   placeholder="Buscar por nome, marca ou volume... (Enter adiciona)"
+                   style="width:100%; background:#27272a; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0.5rem 2rem 0.5rem 0.75rem; font-size:0.85rem; box-sizing:border-box;" />
+            <button type="button" x-show="busca" @@click="busca=''; $refs.buscaInput.focus()"
+                    style="position:absolute; right:0.4rem; top:50%; transform:translateY(-50%); background:none; border:none; color:rgba(255,255,255,0.4); cursor:pointer; font-size:1.1rem; line-height:1;">×</button>
+        </div>
         <div style="max-height:460px; overflow-y:auto; display:flex; flex-direction:column; gap:0.4rem;">
             <template x-for="p in filtrados" :key="p.id">
                 <button type="button" @@click="adicionar(p)"
-                        style="display:flex; justify-content:space-between; align-items:center; gap:0.75rem; text-align:left; background:#27272a; border:1px solid rgba(255,255,255,0.06); padding:0.6rem 0.75rem; cursor:pointer;">
+                        :style="qtdNoCarrinho(p.id) > 0 ? 'border-color:rgba(212,175,55,0.5);' : 'border-color:rgba(255,255,255,0.06);'"
+                        style="display:flex; justify-content:space-between; align-items:center; gap:0.75rem; text-align:left; background:#27272a; border:1px solid; padding:0.6rem 0.75rem; cursor:pointer;">
                     <span style="min-width:0;">
                         <span style="display:block; font-size:0.82rem; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" x-text="p.nome"></span>
-                        <span style="font-size:0.68rem; color:rgba(255,255,255,0.4);" x-text="(p.marca || '') + ' · estoque: ' + p.estoque"></span>
+                        <span style="font-size:0.68rem; color:rgba(255,255,255,0.4);" x-text="[p.marca, p.volume, 'estoque: ' + p.estoque].filter(Boolean).join(' · ')"></span>
                     </span>
                     <span style="display:flex; align-items:center; gap:0.5rem; flex-shrink:0;">
+                        <span x-show="qtdNoCarrinho(p.id) > 0" x-text="qtdNoCarrinho(p.id)"
+                              style="background:#D4AF37; color:#000; font-size:0.62rem; font-weight:700; min-width:1.15rem; height:1.15rem; border-radius:9999px; display:inline-flex; align-items:center; justify-content:center; padding:0 0.2rem;"></span>
                         <span style="font-size:0.8rem; color:#D4AF37;" x-text="fmt(p.preco)"></span>
                         <span style="color:#D4AF37; font-weight:700;">+</span>
                     </span>
@@ -130,14 +140,21 @@ function pdv() {
         itens: [],
         metodo: 'Dinheiro',
         desconto: 0,
+        norm(s) { return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); },
         get filtrados() {
-            const q = this.busca.toLowerCase();
-            return this.produtos.filter(p => p.nome.toLowerCase().includes(q) || (p.marca || '').toLowerCase().includes(q));
+            const q = this.norm(this.busca).trim();
+            if (!q) return this.produtos;
+            return this.produtos.filter(p => this.norm(p.nome + ' ' + (p.marca || '') + ' ' + (p.volume || '')).includes(q));
         },
+        qtdNoCarrinho(id) { const i = this.itens.find(x => x.id === id); return i ? i.qtd : 0; },
         adicionar(p) {
             const ex = this.itens.find(i => i.id === p.id);
             if (ex) { if (ex.qtd < p.estoque) ex.qtd++; }
             else this.itens.push({ id: p.id, nome: p.nome, preco: p.preco, estoque: p.estoque, qtd: 1 });
+        },
+        adicionarPrimeiro() {
+            const lista = this.filtrados;
+            if (lista.length > 0) { this.adicionar(lista[0]); this.busca = ''; }
         },
         inc(i) { if (i.qtd < i.estoque) i.qtd++; },
         dec(i) { if (i.qtd > 1) i.qtd--; },
