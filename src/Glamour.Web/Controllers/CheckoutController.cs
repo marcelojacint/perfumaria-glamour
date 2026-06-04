@@ -24,10 +24,18 @@ public class CheckoutController(
     private string CarrinhoId => HttpContext.ObterCarrinhoId();
     private string UsuarioId => User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "";
 
-    private async Task<bool> CarrinhoTemPromocaoAsync(IEnumerable<Glamour.Domain.Interfaces.ItemCarrinho> itens)
+    private async Task<(decimal promocao, decimal normal)> CalcularSubtotaisAsync(IEnumerable<Glamour.Domain.Interfaces.ItemCarrinho> itens)
     {
-        var produtos = await produtoService.ObterListagemPorIdsAsync(itens.Select(i => i.ProdutoId));
-        return produtos.Any(p => p.PrecoPromo.HasValue);
+        var produtos = (await produtoService.ObterListagemPorIdsAsync(itens.Select(i => i.ProdutoId)))
+            .ToDictionary(p => p.Id);
+        decimal promocao = 0, normal = 0;
+        foreach (var item in itens)
+        {
+            if (!produtos.TryGetValue(item.ProdutoId, out var p)) continue;
+            var valor = (p.PrecoPromo ?? p.Preco) * item.Quantidade;
+            if (p.PrecoPromo.HasValue) promocao += valor; else normal += valor;
+        }
+        return (promocao, normal);
     }
 
     [HttpGet]
@@ -37,8 +45,12 @@ public class CheckoutController(
         if (!itens.Any()) return RedirectToAction("Index", "Carrinho");
 
         var usuario = await userManager.GetUserAsync(User);
+        var (subtotalPromocao, subtotalNormal) = await CalcularSubtotaisAsync(itens);
         ViewBag.TelefoneCliente = usuario?.Telefone ?? usuario?.PhoneNumber ?? "";
-        ViewBag.TemPromocao = await CarrinhoTemPromocaoAsync(itens);
+        ViewBag.SubtotalPromocao = subtotalPromocao;
+        ViewBag.SubtotalNormal = subtotalNormal;
+        ViewBag.TemPromocao = subtotalPromocao > 0;
+        ViewBag.TemNormal = subtotalNormal > 0;
         ViewBag.Enderecos = await enderecoService.ListarPorUsuarioAsync(UsuarioId);
         return View(itens);
     }
@@ -59,7 +71,7 @@ public class CheckoutController(
 
         string? cep, string? logradouro, string? numero,
         string? complemento, string? bairro, string? cidade, string? uf,
-        string? cupomCodigo, string? observacoes, string? telefone)
+        string? cupomCodigo, string? observacoes, string? telefone, string? metodoPagamentoPromocao)
     {
         var usuario = await userManager.GetUserAsync(User);
         if (usuario == null) return Challenge();
@@ -109,7 +121,8 @@ public class CheckoutController(
             }
         }
 
-        var dto = new CriarPedidoDto(tipo, metodo, enderecoFinalId, cupomCodigo, observacoes, CarrinhoId);
+        MetodoPagamento? metodoPromo = Enum.TryParse<MetodoPagamento>(metodoPagamentoPromocao, out var mp) ? mp : null;
+        var dto = new CriarPedidoDto(tipo, metodo, enderecoFinalId, cupomCodigo, observacoes, CarrinhoId, metodoPromo);
         var pedidoId = await pedidoService.CriarAsync(dto, UsuarioId);
 
         if (pedidoId == Guid.Empty)

@@ -1,0 +1,14 @@
+@model Glamour.Web.Models.MetodosPagamentoVm
+<div class="grid grid-cols-2 gap-3" x-data="{ metodo: 'Dinheiro' }">
+    @foreach (var (val, nome, icon) in Model.Itens)
+    {
+        <label class="cursor-pointer">
+            <input type="radio" name="@Model.Campo" value="@val" x-model="metodo" class="sr-only" @(val == "Dinheiro" ? "checked" : "") />
+            <div :class="metodo === '@val' ? 'border-gold bg-gold/10' : 'border-white/20 hover:border-white/40'"
+                 class="border p-3 text-center transition-all">
+                <div class="text-xl mb-1">@icon</div>
+                <div class="text-sm font-medium">@nome</div>
+            </div>
+        </label>
+    }
+</div>

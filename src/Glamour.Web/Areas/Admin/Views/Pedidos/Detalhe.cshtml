@@ -77,7 +77,20 @@
             <div style="font-size:0.8rem; color:rgba(255,255,255,0.5); display:flex; flex-direction:column; gap:0.5rem;">
                 <div><span style="color:rgba(255,255,255,0.3);">Data:</span> @Model.CriadoEm.ToString("dd/MM/yyyy HH:mm")</div>
                 <div><span style="color:rgba(255,255,255,0.3);">Entrega:</span> @(Model.TipoEntrega == Glamour.Domain.Enums.TipoEntrega.RetiradaNaLoja ? "Retirada na Loja" : "Entrega")</div>
-                <div><span style="color:rgba(255,255,255,0.3);">Pagamento:</span> @Model.MetodoPagamento</div>
+                @if (Model.MetodoPagamentoPromocao != null)
+                {
+                    <div>
+                        <span style="color:rgba(255,255,255,0.3);">Pagamento (dividido):</span>
+                        <div style="padding-left:0.75rem; margin-top:0.25rem; line-height:1.6;">
+                            <span style="color:#D4AF37;">🏷️ Promoção</span> (R$ @Model.ValorEmPromocao.ToString("N2")): <strong>@Model.MetodoPagamentoPromocao</strong><br/>
+                            Demais (R$ @((Model.Total - Model.ValorEmPromocao).ToString("N2"))): <strong>@Model.MetodoPagamento</strong>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div><span style="color:rgba(255,255,255,0.3);">Pagamento:</span> @Model.MetodoPagamento</div>
+                }
                 @if (!string.IsNullOrEmpty(Model.Observacoes))
                 {
                     <div><span style="color:rgba(255,255,255,0.3);">Obs:</span> @Model.Observacoes</div>

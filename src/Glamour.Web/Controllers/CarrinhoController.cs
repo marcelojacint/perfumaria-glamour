@@ -14,6 +14,7 @@ public class CarrinhoController(ICarrinhoService carrinhoService, ProdutoService
         var itens = await carrinhoService.ObterCarrinhoAsync(CarrinhoId);
         var produtos = await produtoService.ObterListagemPorIdsAsync(itens.Select(i => i.ProdutoId));
         ViewBag.TemPromocao = produtos.Any(p => p.PrecoPromo.HasValue);
+        ViewBag.TemNormal = produtos.Any(p => !p.PrecoPromo.HasValue);
         return View(itens);
     }
 

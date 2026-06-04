@@ -28,6 +28,8 @@ public class PedidoConfiguration : IEntityTypeConfiguration<Pedido>
         builder.HasOne(p => p.Pagamento).WithOne(pg => pg.Pedido).HasForeignKey<Pagamento>(pg => pg.PedidoId);
         builder.Property(p => p.TipoEntrega).HasConversion<string>();
         builder.Property(p => p.MetodoPagamento).HasConversion<string>();
+        builder.Property(p => p.MetodoPagamentoPromocao).HasConversion<string>();
+        builder.Property(p => p.ValorEmPromocao).HasPrecision(18, 2);
 
         builder.HasOne(p => p.Endereco).WithMany().HasForeignKey(p => p.EnderecoId)
             .OnDelete(DeleteBehavior.Restrict).IsRequired(false);

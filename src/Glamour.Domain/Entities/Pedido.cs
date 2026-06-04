@@ -14,6 +14,8 @@ public class Pedido : BaseEntity
     public Guid? EnderecoId { get; private set; }
     public Endereco? Endereco { get; private set; }
     public MetodoPagamento MetodoPagamento { get; private set; }
+    public MetodoPagamento? MetodoPagamentoPromocao { get; private set; }
+    public decimal ValorEmPromocao { get; private set; }
     public string? CupomCodigo { get; private set; }
     public string? CodigoRastreio { get; private set; }
     public string? Observacoes { get; private set; }
@@ -91,6 +93,13 @@ public class Pedido : BaseEntity
         Origem = OrigemPedido.Loja;
         NomeCliente = string.IsNullOrWhiteSpace(nomeCliente) ? null : nomeCliente.Trim();
         Status = StatusPedido.Entregue;
+        MarcarAtualizado();
+    }
+
+    public void DefinirPagamentoDividido(MetodoPagamento metodoPromocao, decimal valorEmPromocao)
+    {
+        MetodoPagamentoPromocao = metodoPromocao;
+        ValorEmPromocao = valorEmPromocao;
         MarcarAtualizado();
     }
 }

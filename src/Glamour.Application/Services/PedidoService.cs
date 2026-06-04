@@ -34,18 +34,37 @@ public class PedidoService(
             return Guid.Empty;
         }
 
-        var ehCartao = dto.MetodoPagamento is MetodoPagamento.CartaoCredito or MetodoPagamento.CartaoDebito;
-        if (ehCartao)
+        var produtosPedido = new Dictionary<Guid, Produto>();
+        foreach (var item in itensCarrinho)
         {
-            foreach (var item in itensCarrinho)
+            var prod = await produtoRepo.ObterPorIdAsync(item.ProdutoId);
+            if (prod == null)
             {
-                var produtoPromo = await produtoRepo.ObterPorIdAsync(item.ProdutoId);
-                if (produtoPromo?.PrecoPromo != null)
-                {
-                    notificacoes.Adicionar("Pagamento", "Itens em promoção só podem ser pagos com PIX ou dinheiro.");
-                    return Guid.Empty;
-                }
+                notificacoes.Adicionar("Produto", $"Produto '{item.Nome}' não encontrado.");
+                return Guid.Empty;
             }
+            produtosPedido[item.ProdutoId] = prod;
+        }
+
+        var valorEmPromocao = itensCarrinho.Where(i => produtosPedido[i.ProdutoId].PrecoPromo.HasValue)
+            .Sum(i => produtosPedido[i.ProdutoId].PrecoEfetivo * i.Quantidade);
+        var valorNormal = itensCarrinho.Where(i => !produtosPedido[i.ProdutoId].PrecoPromo.HasValue)
+            .Sum(i => produtosPedido[i.ProdutoId].PrecoEfetivo * i.Quantidade);
+        var temPromocao = valorEmPromocao > 0;
+        var temNormal = valorNormal > 0;
+
+        if (temPromocao && temNormal)
+        {
+            if (dto.MetodoPagamentoPromocao is not (MetodoPagamento.Dinheiro or MetodoPagamento.Pix))
+            {
+                notificacoes.Adicionar("Pagamento", "Os itens em promoção devem ser pagos com PIX ou dinheiro.");
+                return Guid.Empty;
+            }
+        }
+        else if (temPromocao && dto.MetodoPagamento is not (MetodoPagamento.Dinheiro or MetodoPagamento.Pix))
+        {
+            notificacoes.Adicionar("Pagamento", "Itens em promoção só podem ser pagos com PIX ou dinheiro.");
+            return Guid.Empty;
         }
 
         if (dto.TipoEntrega == TipoEntrega.Entrega && dto.EnderecoId == null)
@@ -90,8 +109,8 @@ public class PedidoService(
 
         foreach (var item in itensCarrinho)
         {
-            var produto = await produtoRepo.ObterPorIdAsync(item.ProdutoId);
-            if (produto == null || !produto.DebitarEstoque(item.Quantidade))
+            var produto = produtosPedido[item.ProdutoId];
+            if (!produto.DebitarEstoque(item.Quantidade))
             {
                 notificacoes.Adicionar("Estoque", $"Produto '{item.Nome}' sem estoque suficiente.");
                 return Guid.Empty;
@@ -100,6 +119,9 @@ public class PedidoService(
             pedido.AdicionarItem(new PedidoItem(pedido.Id, produto.Id, produto.Nome, item.Quantidade, produto.PrecoEfetivo));
             await produtoRepo.AtualizarAsync(produto);
         }
+
+        if (temPromocao && temNormal)
+            pedido.DefinirPagamentoDividido(dto.MetodoPagamentoPromocao!.Value, valorEmPromocao);
 
         if (enderecoEntrega != null)
         {
@@ -183,5 +205,5 @@ public class PedidoService(
             p.Endereco.Complemento, p.Endereco.Bairro, p.Endereco.Cidade, p.Endereco.UF,
             p.Endereco.Apelido, p.Endereco.Principal),
         p.Itens.Select(i => new PedidoItemDto(i.ProdutoId, i.NomeProduto, i.Quantidade, i.PrecoUnitario, i.Subtotal)),
-        p.Origem, p.NomeCliente);
+        p.Origem, p.NomeCliente, p.MetodoPagamentoPromocao, p.ValorEmPromocao);
 }

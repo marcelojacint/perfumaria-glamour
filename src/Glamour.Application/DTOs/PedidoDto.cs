@@ -11,7 +11,9 @@ public record PedidoDto(
     EnderecoDto? Endereco,
     IEnumerable<PedidoItemDto> Itens,
     OrigemPedido Origem = OrigemPedido.Site,
-    string? NomeCliente = null);
+    string? NomeCliente = null,
+    MetodoPagamento? MetodoPagamentoPromocao = null,
+    decimal ValorEmPromocao = 0);
 
 public record ItemVendaLojaDto(Guid ProdutoId, int Quantidade);
 
@@ -31,6 +33,7 @@ public record CriarPedidoDto(
     Guid? EnderecoId,
     string? CupomCodigo,
     string? Observacoes,
-    string CarrinhoId);
+    string CarrinhoId,
+    MetodoPagamento? MetodoPagamentoPromocao = null);
 
 public record AtualizarStatusPedidoDto(Guid PedidoId, StatusPedido NovoStatus);
