@@ -251,7 +251,11 @@
                     <div>
                         <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">Cupom de Desconto</label>
                         <input type="text" name="cupomCodigo" placeholder="CÓDIGO DO CUPOM"
+                               x-on:input.debounce.500ms="validarCupom($event.target.value)"
                                class="w-full bg-zinc-800 border border-white/10 text-white px-4 py-3 text-sm focus:border-gold/60 focus:outline-none uppercase" />
+                        <p x-show="validandoCupom" x-cloak class="text-xs text-white/40 mt-2">Verificando cupom...</p>
+                        <p x-show="!validandoCupom && cupomMensagem" x-cloak class="text-xs mt-2"
+                           :class="cupomValido ? 'text-green-400' : 'text-red-400'" x-text="cupomMensagem"></p>
                     </div>
                     <div>
                         <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">Observações</label>
@@ -281,6 +285,10 @@
                         <div class="flex justify-between">
                             <span>Frete</span>
                             <span class="text-white" x-text="textoFrete()"></span>
+                        </div>
+                        <div class="flex justify-between" x-show="cupomDesconto > 0" x-cloak>
+                            <span class="text-gold/80">Desconto (cupom)</span>
+                            <span class="text-gold" x-text="textoDesconto()"></span>
                         </div>
                     </div>
                     <div class="border-t border-white/10 pt-4 flex justify-between font-semibold mb-6">
@@ -319,6 +327,31 @@ function checkout() {
         freteGratis: false,
         freteValor: 0,
         freteMensagem: '',
+        cupomDesconto: 0,
+        cupomMensagem: '',
+        cupomValido: false,
+        validandoCupom: false,
+
+        async validarCupom(codigo) {
+            codigo = (codigo || '').trim();
+            if (!codigo) { this.cupomDesconto = 0; this.cupomMensagem = ''; this.cupomValido = false; return; }
+            this.validandoCupom = true;
+            try {
+                const r = await fetch('/checkout/validar-cupom?codigo=' + encodeURIComponent(codigo));
+                const d = await r.json();
+                this.cupomDesconto = d.valido ? d.desconto : 0;
+                this.cupomValido = d.valido;
+                this.cupomMensagem = d.mensagem;
+            } catch (e) {
+                this.cupomDesconto = 0; this.cupomValido = false; this.cupomMensagem = '';
+            } finally {
+                this.validandoCupom = false;
+            }
+        },
+
+        textoDesconto() {
+            return '- R$ ' + this.cupomDesconto.toFixed(2).replace('.', ',');
+        },
 
         init() {
             this.$nextTick(() => { if (this.tipoEntrega === 'Entrega') this.aoSelecionarEndereco(); });
@@ -390,7 +423,7 @@ function checkout() {
         },
 
         textoTotal() {
-            return 'R$ ' + (this.subtotal + this.freteAtual()).toFixed(2).replace('.', ',');
+            return 'R$ ' + Math.max(0, this.subtotal + this.freteAtual() - this.cupomDesconto).toFixed(2).replace('.', ',');
         },
 
         bloqueado() {

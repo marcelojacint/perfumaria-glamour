@@ -18,6 +18,7 @@ public class CheckoutController(
     ICarrinhoService carrinhoService,
     ProdutoService produtoService,
     FreteService freteService,
+    ICupomRepository cupomRepo,
     UserManager<ApplicationUser> userManager,
     NotificacaoContext notificacoes) : Controller
 {
@@ -62,6 +63,32 @@ public class CheckoutController(
         var subtotal = itens.Sum(i => i.Preco * i.Quantidade);
         var resultado = freteService.Calcular(cidade, uf, subtotal);
         return Json(resultado);
+    }
+
+    [HttpGet("validar-cupom")]
+    public async Task<IActionResult> ValidarCupom(string? codigo)
+    {
+        if (string.IsNullOrWhiteSpace(codigo))
+            return Json(new { valido = false, desconto = 0m, mensagem = "" });
+
+        var itens = await carrinhoService.ObterCarrinhoAsync(CarrinhoId);
+        var subtotal = itens.Sum(i => i.Preco * i.Quantidade);
+
+        var cupom = await cupomRepo.ObterPorCodigoAsync(codigo.Trim());
+        if (cupom is null || !cupom.Valido)
+            return Json(new { valido = false, desconto = 0m, mensagem = "Cupom inválido ou expirado." });
+
+        var desconto = cupom.CalcularDesconto(subtotal);
+        if (desconto <= 0)
+        {
+            var minimo = cupom.ValorMinimoPedido ?? 0m;
+            return Json(new { valido = false, desconto = 0m, mensagem = $"Cupom válido para pedidos a partir de R$ {minimo:N2}." });
+        }
+
+        var detalhe = cupom.TipoDesconto == TipoDesconto.Percentual
+            ? $"Cupom aplicado: {cupom.Valor:0.##}% de desconto."
+            : "Cupom aplicado.";
+        return Json(new { valido = true, desconto, mensagem = detalhe });
     }
 
     [HttpPost]
