@@ -15,6 +15,7 @@ namespace Glamour.Web.Areas.Admin.Controllers;
 public class PedidosController(
     PedidoService pedidoService,
     IPedidoRepository pedidoRepo,
+    Glamour.Domain.Notifications.NotificacaoContext notificacoes,
     UserManager<ApplicationUser> userManager) : Controller
 {
     [HttpGet]
@@ -55,6 +56,20 @@ public class PedidosController(
         await pedidoService.AtualizarStatusAsync(dto);
         TempData["Sucesso"] = "Status atualizado.";
         return RedirectToAction(nameof(Detalhe), new { id = dto.PedidoId });
+    }
+
+    [HttpPost("{id}/excluir")]
+    public async Task<IActionResult> Excluir(Guid id)
+    {
+        if (await pedidoService.ExcluirAsync(id))
+        {
+            TempData["Sucesso"] = "Pedido excluído.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        foreach (var n in notificacoes.Notificacoes)
+            TempData["Erro"] = n.Mensagem;
+        return RedirectToAction(nameof(Detalhe), new { id });
     }
 
     [HttpPost("{id}/rastreio")]

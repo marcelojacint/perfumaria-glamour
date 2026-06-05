@@ -194,6 +194,22 @@ public class PedidoService(
         return true;
     }
 
+    public async Task<bool> ExcluirAsync(Guid pedidoId)
+    {
+        var pedido = await pedidoRepo.ObterComItensAsync(pedidoId);
+        if (pedido == null) { notificacoes.Adicionar("Id", "Pedido não encontrado."); return false; }
+
+        if (pedido.Status != StatusPedido.Cancelado)
+        {
+            notificacoes.Adicionar("Status", "Só é possível excluir pedidos cancelados. Cancele o pedido antes.");
+            return false;
+        }
+
+        await pedidoRepo.RemoverAsync(pedido);
+        await pedidoRepo.SalvarAsync();
+        return true;
+    }
+
     private static PedidoDto MapDto(Pedido p) => new(
         p.Id, p.UsuarioId, p.Status,
         p.Subtotal, p.Frete, p.Desconto, p.Total,
