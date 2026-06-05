@@ -49,6 +49,13 @@ public class ClientesController(
     {
         var usuario = await userManager.FindByIdAsync(id);
         if (usuario == null) return NotFound();
+
+        if (usuario.Ativo && await userManager.IsInRoleAsync(usuario, "Admin"))
+        {
+            TempData["Erro"] = "Não é possível inativar uma conta de administrador.";
+            return RedirectToAction(nameof(Index));
+        }
+
         usuario.Ativo = !usuario.Ativo;
         await userManager.UpdateAsync(usuario);
         TempData["Sucesso"] = usuario.Ativo ? "Conta ativada." : "Conta inativada.";
