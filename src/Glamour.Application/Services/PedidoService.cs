@@ -1,3 +1,4 @@
+using System.Globalization;
 using Glamour.Application.DTOs;
 using Glamour.Domain.Entities;
 using Glamour.Domain.Enums;
@@ -14,6 +15,7 @@ public class PedidoService(
     IFidelidadeService fidelidadeService,
     IRepository<Endereco> enderecoRepo,
     FreteService freteService,
+    IWhatsAppService whatsApp,
     NotificacaoContext notificacoes)
 {
     public async Task<PedidoDto?> ObterAsync(Guid pedidoId)
@@ -25,7 +27,7 @@ public class PedidoService(
     public async Task<IEnumerable<PedidoDto>> ObterPorUsuarioAsync(string usuarioId) =>
         (await pedidoRepo.ObterPorUsuarioAsync(usuarioId)).Select(MapDto);
 
-    public async Task<Guid> CriarAsync(CriarPedidoDto dto, string usuarioId)
+    public async Task<Guid> CriarAsync(CriarPedidoDto dto, string usuarioId, string? nomeCliente = null)
     {
         var itensCarrinho = await carrinhoService.ObterCarrinhoAsync(dto.CarrinhoId);
         if (!itensCarrinho.Any())
@@ -138,8 +140,72 @@ public class PedidoService(
         if (cupom != null) await cupomRepo.SalvarAsync();
 
         await carrinhoService.LimparCarrinhoAsync(dto.CarrinhoId);
+
+        await NotificarProprietariaAsync(pedido, itensCarrinho, nomeCliente, enderecoEntrega);
         return pedido.Id;
     }
+
+    private async Task NotificarProprietariaAsync(Pedido pedido, IEnumerable<ItemCarrinho> itens,
+        string? nomeCliente, Endereco? endereco)
+    {
+        try
+        {
+            var cultura = CultureInfo.GetCultureInfo("pt-BR");
+            var linhasItens = string.Join("\n", itens.Select(i => $"• {i.Quantidade}x {i.Nome}"));
+
+            string pagamento;
+            if (pedido.MetodoPagamentoPromocao != null)
+            {
+                var valorDemais = pedido.Total - pedido.ValorEmPromocao;
+                pagamento =
+                    $"Pagamento (dividido):\n" +
+                    $"  Promoção (R$ {pedido.ValorEmPromocao.ToString("N2", cultura)}): {NomePagamento(pedido.MetodoPagamentoPromocao.Value)}\n" +
+                    $"  Demais (R$ {valorDemais.ToString("N2", cultura)}): {NomePagamento(pedido.MetodoPagamento)}";
+            }
+            else
+            {
+                pagamento = $"Pagamento: {NomePagamento(pedido.MetodoPagamento)}";
+            }
+
+            string entrega;
+            if (pedido.TipoEntrega == TipoEntrega.RetiradaNaLoja || endereco == null)
+            {
+                entrega = "Entrega: Retirada na loja";
+            }
+            else
+            {
+                var complemento = string.IsNullOrWhiteSpace(endereco.Complemento) ? "" : $" {endereco.Complemento}";
+                entrega =
+                    $"Entrega no endereço:\n" +
+                    $"  {endereco.Logradouro}, {endereco.Numero}{complemento}\n" +
+                    $"  {endereco.Bairro} - {endereco.Cidade}/{endereco.UF}\n" +
+                    $"  CEP {endereco.CEP}";
+            }
+
+            var mensagem =
+                $"🛍️ *Novo pedido na Glamour!*\n" +
+                $"Pedido #{pedido.Id.ToString()[..8].ToUpper()}\n\n" +
+                $"Cliente: {(string.IsNullOrWhiteSpace(nomeCliente) ? "—" : nomeCliente)}\n\n" +
+                $"Itens:\n{linhasItens}\n\n" +
+                $"Total: R$ {pedido.Total.ToString("N2", cultura)}\n" +
+                $"{pagamento}\n\n" +
+                $"{entrega}";
+
+            await whatsApp.EnviarAsync(mensagem);
+        }
+        catch
+        {
+        }
+    }
+
+    private static string NomePagamento(MetodoPagamento metodo) => metodo switch
+    {
+        MetodoPagamento.Dinheiro => "Dinheiro",
+        MetodoPagamento.CartaoCredito => "Cartão de Crédito",
+        MetodoPagamento.CartaoDebito => "Cartão de Débito",
+        MetodoPagamento.Pix => "Pix",
+        _ => metodo.ToString()
+    };
 
     public async Task<Guid> RegistrarVendaLojaAsync(RegistrarVendaLojaDto dto, string adminId)
     {

@@ -150,7 +150,7 @@ public class CheckoutController(
 
         MetodoPagamento? metodoPromo = Enum.TryParse<MetodoPagamento>(metodoPagamentoPromocao, out var mp) ? mp : null;
         var dto = new CriarPedidoDto(tipo, metodo, enderecoFinalId, cupomCodigo, observacoes, CarrinhoId, metodoPromo);
-        var pedidoId = await pedidoService.CriarAsync(dto, UsuarioId);
+        var pedidoId = await pedidoService.CriarAsync(dto, UsuarioId, usuario.Nome);
 
         if (pedidoId == Guid.Empty)
         {
