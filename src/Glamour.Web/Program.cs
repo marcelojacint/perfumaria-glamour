@@ -5,6 +5,7 @@ using Glamour.Infrastructure;
 using Glamour.Infrastructure.Data;
 using Glamour.Infrastructure.Identity;
 using Glamour.Web;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
@@ -66,12 +67,17 @@ try
 
     var redisConn = builder.Configuration.GetConnectionString("Redis");
     if (!string.IsNullOrWhiteSpace(redisConn))
-        builder.Services.AddStackExchangeRedisCache(opt =>
-        {
-            var options = StackExchange.Redis.ConfigurationOptions.Parse(redisConn);
-            options.AbortOnConnectFail = false;
-            opt.ConfigurationOptions = options;
-        });
+    {
+        var redisOptions = StackExchange.Redis.ConfigurationOptions.Parse(redisConn);
+        redisOptions.AbortOnConnectFail = false;
+
+        builder.Services.AddStackExchangeRedisCache(opt => opt.ConfigurationOptions = redisOptions);
+
+        var redisDataProtection = StackExchange.Redis.ConnectionMultiplexer.Connect(redisOptions);
+        builder.Services.AddDataProtection()
+            .SetApplicationName("Glamour")
+            .PersistKeysToStackExchangeRedis(redisDataProtection, "glamour:dataprotection-keys");
+    }
     else
         builder.Services.AddDistributedMemoryCache();
 
