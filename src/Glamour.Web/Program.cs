@@ -4,6 +4,8 @@ using Glamour.Application;
 using Glamour.Infrastructure;
 using Glamour.Infrastructure.Data;
 using Glamour.Infrastructure.Identity;
+using Glamour.Web;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -22,6 +24,14 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
     builder.Host.UseSerilog();
+    builder.AddRailway();
+
+    builder.Services.Configure<ForwardedHeadersOptions>(opt =>
+    {
+        opt.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+        opt.KnownIPNetworks.Clear();
+        opt.KnownProxies.Clear();
+    });
 
     builder.Services.AddControllersWithViews(opt =>
     {
@@ -120,6 +130,8 @@ try
         await SeedAsync(userMgr, roleMgr);
         await DataSeeder.SeedDadosDemoAsync(db);
     }
+
+    app.UseForwardedHeaders();
 
     if (!app.Environment.IsDevelopment())
     {
