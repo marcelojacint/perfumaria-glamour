@@ -44,6 +44,7 @@ public static class DependencyInjection
         services.AddScoped<IWishlistService, WishlistRedisService>();
         services.AddScoped<IFidelidadeService, FidelidadeService>();
         services.AddHttpClient<IWhatsAppService, CallMeBotWhatsAppService>();
+        services.AddHttpClient<IEmailService, ResendEmailService>();
         services.AddScoped<IRepository<Glamour.Domain.Entities.Endereco>, BaseRepository<Glamour.Domain.Entities.Endereco>>();
         services.AddScoped<IRepository<Glamour.Domain.Entities.Avaliacao>, BaseRepository<Glamour.Domain.Entities.Avaliacao>>();
         services.AddScoped<IRepository<Glamour.Domain.Entities.NotificacaoEstoque>, BaseRepository<Glamour.Domain.Entities.NotificacaoEstoque>>();

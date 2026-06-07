@@ -16,6 +16,7 @@ public class PedidoService(
     IRepository<Endereco> enderecoRepo,
     FreteService freteService,
     IWhatsAppService whatsApp,
+    IEmailService email,
     NotificacaoContext notificacoes)
 {
     public async Task<PedidoDto?> ObterAsync(Guid pedidoId)
@@ -191,7 +192,10 @@ public class PedidoService(
                 $"{pagamento}\n\n" +
                 $"{entrega}";
 
+            var assunto = $"Novo pedido na Glamour #{pedido.Id.ToString()[..8].ToUpper()}";
+
             await whatsApp.EnviarAsync(mensagem);
+            await email.EnviarAsync(assunto, mensagem);
         }
         catch
         {
