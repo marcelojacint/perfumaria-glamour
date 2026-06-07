@@ -33,8 +33,16 @@ public class PedidoRepository(GlamourDbContext context) : BaseRepository<Pedido>
         if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse<StatusPedido>(status, out var s))
             query = query.Where(p => p.Status == s);
 
-        if (de.HasValue) query = query.Where(p => p.CriadoEm >= de.Value);
-        if (ate.HasValue) query = query.Where(p => p.CriadoEm <= ate.Value);
+        if (de.HasValue)
+        {
+            var inicio = DateTime.SpecifyKind(de.Value.Date, DateTimeKind.Utc);
+            query = query.Where(p => p.CriadoEm >= inicio);
+        }
+        if (ate.HasValue)
+        {
+            var fim = DateTime.SpecifyKind(ate.Value.Date, DateTimeKind.Utc).AddDays(1);
+            query = query.Where(p => p.CriadoEm < fim);
+        }
 
         var total = await query.CountAsync();
         var pedidos = await query.OrderByDescending(p => p.CriadoEm)
