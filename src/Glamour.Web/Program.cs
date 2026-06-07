@@ -66,7 +66,12 @@ try
 
     var redisConn = builder.Configuration.GetConnectionString("Redis");
     if (!string.IsNullOrWhiteSpace(redisConn))
-        builder.Services.AddStackExchangeRedisCache(opt => opt.Configuration = redisConn);
+        builder.Services.AddStackExchangeRedisCache(opt =>
+        {
+            var options = StackExchange.Redis.ConfigurationOptions.Parse(redisConn);
+            options.AbortOnConnectFail = false;
+            opt.ConfigurationOptions = options;
+        });
     else
         builder.Services.AddDistributedMemoryCache();
 
