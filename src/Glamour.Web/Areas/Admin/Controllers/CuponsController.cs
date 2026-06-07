@@ -2,7 +2,6 @@ using Glamour.Application.DTOs;
 using Glamour.Domain.Entities;
 using Glamour.Domain.Enums;
 using Glamour.Domain.Interfaces;
-using Glamour.Domain.Notifications;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +10,7 @@ namespace Glamour.Web.Areas.Admin.Controllers;
 [Area("Admin")]
 [Authorize(Roles = "Admin")]
 [Route("admin/cupons")]
-public class CuponsController(ICupomRepository cupomRepo, NotificacaoContext notificacoes) : Controller
+public class CuponsController(ICupomRepository cupomRepo) : Controller
 {
     [HttpGet]
     public async Task<IActionResult> Index()
