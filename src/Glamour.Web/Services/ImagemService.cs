@@ -1,14 +1,22 @@
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 using Glamour.Domain.Entities;
 using Glamour.Domain.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 
 namespace Glamour.Web.Services;
 
-public class ImagemService(IWebHostEnvironment env, IProdutoRepository produtoRepo, IRepository<ProdutoImagem> imagemRepo)
+public class ImagemService(
+    IWebHostEnvironment env,
+    IConfiguration config,
+    IProdutoRepository produtoRepo,
+    IRepository<ProdutoImagem> imagemRepo)
 {
     private static readonly string[] _extensoesPermitidas = [".jpg", ".jpeg", ".png", ".webp", ".avif"];
     private const long TamanhoMaxBytes = 5 * 1024 * 1024;
+    private const string OtimizacaoCloudinary = "f_auto,q_auto,w_1200,c_limit";
 
     public async Task<(bool ok, string? urlOuErro)> SalvarImagemAsync(IFormFile arquivo, string subpasta = "produtos")
     {
@@ -19,6 +27,10 @@ public class ImagemService(IWebHostEnvironment env, IProdutoRepository produtoRe
         if (arquivo.Length > TamanhoMaxBytes)
             return (false, "Arquivo muito grande. Máximo 5 MB.");
 
+        var cloudinaryUrl = config["CLOUDINARY_URL"];
+        if (!string.IsNullOrWhiteSpace(cloudinaryUrl))
+            return await SalvarNoCloudinaryAsync(arquivo, subpasta, cloudinaryUrl);
+
         var nomeArquivo = $"{Guid.NewGuid():N}{ext}";
         var pasta = Path.Combine(env.WebRootPath, "uploads", subpasta);
         Directory.CreateDirectory(pasta);
@@ -28,6 +40,34 @@ public class ImagemService(IWebHostEnvironment env, IProdutoRepository produtoRe
         await arquivo.CopyToAsync(stream);
 
         return (true, $"/uploads/{subpasta}/{nomeArquivo}");
+    }
+
+    private static async Task<(bool ok, string? urlOuErro)> SalvarNoCloudinaryAsync(IFormFile arquivo, string subpasta, string cloudinaryUrl)
+    {
+        try
+        {
+            var cloudinary = new Cloudinary(cloudinaryUrl) { Api = { Secure = true } };
+
+            await using var stream = arquivo.OpenReadStream();
+            var resultado = await cloudinary.UploadAsync(new ImageUploadParams
+            {
+                File = new FileDescription(arquivo.FileName, stream),
+                Folder = $"glamour/{subpasta}",
+                UniqueFilename = true,
+                Overwrite = false
+            });
+
+            if (resultado.Error != null || resultado.SecureUrl == null)
+                return (false, "Não foi possível enviar a imagem. Tente novamente.");
+
+            var url = resultado.SecureUrl.ToString()
+                .Replace("/upload/", $"/upload/{OtimizacaoCloudinary}/");
+            return (true, url);
+        }
+        catch
+        {
+            return (false, "Não foi possível enviar a imagem. Tente novamente.");
+        }
     }
 
     public async Task AdicionarImagemProdutoAsync(Guid produtoId, string url, bool principal = false)
