@@ -146,8 +146,8 @@ Sobe aplicação + PostgreSQL + Redis + Nginx. Acesse via **http://localhost**.
 **Administrador (criado automaticamente):**
 
 ```
-E-mail: admin@glamour.com
-Senha:  Admin@123456
+E-mail: **************************
+Senha:  ***********
 ```
 
 Ao fazer login, o administrador é direcionado direto ao dashboard (`/admin`). Clientes vão para a página inicial.
