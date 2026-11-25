@@ -5,9 +5,15 @@ namespace Glamour.Infrastructure.Data;
 
 public static class DataSeeder
 {
+    private const string SlugMiniatura = "miniatura-la-vie-est-belle";
+
     public static async Task SeedDadosDemoAsync(GlamourDbContext db)
     {
-        if (await db.Categorias.AnyAsync()) return;
+        if (await db.Categorias.AnyAsync())
+        {
+            await GarantirMiniaturaAsync(db);
+            return;
+        }
 
         var feminino = new Categoria("Feminino", "feminino", 1);
         var masculino = new Categoria("Masculino", "masculino", 2);
@@ -84,11 +90,33 @@ public static class DataSeeder
                 "Kit presente especial com 3 miniaturas exclusivas + nécessaire de couro. Ideal para presentear.",
                 299.90m, 249.90m, 25, true,
                 "https://images.unsplash.com/photo-1549187774-b4e9b0445b41?w=600&q=80"),
+
+            CriarMiniatura(feminino.Id),
         };
 
         await db.Produtos.AddRangeAsync(produtos);
         await db.SaveChangesAsync();
     }
+
+    // Produto abaixo de R$ 150 para a vitrine ter um caso sem frete grátis.
+    // Bancos criados antes dele recebem a miniatura na próxima inicialização.
+    private static async Task GarantirMiniaturaAsync(GlamourDbContext db)
+    {
+        if (await db.Produtos.AnyAsync(p => p.Slug == SlugMiniatura)) return;
+
+        var feminino = await db.Categorias.FirstOrDefaultAsync(c => c.Slug == "feminino");
+        if (feminino == null) return;
+
+        await db.Produtos.AddAsync(CriarMiniatura(feminino.Id));
+        await db.SaveChangesAsync();
+    }
+
+    private static Produto CriarMiniatura(Guid categoriaId) =>
+        CriarProduto("Miniatura La Vie Est Belle", SlugMiniatura, categoriaId,
+            "Lancôme", "4ml", "Feminino",
+            "A versão de bolsa do floral-gourmand da Lancôme. Íris, patchouli e baunilha em 4ml.",
+            89.90m, null, 30, false,
+            "https://images.unsplash.com/photo-1541643600914-78b084683702?w=600&q=80");
 
     private static Produto CriarProduto(string nome, string slug, Guid categoriaId,
         string marca, string volume, string genero, string descricao,
