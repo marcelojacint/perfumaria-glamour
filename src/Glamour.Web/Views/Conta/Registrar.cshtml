@@ -13,7 +13,7 @@
         <div class="border border-gold/20 bg-zinc-900/80 p-8">
             @if (!ViewData.ModelState.IsValid)
             {
-                <div class="border border-red-900/40 bg-red-950/20 text-red-400 text-sm p-4 mb-6">
+                <div data-cy="alerta-erro" class="border border-red-900/40 bg-red-950/20 text-red-400 text-sm p-4 mb-6">
                     @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
                     {
                         <p>@error.ErrorMessage</p>
@@ -25,23 +25,23 @@
                 @Html.AntiForgeryToken()
                 <div>
                     <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">Nome Completo</label>
-                    <input type="text" name="Nome" value="@Model?.Nome" required autocomplete="name"
+                    <input data-cy="registrar-nome" type="text" name="Nome" value="@Model?.Nome" required autocomplete="name"
                            class="w-full bg-zinc-800 border border-white/10 text-white px-4 py-3 text-sm focus:border-gold/60 focus:outline-none" />
                 </div>
                 <div>
                     <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">E-mail</label>
-                    <input type="email" name="Email" value="@Model?.Email" required autocomplete="email"
+                    <input data-cy="registrar-email" type="email" name="Email" value="@Model?.Email" required autocomplete="email"
                            class="w-full bg-zinc-800 border border-white/10 text-white px-4 py-3 text-sm focus:border-gold/60 focus:outline-none" />
                 </div>
                 <div>
                     <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">Telefone</label>
-                    <input type="tel" name="Telefone" value="@Model?.Telefone" autocomplete="tel"
+                    <input data-cy="registrar-telefone" type="tel" name="Telefone" value="@Model?.Telefone" autocomplete="tel"
                            class="w-full bg-zinc-800 border border-white/10 text-white px-4 py-3 text-sm focus:border-gold/60 focus:outline-none" />
                 </div>
                 <div>
                     <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">Senha</label>
                     <div class="campo-senha" x-data="{ ver:false }">
-                        <input :type="ver ? 'text' : 'password'" name="Senha" required autocomplete="new-password" minlength="8"
+                        <input data-cy="registrar-senha" :type="ver ? 'text' : 'password'" name="Senha" required autocomplete="new-password" minlength="8"
                                class="w-full bg-zinc-800 border border-white/10 text-white px-4 py-3 text-sm focus:border-gold/60 focus:outline-none" />
                         <partial name="_ToggleSenha" />
                     </div>
@@ -49,12 +49,12 @@
                 <div>
                     <label class="text-xs text-gold/80 tracking-wider uppercase block mb-2">Confirmar Senha</label>
                     <div class="campo-senha" x-data="{ ver:false }">
-                        <input :type="ver ? 'text' : 'password'" name="ConfirmacaoSenha" required autocomplete="new-password"
+                        <input data-cy="registrar-confirmacao" :type="ver ? 'text' : 'password'" name="ConfirmacaoSenha" required autocomplete="new-password"
                                class="w-full bg-zinc-800 border border-white/10 text-white px-4 py-3 text-sm focus:border-gold/60 focus:outline-none" />
                         <partial name="_ToggleSenha" />
                     </div>
                 </div>
-                <button type="submit" class="btn-gold w-full py-4 text-sm tracking-widest uppercase">
+                <button data-cy="registrar-enviar" type="submit" class="btn-gold w-full py-4 text-sm tracking-widest uppercase">
                     Criar Conta
                 </button>
             </form>

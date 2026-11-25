@@ -18,7 +18,7 @@
 
     @if (TempData["Sucesso"] != null)
     {
-        <div style="border:1px solid rgba(74,222,128,0.3); background:rgba(74,222,128,0.05); color:rgb(74,222,128); padding:0.75rem 1rem; margin-bottom:1.5rem; font-size:0.875rem;">
+        <div data-cy="alerta-sucesso" style="border:1px solid rgba(74,222,128,0.3); background:rgba(74,222,128,0.05); color:rgb(74,222,128); padding:0.75rem 1rem; margin-bottom:1.5rem; font-size:0.875rem;">
             @TempData["Sucesso"]
         </div>
     }
@@ -46,7 +46,7 @@
 
     @if (!itens.Any())
     {
-        <div class="text-center py-24 text-white/30">
+        <div data-cy="carrinho-vazio" class="text-center py-24 text-white/30">
             <div class="text-6xl mb-6 font-playfair">✦</div>
             <p class="text-lg mb-4">Seu carrinho está vazio.</p>
             <a href="/catalogo" class="btn-gold px-8 py-3 text-sm tracking-widest uppercase inline-block">Ver Catálogo</a>
@@ -59,7 +59,7 @@
         {
             <div style="border:1px solid rgba(212,175,55,0.2); background:rgba(212,175,55,0.05); padding:1rem 1.25rem; margin-bottom:1.5rem;">
                 <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.8rem;">
-                    <span style="color:rgba(255,255,255,0.7);">Faltam <strong style="color:#D4AF37;">R$ @faltaFreteGratis.ToString("N2")</strong> para frete grátis!</span>
+                    <span data-cy="frete-falta" style="color:rgba(255,255,255,0.7);">Faltam <strong style="color:#D4AF37;">R$ @faltaFreteGratis.ToString("N2")</strong> para frete grátis!</span>
                     <span style="color:rgba(255,255,255,0.3);">R$ @limiteFreteGratis.ToString("N0")</span>
                 </div>
                 <div style="background:rgba(255,255,255,0.08); height:4px; border-radius:2px; overflow:hidden;">
@@ -69,7 +69,7 @@
         }
         else
         {
-            <div style="border:1px solid rgba(74,222,128,0.3); background:rgba(74,222,128,0.05); padding:0.875rem 1.25rem; margin-bottom:1.5rem; font-size:0.8rem; color:rgb(74,222,128);">
+            <div data-cy="frete-gratis" style="border:1px solid rgba(74,222,128,0.3); background:rgba(74,222,128,0.05); padding:0.875rem 1.25rem; margin-bottom:1.5rem; font-size:0.8rem; color:rgb(74,222,128);">
                 ✓ Você ganhou <strong>frete grátis</strong>!
             </div>
         }
@@ -79,7 +79,7 @@
             <div class="lg:col-span-2 space-y-4">
                 @foreach (var item in itens)
                 {
-                    <div class="border border-white/10 bg-zinc-900/50 p-4 flex gap-4">
+                    <div data-cy="carrinho-item" class="border border-white/10 bg-zinc-900/50 p-4 flex gap-4">
                         <div class="w-20 h-20 bg-zinc-800 flex-shrink-0 flex items-center justify-center">
                             @if (!string.IsNullOrEmpty(item.UrlImagem))
                             {
@@ -91,23 +91,23 @@
                             }
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h3 class="text-sm font-medium mb-1">@item.Nome</h3>
-                            <p class="text-gold text-sm font-semibold">R$ @item.Preco.ToString("N2")</p>
+                            <h3 data-cy="item-nome" class="text-sm font-medium mb-1">@item.Nome</h3>
+                            <p data-cy="item-preco" class="text-gold text-sm font-semibold">R$ @item.Preco.ToString("N2")</p>
                         </div>
                         <div class="flex flex-col items-end gap-2">
                             <form method="post" action="/carrinho/atualizar" class="flex items-center border border-white/20">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="produtoId" value="@item.ProdutoId" />
-                                <button type="submit" name="quantidade" value="@(item.Quantidade - 1)"
+                                <button data-cy="item-menos" type="submit" name="quantidade" value="@(item.Quantidade - 1)"
                                         class="px-3 py-1 text-white/60 hover:text-white transition-colors text-sm">−</button>
-                                <span class="px-3 text-sm">@item.Quantidade</span>
-                                <button type="submit" name="quantidade" value="@(item.Quantidade + 1)"
+                                <span data-cy="item-quantidade" class="px-3 text-sm">@item.Quantidade</span>
+                                <button data-cy="item-mais" type="submit" name="quantidade" value="@(item.Quantidade + 1)"
                                         class="px-3 py-1 text-white/60 hover:text-white transition-colors text-sm">+</button>
                             </form>
-                            <p class="text-white/60 text-xs">R$ @((item.Preco * item.Quantidade).ToString("N2"))</p>
+                            <p data-cy="item-total" class="text-white/60 text-xs">R$ @((item.Preco * item.Quantidade).ToString("N2"))</p>
                             <form method="post" action="/carrinho/remover/@item.ProdutoId">
                                 @Html.AntiForgeryToken()
-                                <button type="submit" class="text-red-400/60 hover:text-red-400 text-xs transition-colors">Remover</button>
+                                <button data-cy="item-remover" type="submit" class="text-red-400/60 hover:text-red-400 text-xs transition-colors">Remover</button>
                             </form>
                         </div>
                     </div>
@@ -120,7 +120,7 @@
                     <div class="space-y-3 text-sm text-white/60 mb-6">
                         <div class="flex justify-between">
                             <span>Subtotal</span>
-                            <span class="text-white">R$ @subtotal.ToString("N2")</span>
+                            <span data-cy="carrinho-subtotal" class="text-white">R$ @subtotal.ToString("N2")</span>
                         </div>
                         <div class="flex justify-between">
                             <span>Frete</span>

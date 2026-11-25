@@ -130,7 +130,7 @@
                                        style="width:3.5rem; background:transparent; text-align:center; color:#fff; border:none; outline:none; font-size:0.875rem;" />
                                 <button type="button" @@click="inc()" style="padding:0.75rem 1rem; color:rgba(255,255,255,0.6); background:none; border:none; cursor:pointer; font-size:1rem;">+</button>
                             </div>
-                            <button type="submit" class="btn-accent" :disabled="enviando" style="flex:1; padding:0.875rem; font-size:0.8rem; letter-spacing:0.1em;">
+                            <button data-cy="produto-adicionar" type="submit" class="btn-accent" :disabled="enviando" style="flex:1; padding:0.875rem; font-size:0.8rem; letter-spacing:0.1em;">
                                 <span x-show="!enviando">Adicionar ao Carrinho</span>
                                 <span x-show="enviando" x-cloak>Adicionando…</span>
                             </button>
@@ -143,7 +143,7 @@
                     <div x-show="adicionado" x-cloak x-transition
                          style="margin-top:1rem; border:1px solid rgba(74,222,128,0.3); background:rgba(74,222,128,0.07); padding:1rem;">
                         <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
-                            <span style="color:rgb(74,222,128); font-size:0.85rem;">✓ Adicionado ao carrinho!</span>
+                            <span data-cy="alerta-sucesso" style="color:rgb(74,222,128); font-size:0.85rem;">✓ Adicionado ao carrinho!</span>
                             <div style="display:flex; gap:0.6rem;">
                                 <a href="/catalogo"
                                    style="background:none; border:1px solid rgba(255,255,255,0.2); color:rgba(255,255,255,0.7); padding:0.4rem 0.9rem; font-size:0.7rem; cursor:pointer; text-transform:uppercase; letter-spacing:0.05em; text-decoration:none;">
